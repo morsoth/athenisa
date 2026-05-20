@@ -10,11 +10,6 @@ AthenISA defines the programmer-visible behavior of the processor:
 - instruction formats
 - instruction semantics
 - opcode allocation
-- memory model
-- stack behavior
-- control-flow behavior
-
-Implementation details such as the multicycle datapath, internal control unit, FSM states, and stage timing are not part of AthenISA. Those are documented in the Tydeus-16 core microarchitecture document.
 
 ## 1. Architectural Summary
 
@@ -22,14 +17,11 @@ Implementation details such as the multicycle datapath, internal control unit, F
 | --- | --- |
 | Data width | 16 bits |
 | Instruction width | 16 bits |
-| Instruction encoding | Fixed-width, 16-bit |
-| General-purpose registers | 7, named R1-R7 |
-| Zero register | R0 |
+| Instruction encoding | 16-bit fixed width |
+| General-purpose registers | 7 |
 | Program counter width | 11 bits |
 | Stack pointer width | 16 bits |
 | Flags register width | 4 bits |
-| Instruction memory model | Separate instruction address space |
-| Data memory model | Separate data address space |
 
 ## 2. Registers
 
@@ -71,17 +63,15 @@ the following four 1-bit elements:
 | N | Negative flag |
 | V | Overflow flag |
 
-## 3. Instruction Encoding Model
+## 3. Instruction Formats
 
 All AthenISA instructions are 16 bits wide. Depending on the instruction, the encoded fields may represent registers, immediates, absolute addresses, or relative offsets.
-
-The top 5 bits encode the primary opcode field. Some instruction groups use a secondary `func` field to distinguish operations sharing the same primary opcode.
-
-## 4. Instruction Formats
 
 ### No-operand
 
 `NOP`, `RET`
+
+<img src="../imgs/no_op.png" alt="No-operand instruction format" style="max-width: 760px; width: 100%; height: auto;">
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -91,6 +81,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 ### Register-register-register (RRR)
 
 `ADD`, `SUB`, `AND`, `OR`, `XOR`
+
+<img src="../imgs/rrr.png" alt="Register-register-register instruction format" style="max-width: 760px; width: 100%; height: auto;">
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -104,6 +96,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 
 `MOV`, `NOT`, `CMP`
 
+<img src="../imgs/rr.png" alt="Register-register instruction format" style="max-width: 760px; width: 100%; height: auto;">
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
@@ -116,6 +110,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 
 `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI`
 
+<img src="../imgs/ri.png" alt="Register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
@@ -125,6 +121,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 ### Register-register-immediate (RRI)
 
 `SLL`, `SRL`, `SRA`
+
+<img src="../imgs/rri.png" alt="Register-register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -141,6 +139,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 
 `JMP`, `CALL`
 
+<img src="../imgs/uncond_jump.png" alt="Unconditional jump instruction format" style="max-width: 760px; width: 100%; height: auto;">
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
@@ -152,6 +152,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 ### Conditional branch
 
 `BEQ`, `BNE`, `BLT`, `BGT`, `BLE`, `BGE`
+
+<img src="../imgs/cond_jump.png" alt="Conditional branch instruction format" style="max-width: 760px; width: 100%; height: auto;">
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -165,6 +167,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 
 `LOAD`
 
+<img src="../imgs/load.png" alt="Load instruction format" style="max-width: 760px; width: 100%; height: auto;">
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
@@ -176,6 +180,8 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 
 `STORE`
 
+<img src="../imgs/store.png" alt="Store instruction format" style="max-width: 760px; width: 100%; height: auto;">
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
@@ -183,7 +189,7 @@ The top 5 bits encode the primary opcode field. Some instruction groups use a se
 | `rb` | `7:5` | Base register |
 | `off(5)` | `4:0` | Signed 5-bit offset |
 
-## 5. Instruction Set
+## 4. Instruction Set
 
 ### No-operation instructions
 
@@ -438,7 +444,7 @@ The `STORE` instruction writes a word into data memory using `BASE + offset` add
 STORE off(5)[rb], rs    // MEM[rb + sext(off(5))] <- rs
 ```
 
-## 6. Instruction Encoding Table
+## 5. Instruction Encoding Table
 
 | Instruction | Opcode | Func | Format |
 | --- | --- | --- | --- |
