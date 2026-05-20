@@ -11,6 +11,14 @@ AthenISA defines the programmer-visible behavior of the processor:
 - instruction semantics
 - opcode allocation
 
+## Content
+
+- [1. Architectural Summary](#1-architectural-summary)
+- [2. Registers](#2-registers)
+- [3. Instruction Formats](#3-instruction-formats)
+- [4. Instruction Set](#4-instruction-set)
+- [5. Instruction Encoding Table](#5-instruction-encoding-table)
+
 ## 1. Architectural Summary
 
 | Property | Value |
