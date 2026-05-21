@@ -28,6 +28,4 @@ AthenISA is the 16-bit Instruction Set Architecture implemented by the Tydeus-16
 - `encodings/`: machine-readable encoding definitions
 - `asm/`: assembly syntax and examples
 - `tools/`: reference assembler and disassembler
-- `tests/`: encoding, assembler and compliance tests
-- `generated/`: generated documentation artifacts
 - `docs/`: rationale and project notes
