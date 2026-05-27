@@ -82,7 +82,7 @@ AND rd, rs1, rs2        // rd <- rs1 & rs2
 ```
 
 > [!NOTE]
-> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because an 8-bit immediate is not especially useful in a 16-bit architecture, particularly for full-width bit masks. These instructions may be added in the future if free opcodes remain available.
+> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in `RI` instructions is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
 
 #### OR
 

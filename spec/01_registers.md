@@ -8,7 +8,7 @@ seven general-purpose registers, the program counter, the stack pointer, and a f
 `R0` is a 16-bit constant zero register. Its value is permanently fixed to `0x0000`, and any write
 to `R0` is ignored.
 
-### General-Purpose registers
+### General-purpose registers
 
 The processor provides seven 16-bit general-purpose registers, `R1` to `R7`. These registers are
 used as operands and destinations for the instructions.

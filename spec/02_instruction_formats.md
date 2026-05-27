@@ -11,7 +11,7 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `reserved` | `10:0` | Reserved bits, should be encoded as zero by assemblers |
+| `reserved` | `10:0` | Reserved bits |
 
 ### Register-register-register (RRR)
 
@@ -38,14 +38,14 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination or first operand register |
 | `rs` | `7:5` | Source or second operand register |
-| `reserved` | `4:2` | Reserved bits, should be encoded as zero by assemblers |
+| `reserved` | `4:2` | Reserved bits |
 | `func` | `1:0` | Secondary function selector |
 
 ### Register-immediate (RI)
 
 `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI`
 
-<img src=".imgs/ri.png" alt="Register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
+<img src="imgs/ri.png" alt="Register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -64,7 +64,7 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination register |
 | `rs` | `7:5` | Source register |
-| `reserved` | `4` | Reserved bit, should be encoded as zero by assemblers |
+| `reserved` | `4` | Reserved bit |
 | `imm(4)` | `3:0` | 4-bit shift amount |
 
 > [!NOTE]
@@ -96,7 +96,7 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | `off(11)` | `10:0` | Signed 11-bit PC-relative offset |
 
 > [!NOTE]
-> Conditional branch targets are computed relative to `PC + 1`.
+> Conditional branch targets are computed relative to `PC+1`.
 
 ### Load
 

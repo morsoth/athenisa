@@ -68,7 +68,7 @@ STORE -1[R7], R1
 
 ## Memory operands
 
-Memory operands use base-plus-offset syntax:
+Memory operands use base + offset syntax:
 
 ```athe
 LOAD  R1, 0[R2]
@@ -91,44 +91,6 @@ loop:
 For branches, label operands are assembled as signed offsets relative to `PC + 1`.
 
 For `JMP` and `CALL`, label operands are assembled as absolute instruction addresses.
-
-## Instruction syntax summary
-
-```athe
-NOP
-RET
-
-MOV  rd, rs
-ADD  rd, rs1, rs2
-SUB  rd, rs1, rs2
-CMP  rd, rs
-AND  rd, rs1, rs2
-OR   rd, rs1, rs2
-XOR  rd, rs1, rs2
-NOT  rd, rs
-
-LI   rd, imm8
-LIH  rd, imm8
-ADDI rd, imm8
-SUBI rd, imm8
-CMPI rd, imm8
-
-SLL  rd, rs, imm4
-SRL  rd, rs, imm4
-SRA  rd, rs, imm4
-
-JMP  addr11
-CALL addr11
-BEQ  off11
-BNE  off11
-BLT  off11
-BGT  off11
-BLE  off11
-BGE  off11
-
-LOAD  rd, off5[rb]
-STORE off5[rb], rs
-```
 
 ## Pseudo-instructions
 
@@ -189,4 +151,42 @@ Expands to:
 
 ```athe
 SUBI R1, 1
+```
+
+## Instruction syntax summary
+
+```athe
+NOP
+RET
+
+MOV  rd, rs
+ADD  rd, rs1, rs2
+SUB  rd, rs1, rs2
+CMP  rd, rs
+AND  rd, rs1, rs2
+OR   rd, rs1, rs2
+XOR  rd, rs1, rs2
+NOT  rd, rs
+
+LI   rd, imm8
+LIH  rd, imm8
+ADDI rd, imm8
+SUBI rd, imm8
+CMPI rd, imm8
+
+SLL  rd, rs, imm4
+SRL  rd, rs, imm4
+SRA  rd, rs, imm4
+
+JMP  addr11
+CALL addr11
+BEQ  off11
+BNE  off11
+BLT  off11
+BGT  off11
+BLE  off11
+BGE  off11
+
+LOAD  rd, off5[rb]
+STORE off5[rb], rs
 ```
