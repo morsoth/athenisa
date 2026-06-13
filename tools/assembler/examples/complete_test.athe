@@ -1,0 +1,75 @@
+; Complete valid test for the current AthenISA assembler.
+; Covers comments, blank lines, case-insensitive mnemonics/registers,
+; comma-separated operands, whitespace-separated operands, immediates,
+; shifts, and memory operands.
+; Binary comments are split by encoded fields.
+
+; No-operand instructions
+NOP                         ; 00000 00000000000
+nop                         ; 00000 00000000000
+RET                         ; 10000 00000000000
+ret                         ; 10000 00000000000
+
+; Register-register instructions
+MOV R1, R0                  ; 00001 001 000 000 00
+mov r2 r1                   ; 00001 010 001 000 00
+CMP R3, R2                  ; 00001 011 010 000 11
+cmp r4 r3                   ; 00001 100 011 000 11
+NOT R5, R4                  ; 00010 101 100 000 11
+not r6 r5                   ; 00010 110 101 000 11
+
+; Register-register-register arithmetic
+ADD R1, R2, R3              ; 00001 001 010 011 01
+add r4 r5 r6                ; 00001 100 101 110 01
+SUB R7, R6, R5              ; 00001 111 110 101 10
+sub r0 r1 r2                ; 00001 000 001 010 10
+
+; Register-register-register logic
+AND R1, R3, R5              ; 00010 001 011 101 00
+and r2 r4 r6                ; 00010 010 100 110 00
+OR R3, R5, R7               ; 00010 011 101 111 01
+or r4 r6 r0                 ; 00010 100 110 000 01
+XOR R5, R7, R1              ; 00010 101 111 001 10
+xor r6 r0 r2                ; 00010 110 000 010 10
+
+; Register-immediate loads: decimal, hex, binary, lower-case registers
+LI R0, 0                    ; 00011 000 00000000
+LI R1, 255                  ; 00011 001 11111111
+LI R2, 0xA5                 ; 00011 010 10100101
+li r3, 0b01011010           ; 00011 011 01011010
+LIH R4, 0                   ; 00100 100 00000000
+LIH R5, 0xFF                ; 00100 101 11111111
+lih r6 0b11110000           ; 00100 110 11110000
+lih r7 42                   ; 00100 111 00101010
+
+; Register-immediate arithmetic/compare
+ADDI R0, 1                  ; 10100 000 00000001
+addi r1 0x10                ; 10100 001 00010000
+SUBI R2, 15                 ; 10101 010 00001111
+subi r3, 0b00001111         ; 10101 011 00001111
+CMPI R4, 0                  ; 10110 100 00000000
+cmpi r5, 255                ; 10110 101 11111111
+CMPI R6, 0x80               ; 10110 110 10000000
+cmpi r7 0b01111111          ; 10110 111 01111111
+
+; Shifts: imm4 range and immediate bases
+SLL R0, R1, 0               ; 00101 000 001 0 0000
+sll r2 r3 15                ; 00101 010 011 0 1111
+SRL R4, R5, 0xF             ; 00110 100 101 0 1111
+srl r6 r7 0b1010            ; 00110 110 111 0 1010
+SRA R1, R2, 1               ; 00111 001 010 0 0001
+sra r3 r4 0b1111            ; 00111 011 100 0 1111
+
+; Memory operands: signed off5 limits and normal cases
+LOAD R0, 0[R1]              ; 10010 000 001 00000
+LOAD R2, 15[R3]             ; 10010 010 011 01111
+LOAD R4, -1[R5]             ; 10010 100 101 11111
+load r6, -16[r7]            ; 10010 110 111 10000
+
+STORE 0[R0], R1             ; 10011 001 000 00000
+STORE 15[R2], R3            ; 10011 011 010 01111
+STORE -1[R4], R5            ; 10011 101 100 11111
+store -16[r6], r7           ; 10011 111 110 10000
+
+; This file intentionally avoids labels, pseudo-instructions, jumps,
+; and branches because they are not implemented in the assembler yet.
