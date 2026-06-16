@@ -78,6 +78,13 @@ STORE -1[R7], R3
 
 The offset is a signed 5-bit value.
 
+When the offset is zero, it may be omitted:
+
+```athe
+LOAD  R1, [R2]    ; equivalent to LOAD R1, 0[R2]
+STORE [R7], R3    ; equivalent to STORE 0[R7], R3
+```
+
 ## Labels
 
 Labels mark instruction addresses.
@@ -189,5 +196,7 @@ BLE  off11
 BGE  off11
 
 LOAD  rd, off5[rb]
+LOAD  rd, [rb]
 STORE off5[rb], rs
+STORE [rb], rs
 ```

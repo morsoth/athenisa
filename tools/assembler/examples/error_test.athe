@@ -1,0 +1,50 @@
+; AthenISA assembler syntax error catalog.
+;
+; The assembler currently aborts on the first error. Keep all cases commented
+; and uncomment only one line at a time to check the diagnostic you want.
+;
+; Tip: uncomment only the instruction part. The text after the second ';'
+; can stay as the expected diagnostic note.
+
+; Unknown or unsupported instructions
+; FOO R1, R2                         ; expected: unknown instruction
+; loop:                              ; expected: unknown instruction, labels not implemented yet
+; LDI R1, 0x1234                     ; expected: unknown instruction, pseudo-instructions not implemented yet
+; JMP 0                              ; expected: unknown instruction, jumps not implemented yet
+
+; Wrong operand count
+; NOP R1                             ; expected: NOP has too many operands
+; RET R0                             ; expected: RET has too many operands
+; MOV R1                             ; expected: MOV is missing one operand
+; ADD R1, R2                         ; expected: ADD is missing one operand
+; ADD R1, R2, R3, R4                 ; expected: ADD has too many operands
+; STORE 0[R1]                        ; expected: STORE is missing source register
+
+; Invalid registers
+; MOV R8, R0                         ; expected: invalid register
+; ADD R1, RA, R2                     ; expected: invalid register
+; STORE 0[R1], R9                    ; expected: invalid register
+
+; Invalid imm8 values
+; LI R1, hello                       ; expected: invalid immediate
+; LI R1, 0xGG                        ; expected: invalid immediate
+; LI R1, 0b102                       ; expected: invalid immediate
+; LI R1, 256                         ; expected: immediate does not fit in 8 bits
+; LI R1, -1                          ; expected: invalid immediate, negative imm8 is not supported
+
+; Invalid imm4 shift values
+; SLL R1, R2, 16                     ; expected: immediate does not fit in 4 bits
+; SRA R1, R2, x                      ; expected: invalid immediate
+
+; Invalid memory operand syntax
+; LOAD R1, R2                        ; expected: memory operand must use off5[rb]
+; LOAD R1, 0[R2                      ; expected: missing ']'
+; LOAD R1, 0[]                       ; expected: missing base register
+; LOAD R1, []                        ; expected: missing base register
+; LOAD R1, 0[R2]x                    ; expected: unexpected text after memory operand
+; LOAD R1, 0 [R2]                    ; expected: wrong token count, spaces inside off5[rb] are not supported
+
+; Invalid memory offsets
+; LOAD R1, 16[R2]                    ; expected: offset does not fit in signed 5 bits
+; LOAD R1, -17[R2]                   ; expected: offset does not fit in signed 5 bits
+; STORE nope[R1], R2                 ; expected: invalid number

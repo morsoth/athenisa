@@ -293,13 +293,6 @@ fn parse_mem_operand(text: &str, line_num: usize) -> Result<(Register, i8)> {
     let offset_text = &text[..open_bracket];
     let base_text = &text[open_bracket + 1..close_bracket];
 
-    if offset_text.is_empty() {
-        bail!(
-            "line {line_num}: memory operand '{}' is missing offset",
-            text
-        );
-    }
-
     if base_text.is_empty() {
         bail!(
             "line {line_num}: memory operand '{}' is missing base register",
@@ -308,7 +301,11 @@ fn parse_mem_operand(text: &str, line_num: usize) -> Result<(Register, i8)> {
     }
 
     let rb = parse_reg(base_text, line_num)?;
-    let off5 = parse_off5(offset_text, line_num)?;
+    let off5 = if offset_text.is_empty() {
+        0
+    } else {
+        parse_off5(offset_text, line_num)?
+    };
 
     Ok((rb, off5))
 }
