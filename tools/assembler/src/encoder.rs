@@ -49,6 +49,17 @@ fn encode_instruction(instruction: Instruction) -> u16 {
         Instruction::Load { rd, rb, off5 } => encode_load(instruction, rd, rb, off5),
 
         Instruction::Store { rb, off5, rs } => encode_store(instruction, rb, off5, rs),
+
+        Instruction::Jmp { addr11 } | Instruction::Call { addr11 } => {
+            encode_addr11(instruction, addr11)
+        }
+
+        Instruction::Beq { off11 }
+        | Instruction::Bne { off11 }
+        | Instruction::Blt { off11 }
+        | Instruction::Bgt { off11 }
+        | Instruction::Ble { off11 }
+        | Instruction::Bge { off11 } => encode_off11(instruction, off11),
     }
 }
 
@@ -92,4 +103,12 @@ fn encode_store(instruction: Instruction, rb: Register, off5: i8, rs: Register) 
 
 fn encode_off5(off5: i8) -> u16 {
     (off5 as i16 as u16) & 0x1F
+}
+
+fn encode_addr11(instruction: Instruction, addr11: u16) -> u16 {
+    opcode(instruction) | (addr11 & 0x7FF)
+}
+
+fn encode_off11(instruction: Instruction, off11: i16) -> u16 {
+    opcode(instruction) | ((off11 as u16) & 0x7FF)
 }

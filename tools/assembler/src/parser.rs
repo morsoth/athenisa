@@ -1,9 +1,19 @@
 use anyhow::{Result, bail};
+use std::collections::HashMap;
 
 use crate::isa::{Instruction, Register};
 
+const INSTR_MEM_SIZE: i32 = 2048;
+
 pub fn parse_program(source: &str) -> Result<Vec<Instruction>> {
-    let mut program = Vec::new();
+    let symbols = collect_symbols(source)?;
+
+    parse_instructions(source, &symbols)
+}
+
+fn collect_symbols(source: &str) -> Result<HashMap<String, i32>> {
+    let mut symbols = HashMap::new();
+    let mut pc = 0;
 
     for (line_idx, raw_line) in source.lines().enumerate() {
         let line_num = line_idx + 1;
@@ -13,18 +23,79 @@ pub fn parse_program(source: &str) -> Result<Vec<Instruction>> {
             continue;
         }
 
-        let instruction = parse_line(line, line_num)?;
-        program.push(instruction);
+        if is_label(line) {
+            let (name, value) = parse_symbol(line, line_num, pc)?;
+
+            if symbols.contains_key(&name) {
+                bail!("line {line_num}: symbol '{name}' is already defined");
+            }
+
+            symbols.insert(name, value);
+
+            continue;
+        }
+
+        if pc >= INSTR_MEM_SIZE {
+            bail!(
+                "line {line_num}: program exceeds instruction memory size of {INSTR_MEM_SIZE} words"
+            );
+        } else {  
+            pc += 1;
+        }
     }
 
-    Ok(program)
+    Ok(symbols)
+}
+
+fn parse_instructions(source: &str, _symbols: &HashMap<String, i32>) -> Result<Vec<Instruction>> {
+    let mut instructions = Vec::new();
+
+    for (line_idx, raw_line) in source.lines().enumerate() {
+        let line_num = line_idx + 1;
+        let line = strip_comment(raw_line).trim();
+
+        if line.is_empty() {
+            continue;
+        }
+
+        if is_label(line) {
+            continue;
+        }
+
+        let instruction = parse_instruction(line, line_num)?;
+        instructions.push(instruction);
+    }
+
+    Ok(instructions)
+}
+
+fn is_label(line: &str) -> bool {
+    line.contains(':')
 }
 
 fn strip_comment(line: &str) -> &str {
     line.split(';').next().unwrap()
 }
 
-fn parse_line(line: &str, line_num: usize) -> Result<Instruction> {
+fn parse_symbol(line: &str, line_num: usize, pc: i32) -> Result<(String, i32)> {
+    let colon_idx = line.find(':').unwrap();
+    let name = line[..colon_idx].trim();
+    let value_text = line[colon_idx + 1..].trim();
+
+    if name.is_empty() {
+        bail!("line {line_num}: symbol name cannot be empty");
+    }
+
+    let value = if value_text.is_empty() {
+        pc
+    } else {
+        parse_i32(value_text, line_num)?
+    };
+
+    Ok((name.to_string(), value))
+}
+
+fn parse_instruction(line: &str, line_num: usize) -> Result<Instruction> {
     let clean = line.replace(",", " ");
     let parts: Vec<&str> = clean.split_whitespace().collect();
 

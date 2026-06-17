@@ -67,6 +67,17 @@ Negative decimal immediates are allowed for signed operands such as branch offse
 STORE -1[R7], R1
 ```
 
+If a numeric value does not fit in the destination field, the assembler emits a warning and truncates the value to the encoded bit width.
+
+For example, `LI R1, 0x123` warns and encodes the low 8 bits, `0x23`.
+
+Symbols may also be used wherever a numeric operand is accepted:
+
+```athe
+limit: 15
+ADDI R1, limit
+```
+
 ## Memory operands
 
 Memory operands use base + offset syntax:
@@ -87,7 +98,11 @@ STORE [R7], R3    ; equivalent to STORE 0[R7], R3
 
 ## Labels
 
-Labels mark instruction addresses.
+Symbols are defined with `:`.
+
+Each source line may contain only one kind of item: a label, a constant, or an instruction.
+
+When no value follows the symbol name, the symbol receives the current instruction address:
 
 ```athe
 loop:
@@ -96,13 +111,24 @@ loop:
     BNE loop
 ```
 
-For branches, label operands are assembled as signed offsets relative to `PC + 1`.
+When a value follows the symbol name, the symbol receives that value and does not consume instruction memory:
+
+```athe
+limit: 0x0F
+mask: 0b11110000
+```
+
+All symbols are numeric. The assembler does not distinguish labels from constants after the first pass.
+
+For branches, symbolic operands are assembled as signed offsets relative to `PC + 1`.
+
+Numeric branch operands are treated as raw signed offsets.
 
 For `JMP` and `CALL`, label operands are assembled as absolute instruction addresses.
 
-## Pseudo-instructions
+## Planned pseudo-instructions
 
-Pseudo-instructions are accepted by the assembler but are not real AthenISA instructions. They expand into one or more real instructions.
+Pseudo-instructions are planned for the assembler but are not real AthenISA instructions. They will expand into one or more real instructions.
 
 ### `LDI`
 

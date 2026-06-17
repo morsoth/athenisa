@@ -1,7 +1,7 @@
 ; Complete valid test for the current AthenISA assembler.
 ; Covers comments, blank lines, case-insensitive mnemonics/registers,
 ; comma-separated operands, whitespace-separated operands, immediates,
-; shifts, and memory operands.
+; shifts, memory operands, symbols, and jumps.
 ; Binary comments are split by encoded fields.
 
 ; No-operand instructions
@@ -73,5 +73,22 @@ STORE 15[R2], R3            ; 10011 011 010 01111
 STORE -1[R4], R5            ; 10011 101 100 11111
 store -16[r6], r7           ; 10011 111 110 10000
 
-; This file intentionally avoids labels, pseudo-instructions, jumps,
-; and branches because they are not implemented in the assembler yet.
+; Symbols, absolute jumps, and relative branches
+limit: 0x0F
+entry:
+JMP jump_target              ; 01000 00000111100
+CALL subroutine              ; 01111 00000111101
+branch_back:
+BEQ branch_back              ; 01001 11111111111
+BNE jump_target              ; 01010 00000000100
+BLT jump_target              ; 01011 00000000011
+BGT jump_target              ; 01100 00000000010
+BLE jump_target              ; 01101 00000000001
+BGE jump_target              ; 01110 00000000000
+jump_target:
+ADDI R1, limit               ; 10100 001 00001111
+subroutine:
+RET                          ; 10000 00000000000
+
+; This file intentionally avoids pseudo-instructions because they are not
+; implemented in the assembler yet.

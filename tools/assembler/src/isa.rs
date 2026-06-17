@@ -96,6 +96,30 @@ pub enum Instruction {
         off5: i8,
         rs: Register,
     },
+    Jmp {
+        addr11: u16,
+    },
+    Call {
+        addr11: u16,
+    },
+    Beq {
+        off11: i16,
+    },
+    Bne {
+        off11: i16,
+    },
+    Blt {
+        off11: i16,
+    },
+    Bgt {
+        off11: i16,
+    },
+    Ble {
+        off11: i16,
+    },
+    Bge {
+        off11: i16,
+    },
 }
 
 const OP_NOP: u16 = 0b00000;
@@ -106,6 +130,14 @@ const OP_LIH: u16 = 0b00100;
 const OP_SLL: u16 = 0b00101;
 const OP_SRL: u16 = 0b00110;
 const OP_SRA: u16 = 0b00111;
+const OP_JMP: u16 = 0b01000;
+const OP_BEQ: u16 = 0b01001;
+const OP_BNE: u16 = 0b01010;
+const OP_BLT: u16 = 0b01011;
+const OP_BGT: u16 = 0b01100;
+const OP_BLE: u16 = 0b01101;
+const OP_BGE: u16 = 0b01110;
+const OP_CALL: u16 = 0b01111;
 const OP_RET: u16 = 0b10000;
 const OP_LOAD: u16 = 0b10010;
 const OP_STORE: u16 = 0b10011;
@@ -141,6 +173,14 @@ impl Instruction {
             Instruction::Sll { .. } => OP_SLL,
             Instruction::Srl { .. } => OP_SRL,
             Instruction::Sra { .. } => OP_SRA,
+            Instruction::Jmp { .. } => OP_JMP,
+            Instruction::Beq { .. } => OP_BEQ,
+            Instruction::Bne { .. } => OP_BNE,
+            Instruction::Blt { .. } => OP_BLT,
+            Instruction::Bgt { .. } => OP_BGT,
+            Instruction::Ble { .. } => OP_BLE,
+            Instruction::Bge { .. } => OP_BGE,
+            Instruction::Call { .. } => OP_CALL,
             Instruction::Load { .. } => OP_LOAD,
             Instruction::Store { .. } => OP_STORE,
             Instruction::Addi { .. } => OP_ADDI,

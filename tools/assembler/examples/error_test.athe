@@ -8,9 +8,7 @@
 
 ; Unknown or unsupported instructions
 ; FOO R1, R2                         ; expected: unknown instruction
-; loop:                              ; expected: unknown instruction, labels not implemented yet
 ; LDI R1, 0x1234                     ; expected: unknown instruction, pseudo-instructions not implemented yet
-; JMP 0                              ; expected: unknown instruction, jumps not implemented yet
 
 ; Wrong operand count
 ; NOP R1                             ; expected: NOP has too many operands
@@ -19,22 +17,30 @@
 ; ADD R1, R2                         ; expected: ADD is missing one operand
 ; ADD R1, R2, R3, R4                 ; expected: ADD has too many operands
 ; STORE 0[R1]                        ; expected: STORE is missing source register
+; JMP                                ; expected: JMP is missing target
+; BEQ loop, extra                    ; expected: BEQ has too many operands
 
 ; Invalid registers
 ; MOV R8, R0                         ; expected: invalid register
 ; ADD R1, RA, R2                     ; expected: invalid register
 ; STORE 0[R1], R9                    ; expected: invalid register
 
-; Invalid imm8 values
-; LI R1, hello                       ; expected: invalid immediate
-; LI R1, 0xGG                        ; expected: invalid immediate
-; LI R1, 0b102                       ; expected: invalid immediate
-; LI R1, 256                         ; expected: immediate does not fit in 8 bits
-; LI R1, -1                          ; expected: invalid immediate, negative imm8 is not supported
+; Invalid immediates and symbols
+; LI R1, hello                       ; expected: undefined symbol
+; LI R1, 0xGG                        ; expected: invalid number
+; LI R1, 0b102                       ; expected: invalid number
+; SRA R1, R2, x                      ; expected: undefined symbol
+; JMP missing_label                  ; expected: undefined symbol
+; BNE missing_label                  ; expected: undefined symbol
 
-; Invalid imm4 shift values
-; SLL R1, R2, 16                     ; expected: immediate does not fit in 4 bits
-; SRA R1, R2, x                      ; expected: invalid immediate
+; Invalid symbol definitions
+; 1bad:                              ; expected: invalid symbol name
+; bad-name:                          ; expected: invalid symbol name
+; bad_const: 0xGG                    ; expected: invalid number
+; bad_const: 1 2                     ; expected: constant must have exactly one value
+; loop: ADDI R1, 1                   ; expected: constant must have exactly one value
+; dup:                               ; expected: duplicate symbol, uncomment this line and the next line together
+; dup:                               ; expected: duplicate symbol, uncomment this line and the previous line together
 
 ; Invalid memory operand syntax
 ; LOAD R1, R2                        ; expected: memory operand must use off5[rb]
@@ -44,7 +50,5 @@
 ; LOAD R1, 0[R2]x                    ; expected: unexpected text after memory operand
 ; LOAD R1, 0 [R2]                    ; expected: wrong token count, spaces inside off5[rb] are not supported
 
-; Invalid memory offsets
-; LOAD R1, 16[R2]                    ; expected: offset does not fit in signed 5 bits
-; LOAD R1, -17[R2]                   ; expected: offset does not fit in signed 5 bits
-; STORE nope[R1], R2                 ; expected: invalid number
+; Invalid memory offsets and symbols
+; STORE nope[R1], R2                 ; expected: undefined symbol
