@@ -102,6 +102,24 @@ Symbols are defined with `:`.
 
 Each source line may contain only one kind of item: a label, a constant, or an instruction.
 
+Symbol names must start with an ASCII letter or `_`. The remaining characters may be ASCII letters, digits, or `_`.
+
+Valid:
+
+```athe
+loop:
+_start:
+limit_1: 0x0F
+```
+
+Invalid:
+
+```athe
+1loop:
+bad-name:
+bad$name:
+```
+
 When no value follows the symbol name, the symbol receives the current instruction address:
 
 ```athe
@@ -120,15 +138,24 @@ mask: 0b11110000
 
 All symbols are numeric. The assembler does not distinguish labels from constants after the first pass.
 
-For branches, symbolic operands are assembled as signed offsets relative to `PC + 1`.
+For branches, symbolic operands are assembled as signed offsets relative to `PC + 1`:
 
-Numeric branch operands are treated as raw signed offsets.
+```athe
+loop:
+    SUBI R1, 1
+    BNE loop      ; encoded offset = loop - (PC + 1)
+```
+
+Numeric branch operands are treated as raw signed offsets:
+
+```athe
+BEQ -1            ; branch to itself
+BNE 4             ; branch four instructions forward
+```
 
 For `JMP` and `CALL`, label operands are assembled as absolute instruction addresses.
 
-## Planned pseudo-instructions
-
-Pseudo-instructions are planned for the assembler but are not real AthenISA instructions. They will expand into one or more real instructions.
+## Pseudo-instructions
 
 ### `LDI`
 

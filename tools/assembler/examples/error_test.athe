@@ -11,14 +11,14 @@
 ; LDI R1, 0x1234                     ; expected: unknown instruction, pseudo-instructions not implemented yet
 
 ; Wrong operand count
-; NOP R1                             ; expected: NOP has too many operands
-; RET R0                             ; expected: RET has too many operands
-; MOV R1                             ; expected: MOV is missing one operand
-; ADD R1, R2                         ; expected: ADD is missing one operand
-; ADD R1, R2, R3, R4                 ; expected: ADD has too many operands
-; STORE 0[R1]                        ; expected: STORE is missing source register
-; JMP                                ; expected: JMP is missing target
-; BEQ loop, extra                    ; expected: BEQ has too many operands
+; NOP R1                             ; expected: expected 1 tokens, got 2
+; RET R0                             ; expected: expected 1 tokens, got 2
+; MOV R1                             ; expected: expected 3 tokens, got 2
+; ADD R1, R2                         ; expected: expected 4 tokens, got 3
+; ADD R1, R2, R3, R4                 ; expected: expected 4 tokens, got 5
+; STORE 0[R1]                        ; expected: expected 3 tokens, got 2
+; JMP                                ; expected: expected 2 tokens, got 1
+; BEQ loop, extra                    ; expected: expected 2 tokens, got 3
 
 ; Invalid registers
 ; MOV R8, R0                         ; expected: invalid register
@@ -36,18 +36,20 @@
 ; Invalid symbol definitions
 ; 1bad:                              ; expected: invalid symbol name
 ; bad-name:                          ; expected: invalid symbol name
+; bad$name:                          ; expected: invalid symbol name
+; : 0x10                             ; expected: symbol name cannot be empty
 ; bad_const: 0xGG                    ; expected: invalid number
-; bad_const: 1 2                     ; expected: constant must have exactly one value
-; loop: ADDI R1, 1                   ; expected: constant must have exactly one value
+; bad_const: 1 2                     ; expected: symbol value must contain exactly one value
+; loop: ADDI R1, 1                   ; expected: symbol value must contain exactly one value
 ; dup:                               ; expected: duplicate symbol, uncomment this line and the next line together
 ; dup:                               ; expected: duplicate symbol, uncomment this line and the previous line together
 
 ; Invalid memory operand syntax
-; LOAD R1, R2                        ; expected: memory operand must use off5[rb]
-; LOAD R1, 0[R2                      ; expected: missing ']'
+; LOAD R1, R2                        ; expected: memory operand must end with ']'
+; LOAD R1, 0[R2                      ; expected: memory operand must end with ']'
 ; LOAD R1, 0[]                       ; expected: missing base register
 ; LOAD R1, []                        ; expected: missing base register
-; LOAD R1, 0[R2]x                    ; expected: unexpected text after memory operand
+; LOAD R1, 0[R2]x                    ; expected: memory operand must end with ']'
 ; LOAD R1, 0 [R2]                    ; expected: wrong token count, spaces inside off5[rb] are not supported
 
 ; Invalid memory offsets and symbols
