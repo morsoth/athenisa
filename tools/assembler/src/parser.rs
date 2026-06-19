@@ -5,13 +5,15 @@ use crate::isa::{Instruction, Register};
 
 const INSTR_MEM_SIZE: i32 = 2048;
 
+type Symbols = HashMap<String, i32>;
+
 pub fn parse_program(source: &str) -> Result<Vec<Instruction>> {
     let symbols = collect_symbols(source)?;
 
     parse_instructions(source, &symbols)
 }
 
-fn collect_symbols(source: &str) -> Result<HashMap<String, i32>> {
+fn collect_symbols(source: &str) -> Result<Symbols> {
     let mut symbols = HashMap::new();
     let mut pc = 0;
 
@@ -23,7 +25,7 @@ fn collect_symbols(source: &str) -> Result<HashMap<String, i32>> {
             continue;
         }
 
-        if is_label(line) {
+        if is_symbol_line(line) {
             let (name, value) = parse_symbol(line, pc, &symbols)
                 .with_context(|| format!("line {line_num}: {line}"))?;
 
@@ -48,7 +50,7 @@ fn collect_symbols(source: &str) -> Result<HashMap<String, i32>> {
     Ok(symbols)
 }
 
-fn parse_instructions(source: &str, symbols: &HashMap<String, i32>) -> Result<Vec<Instruction>> {
+fn parse_instructions(source: &str, symbols: &Symbols) -> Result<Vec<Instruction>> {
     let mut instructions = Vec::new();
     let mut pc = 0;
 
@@ -60,7 +62,7 @@ fn parse_instructions(source: &str, symbols: &HashMap<String, i32>) -> Result<Ve
             continue;
         }
 
-        if is_label(line) {
+        if is_symbol_line(line) {
             continue;
         }
 
@@ -73,7 +75,7 @@ fn parse_instructions(source: &str, symbols: &HashMap<String, i32>) -> Result<Ve
     Ok(instructions)
 }
 
-fn is_label(line: &str) -> bool {
+fn is_symbol_line(line: &str) -> bool {
     line.contains(':')
 }
 
@@ -81,7 +83,7 @@ fn strip_comment(line: &str) -> &str {
     line.split(';').next().unwrap()
 }
 
-fn parse_symbol(line: &str, pc: i32, symbols: &HashMap<String, i32>) -> Result<(String, i32)> {
+fn parse_symbol(line: &str, pc: i32, symbols: &Symbols) -> Result<(String, i32)> {
     let colon_idx = line.find(':').unwrap();
     let name = line[..colon_idx].trim();
     let value_text = line[colon_idx + 1..].trim();
@@ -119,7 +121,7 @@ fn is_symbol_name(name: &str) -> bool {
     true
 }
 
-fn parse_symbol_value(text: &str, pc: i32, symbols: &HashMap<String, i32>) -> Result<i32> {
+fn parse_symbol_value(text: &str, pc: i32, symbols: &Symbols) -> Result<i32> {
     if text.is_empty() {
         return Ok(pc);
     }
@@ -133,7 +135,7 @@ fn parse_symbol_value(text: &str, pc: i32, symbols: &HashMap<String, i32>) -> Re
     parse_value(parts[0], symbols)
 }
 
-fn parse_instruction(line: &str, pc: i32, symbols: &HashMap<String, i32>) -> Result<Instruction> {
+fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Instruction> {
     let clean = line.replace(",", " ");
     let parts: Vec<&str> = clean.split_whitespace().collect();
 
@@ -145,255 +147,191 @@ fn parse_instruction(line: &str, pc: i32, symbols: &HashMap<String, i32>) -> Res
 
     match op.as_str() {
         "NOP" => {
-            expect_tokens(&parts, 1)?;
+            parse_no_operand(&parts)?;
             Ok(Instruction::Nop)
         }
-
         "RET" => {
-            expect_tokens(&parts, 1)?;
+            parse_no_operand(&parts)?;
             Ok(Instruction::Ret)
         }
-
         "MOV" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Mov {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-            })
+            let (rd, rs) = parse_rr(&parts)?;
+            Ok(Instruction::Mov(rd, rs))
         }
-
-        "LI" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Li {
-                rd: parse_reg(parts[1])?,
-                imm8: parse_imm8(parts[2], symbols)?,
-            })
-        }
-
-        "LIH" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Lih {
-                rd: parse_reg(parts[1])?,
-                imm8: parse_imm8(parts[2], symbols)?,
-            })
-        }
-
-        "ADD" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Add {
-                rd: parse_reg(parts[1])?,
-                rs1: parse_reg(parts[2])?,
-                rs2: parse_reg(parts[3])?,
-            })
-        }
-
-        "SUB" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Sub {
-                rd: parse_reg(parts[1])?,
-                rs1: parse_reg(parts[2])?,
-                rs2: parse_reg(parts[3])?,
-            })
-        }
-
         "CMP" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Cmp {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-            })
+            let (rd, rs) = parse_rr(&parts)?;
+            Ok(Instruction::Cmp(rd, rs))
         }
-
-        "AND" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::And {
-                rd: parse_reg(parts[1])?,
-                rs1: parse_reg(parts[2])?,
-                rs2: parse_reg(parts[3])?,
-            })
-        }
-
-        "OR" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Or {
-                rd: parse_reg(parts[1])?,
-                rs1: parse_reg(parts[2])?,
-                rs2: parse_reg(parts[3])?,
-            })
-        }
-
-        "XOR" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Xor {
-                rd: parse_reg(parts[1])?,
-                rs1: parse_reg(parts[2])?,
-                rs2: parse_reg(parts[3])?,
-            })
-        }
-
         "NOT" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Not {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-            })
+            let (rd, rs) = parse_rr(&parts)?;
+            Ok(Instruction::Not(rd, rs))
         }
-
+        "ADD" => {
+            let (rd, rs1, rs2) = parse_rrr(&parts)?;
+            Ok(Instruction::Add(rd, rs1, rs2))
+        }
+        "SUB" => {
+            let (rd, rs1, rs2) = parse_rrr(&parts)?;
+            Ok(Instruction::Sub(rd, rs1, rs2))
+        }
+        "AND" => {
+            let (rd, rs1, rs2) = parse_rrr(&parts)?;
+            Ok(Instruction::And(rd, rs1, rs2))
+        }
+        "OR" => {
+            let (rd, rs1, rs2) = parse_rrr(&parts)?;
+            Ok(Instruction::Or(rd, rs1, rs2))
+        }
+        "XOR" => {
+            let (rd, rs1, rs2) = parse_rrr(&parts)?;
+            Ok(Instruction::Xor(rd, rs1, rs2))
+        }
+        "LI" => {
+            let (rd, imm8) = parse_ri8(&parts, symbols)?;
+            Ok(Instruction::Li(rd, imm8))
+        }
+        "LIH" => {
+            let (rd, imm8) = parse_ri8(&parts, symbols)?;
+            Ok(Instruction::Lih(rd, imm8))
+        }
         "ADDI" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Addi {
-                rd: parse_reg(parts[1])?,
-                imm8: parse_imm8(parts[2], symbols)?,
-            })
+            let (rd, imm8) = parse_ri8(&parts, symbols)?;
+            Ok(Instruction::Addi(rd, imm8))
         }
-
         "SUBI" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Subi {
-                rd: parse_reg(parts[1])?,
-                imm8: parse_imm8(parts[2], symbols)?,
-            })
+            let (rd, imm8) = parse_ri8(&parts, symbols)?;
+            Ok(Instruction::Subi(rd, imm8))
         }
-
         "CMPI" => {
-            expect_tokens(&parts, 3)?;
-
-            Ok(Instruction::Cmpi {
-                rd: parse_reg(parts[1])?,
-                imm8: parse_imm8(parts[2], symbols)?,
-            })
+            let (rd, imm8) = parse_ri8(&parts, symbols)?;
+            Ok(Instruction::Cmpi(rd, imm8))
         }
-
         "SLL" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Sll {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-                imm4: parse_imm4(parts[3], symbols)?,
-            })
+            let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
+            Ok(Instruction::Sll(rd, rs, imm4))
         }
-
         "SRL" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Srl {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-                imm4: parse_imm4(parts[3], symbols)?,
-            })
+            let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
+            Ok(Instruction::Srl(rd, rs, imm4))
         }
-
         "SRA" => {
-            expect_tokens(&parts, 4)?;
-
-            Ok(Instruction::Sra {
-                rd: parse_reg(parts[1])?,
-                rs: parse_reg(parts[2])?,
-                imm4: parse_imm4(parts[3], symbols)?,
-            })
+            let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
+            Ok(Instruction::Sra(rd, rs, imm4))
         }
-
         "LOAD" => {
-            expect_tokens(&parts, 3)?;
-            let (rb, off5) = parse_mem_operand(parts[2], symbols)?;
-
-            Ok(Instruction::Load {
-                rd: parse_reg(parts[1])?,
-                rb,
-                off5,
-            })
+            let (rd, rb, off5) = parse_load(&parts, symbols)?;
+            Ok(Instruction::Load { rd, rb, off5 })
         }
-
         "STORE" => {
-            expect_tokens(&parts, 3)?;
-            let (rb, off5) = parse_mem_operand(parts[1], symbols)?;
-
-            Ok(Instruction::Store {
-                rb,
-                off5,
-                rs: parse_reg(parts[2])?,
-            })
+            let (rb, off5, rs) = parse_store(&parts, symbols)?;
+            Ok(Instruction::Store { rb, off5, rs })
         }
-
         "JMP" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Jmp {
-                addr11: parse_addr11(parts[1], symbols)?,
-            })
+            let addr11 = parse_jump(&parts, symbols)?;
+            Ok(Instruction::Jmp(addr11))
         }
-
         "CALL" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Call {
-                addr11: parse_addr11(parts[1], symbols)?,
-            })
+            let addr11 = parse_jump(&parts, symbols)?;
+            Ok(Instruction::Call(addr11))
         }
-
         "BEQ" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Beq {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Beq(off11))
         }
-
         "BNE" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Bne {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Bne(off11))
         }
-
         "BLT" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Blt {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Blt(off11))
         }
-
         "BGT" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Bgt {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Bgt(off11))
         }
-
         "BLE" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Ble {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Ble(off11))
         }
-
         "BGE" => {
-            expect_tokens(&parts, 2)?;
-
-            Ok(Instruction::Bge {
-                off11: parse_branch_off11(parts[1], pc, symbols)?,
-            })
+            let off11 = parse_branch(&parts, pc, symbols)?;
+            Ok(Instruction::Bge(off11))
         }
-
         _ => bail!("unknown instruction '{}'", parts[0]),
     }
+}
+
+fn parse_no_operand(parts: &[&str]) -> Result<()> {
+    expect_tokens(parts, 1)
+}
+
+fn parse_rr(parts: &[&str]) -> Result<(Register, Register)> {
+    expect_tokens(parts, 3)?;
+
+    let rd = parse_reg(parts[1])?;
+    let rs = parse_reg(parts[2])?;
+
+    Ok((rd, rs))
+}
+
+fn parse_rrr(parts: &[&str]) -> Result<(Register, Register, Register)> {
+    expect_tokens(parts, 4)?;
+
+    let rd = parse_reg(parts[1])?;
+    let rs1 = parse_reg(parts[2])?;
+    let rs2 = parse_reg(parts[3])?;
+
+    Ok((rd, rs1, rs2))
+}
+
+fn parse_ri8(parts: &[&str], symbols: &Symbols) -> Result<(Register, u8)> {
+    expect_tokens(parts, 3)?;
+
+    let rd = parse_reg(parts[1])?;
+    let imm8 = parse_imm8(parts[2], symbols)?;
+
+    Ok((rd, imm8))
+}
+
+fn parse_shift(parts: &[&str], symbols: &Symbols) -> Result<(Register, Register, u8)> {
+    expect_tokens(parts, 4)?;
+
+    let rd = parse_reg(parts[1])?;
+    let rs = parse_reg(parts[2])?;
+    let imm4 = parse_imm4(parts[3], symbols)?;
+
+    Ok((rd, rs, imm4))
+}
+
+fn parse_load(parts: &[&str], symbols: &Symbols) -> Result<(Register, Register, i8)> {
+    expect_tokens(parts, 3)?;
+
+    let rd = parse_reg(parts[1])?;
+    let (rb, off5) = parse_mem_operand(parts[2], symbols)?;
+
+    Ok((rd, rb, off5))
+}
+
+fn parse_store(parts: &[&str], symbols: &Symbols) -> Result<(Register, i8, Register)> {
+    expect_tokens(parts, 3)?;
+
+    let (rb, off5) = parse_mem_operand(parts[1], symbols)?;
+    let rs = parse_reg(parts[2])?;
+
+    Ok((rb, off5, rs))
+}
+
+fn parse_jump(parts: &[&str], symbols: &Symbols) -> Result<u16> {
+    expect_tokens(parts, 2)?;
+
+    parse_addr11(parts[1], symbols)
+}
+
+fn parse_branch(parts: &[&str], pc: i32, symbols: &Symbols) -> Result<i16> {
+    expect_tokens(parts, 2)?;
+
+    parse_branch_off11(parts[1], pc, symbols)
 }
 
 fn expect_tokens(parts: &[&str], expected: usize) -> Result<()> {
@@ -418,7 +356,7 @@ fn parse_reg(text: &str) -> Result<Register> {
     }
 }
 
-fn parse_value(text: &str, symbols: &HashMap<String, i32>) -> Result<i32> {
+fn parse_value(text: &str, symbols: &Symbols) -> Result<i32> {
     if is_number(text) {
         return parse_number(text);
     }
@@ -484,7 +422,7 @@ fn parse_number(text: &str) -> Result<i32> {
     Ok(value as i32)
 }
 
-fn parse_imm8(text: &str, symbols: &HashMap<String, i32>) -> Result<u8> {
+fn parse_imm8(text: &str, symbols: &Symbols) -> Result<u8> {
     let value = parse_value(text, symbols)?;
 
     warn_if_unsigned_truncates(value, 8, "imm8");
@@ -492,7 +430,7 @@ fn parse_imm8(text: &str, symbols: &HashMap<String, i32>) -> Result<u8> {
     Ok((value & 0xFF) as u8)
 }
 
-fn parse_imm4(text: &str, symbols: &HashMap<String, i32>) -> Result<u8> {
+fn parse_imm4(text: &str, symbols: &Symbols) -> Result<u8> {
     let value = parse_value(text, symbols)?;
 
     warn_if_unsigned_truncates(value, 4, "imm4");
@@ -500,7 +438,7 @@ fn parse_imm4(text: &str, symbols: &HashMap<String, i32>) -> Result<u8> {
     Ok((value & 0xF) as u8)
 }
 
-fn parse_addr11(text: &str, symbols: &HashMap<String, i32>) -> Result<u16> {
+fn parse_addr11(text: &str, symbols: &Symbols) -> Result<u16> {
     let value = parse_value(text, symbols)?;
 
     warn_if_unsigned_truncates(value, 11, "addr11");
@@ -508,7 +446,7 @@ fn parse_addr11(text: &str, symbols: &HashMap<String, i32>) -> Result<u16> {
     Ok((value & 0x7FF) as u16)
 }
 
-fn parse_branch_off11(text: &str, pc: i32, symbols: &HashMap<String, i32>) -> Result<i16> {
+fn parse_branch_off11(text: &str, pc: i32, symbols: &Symbols) -> Result<i16> {
     let offset = if is_number(text) {
         parse_number(text)?
     } else {
@@ -522,7 +460,7 @@ fn parse_branch_off11(text: &str, pc: i32, symbols: &HashMap<String, i32>) -> Re
     Ok(cut_signed(offset, 11) as i16)
 }
 
-fn parse_mem_operand(text: &str, symbols: &HashMap<String, i32>) -> Result<(Register, i8)> {
+fn parse_mem_operand(text: &str, symbols: &Symbols) -> Result<(Register, i8)> {
     if !text.ends_with(']') {
         bail!("memory operand '{}' must end with ']'", text);
     }
