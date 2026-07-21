@@ -38,12 +38,14 @@ fn collect_symbols(source: &str) -> Result<Symbols> {
             continue;
         }
 
-        if pc >= INSTR_MEM_SIZE {
+        let size = instruction_size(line) as i32;
+
+        if pc + size > INSTR_MEM_SIZE {
             bail!(
                 "line {line_num}: program exceeds instruction memory size of {INSTR_MEM_SIZE} words"
             );
         } else {
-            pc += 1;
+            pc += size;
         }
     }
 
@@ -66,10 +68,10 @@ fn parse_instructions(source: &str, symbols: &Symbols) -> Result<Vec<Instruction
             continue;
         }
 
-        let instruction = parse_instruction(line, pc, symbols)
+        let new_instructions = parse_instruction(line, pc, symbols)
             .with_context(|| format!("line {line_num}: {line}"))?;
-        instructions.push(instruction);
-        pc += 1;
+        pc += new_instructions.len() as i32;
+        instructions.extend(new_instructions);
     }
 
     Ok(instructions)
@@ -135,7 +137,20 @@ fn parse_symbol_value(text: &str, pc: i32, symbols: &Symbols) -> Result<i32> {
     parse_value(parts[0], symbols)
 }
 
-fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Instruction> {
+fn instruction_size(line: &str) -> usize {
+    let op = line
+        .split_whitespace()
+        .next()
+        .unwrap_or("")
+        .to_ascii_uppercase();
+
+    match op.as_str() {
+        "LDI" => 2,
+        _ => 1,
+    }
+}
+
+fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Vec<Instruction>> {
     let clean = line.replace(",", " ");
     let parts: Vec<&str> = clean.split_whitespace().collect();
 
@@ -145,121 +160,158 @@ fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Instructi
 
     let op = parts[0].to_ascii_uppercase();
 
-    match op.as_str() {
+    let instructions = match op.as_str() {
         "NOP" => {
             parse_no_operand(&parts)?;
-            Ok(Instruction::Nop)
+            vec![Instruction::Nop]
         }
         "RET" => {
             parse_no_operand(&parts)?;
-            Ok(Instruction::Ret)
+            vec![Instruction::Ret]
         }
         "MOV" => {
             let (rd, rs) = parse_rr(&parts)?;
-            Ok(Instruction::Mov(rd, rs))
+            vec![Instruction::Mov { rd, rs }]
         }
         "CMP" => {
             let (rd, rs) = parse_rr(&parts)?;
-            Ok(Instruction::Cmp(rd, rs))
+            vec![Instruction::Cmp { rd, rs }]
         }
         "NOT" => {
             let (rd, rs) = parse_rr(&parts)?;
-            Ok(Instruction::Not(rd, rs))
+            vec![Instruction::Not { rd, rs }]
         }
         "ADD" => {
             let (rd, rs1, rs2) = parse_rrr(&parts)?;
-            Ok(Instruction::Add(rd, rs1, rs2))
+            vec![Instruction::Add { rd, rs1, rs2 }]
         }
         "SUB" => {
             let (rd, rs1, rs2) = parse_rrr(&parts)?;
-            Ok(Instruction::Sub(rd, rs1, rs2))
+            vec![Instruction::Sub { rd, rs1, rs2 }]
         }
         "AND" => {
             let (rd, rs1, rs2) = parse_rrr(&parts)?;
-            Ok(Instruction::And(rd, rs1, rs2))
+            vec![Instruction::And { rd, rs1, rs2 }]
         }
         "OR" => {
             let (rd, rs1, rs2) = parse_rrr(&parts)?;
-            Ok(Instruction::Or(rd, rs1, rs2))
+            vec![Instruction::Or { rd, rs1, rs2 }]
         }
         "XOR" => {
             let (rd, rs1, rs2) = parse_rrr(&parts)?;
-            Ok(Instruction::Xor(rd, rs1, rs2))
+            vec![Instruction::Xor { rd, rs1, rs2 }]
         }
         "LI" => {
             let (rd, imm8) = parse_ri8(&parts, symbols)?;
-            Ok(Instruction::Li(rd, imm8))
+            vec![Instruction::Li { rd, imm8 }]
         }
         "LIH" => {
             let (rd, imm8) = parse_ri8(&parts, symbols)?;
-            Ok(Instruction::Lih(rd, imm8))
+            vec![Instruction::Lih { rd, imm8 }]
         }
         "ADDI" => {
             let (rd, imm8) = parse_ri8(&parts, symbols)?;
-            Ok(Instruction::Addi(rd, imm8))
+            vec![Instruction::Addi { rd, imm8 }]
         }
         "SUBI" => {
             let (rd, imm8) = parse_ri8(&parts, symbols)?;
-            Ok(Instruction::Subi(rd, imm8))
+            vec![Instruction::Subi { rd, imm8 }]
         }
         "CMPI" => {
             let (rd, imm8) = parse_ri8(&parts, symbols)?;
-            Ok(Instruction::Cmpi(rd, imm8))
+            vec![Instruction::Cmpi { rd, imm8 }]
         }
         "SLL" => {
             let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
-            Ok(Instruction::Sll(rd, rs, imm4))
+            vec![Instruction::Sll { rd, rs, imm4 }]
         }
         "SRL" => {
             let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
-            Ok(Instruction::Srl(rd, rs, imm4))
+            vec![Instruction::Srl { rd, rs, imm4 }]
         }
         "SRA" => {
             let (rd, rs, imm4) = parse_shift(&parts, symbols)?;
-            Ok(Instruction::Sra(rd, rs, imm4))
+            vec![Instruction::Sra { rd, rs, imm4 }]
         }
         "LOAD" => {
             let (rd, rb, off5) = parse_load(&parts, symbols)?;
-            Ok(Instruction::Load { rd, rb, off5 })
+            vec![Instruction::Load { rd, rb, off5 }]
         }
         "STORE" => {
             let (rb, off5, rs) = parse_store(&parts, symbols)?;
-            Ok(Instruction::Store { rb, off5, rs })
+            vec![Instruction::Store { rb, off5, rs }]
         }
         "JMP" => {
             let addr11 = parse_jump(&parts, symbols)?;
-            Ok(Instruction::Jmp(addr11))
+            vec![Instruction::Jmp { addr11 }]
         }
         "CALL" => {
             let addr11 = parse_jump(&parts, symbols)?;
-            Ok(Instruction::Call(addr11))
+            vec![Instruction::Call { addr11 }]
         }
         "BEQ" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Beq(off11))
+            vec![Instruction::Beq { off11 }]
         }
         "BNE" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Bne(off11))
+            vec![Instruction::Bne { off11 }]
         }
         "BLT" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Blt(off11))
+            vec![Instruction::Blt { off11 }]
         }
         "BGT" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Bgt(off11))
+            vec![Instruction::Bgt { off11 }]
         }
         "BLE" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Ble(off11))
+            vec![Instruction::Ble { off11 }]
         }
         "BGE" => {
             let off11 = parse_branch(&parts, pc, symbols)?;
-            Ok(Instruction::Bge(off11))
+            vec![Instruction::Bge { off11 }]
+        }
+        "LDI" => {
+            expect_tokens(&parts, 3)?;
+            let rd = parse_reg(parts[1])?;
+            let value = parse_value(parts[2], symbols)?;
+            warn_if_unsigned_truncates(value, 16, "imm16");
+
+            vec![
+                Instruction::Li {
+                    rd,
+                    imm8: (value & 0xFF) as u8,
+                },
+                Instruction::Lih {
+                    rd,
+                    imm8: ((value >> 8) & 0xFF) as u8,
+                },
+            ]
+        }
+        "CLR" => {
+            expect_tokens(&parts, 2)?;
+            let rd = parse_reg(parts[1])?;
+            vec![Instruction::Mov {
+                rd,
+                rs: Register::R0,
+            }]
+        }
+        "INC" => {
+            expect_tokens(&parts, 2)?;
+            let rd = parse_reg(parts[1])?;
+            vec![Instruction::Addi { rd, imm8: 1 }]
+        }
+        "DEC" => {
+            expect_tokens(&parts, 2)?;
+            let rd = parse_reg(parts[1])?;
+            vec![Instruction::Subi { rd, imm8: 1 }]
         }
         _ => bail!("unknown instruction '{}'", parts[0]),
-    }
+    };
+
+    Ok(instructions)
 }
 
 fn parse_no_operand(parts: &[&str]) -> Result<()> {

@@ -165,12 +165,16 @@ Loads a full 16-bit immediate.
 LDI R1, 0x1234
 ```
 
+The operand is parsed as `imm16`. If the value does not fit in 16 bits, the assembler emits a warning and encodes the low 16 bits.
+
 Expands to:
 
 ```athe
 LI  R1, 0x34
 LIH R1, 0x12
 ```
+
+The low byte is emitted first with `LI`; the high byte is emitted second with `LIH`.
 
 ### `CLR`
 
@@ -252,4 +256,9 @@ LOAD  rd, off5[rb]
 LOAD  rd, [rb]
 STORE off5[rb], rs
 STORE [rb], rs
+
+LDI  rd, imm16
+CLR  rd
+INC  rd
+DEC  rd
 ```

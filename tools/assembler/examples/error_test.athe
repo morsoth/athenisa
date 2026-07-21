@@ -8,7 +8,6 @@
 
 ; Unknown or unsupported instructions
 ; FOO R1, R2                         ; expected: unknown instruction
-; LDI R1, 0x1234                     ; expected: unknown instruction, pseudo-instructions not implemented yet
 
 ; Wrong operand count
 ; NOP R1                             ; expected: expected 1 tokens, got 2
@@ -20,6 +19,16 @@
 ; JMP                                ; expected: expected 2 tokens, got 1
 ; BEQ loop, extra                    ; expected: expected 2 tokens, got 3
 
+; Wrong operand count -- pseudo-instructions
+; LDI R1                             ; expected: expected 3 tokens, got 2
+; LDI R1, 0x1234, R2                 ; expected: expected 3 tokens, got 4
+; CLR                                ; expected: expected 2 tokens, got 1
+; CLR R1, R2                         ; expected: expected 2 tokens, got 3
+; INC                                ; expected: expected 2 tokens, got 1
+; INC R1, R2                         ; expected: expected 2 tokens, got 3
+; DEC                                ; expected: expected 2 tokens, got 1
+; DEC R1, R2                         ; expected: expected 2 tokens, got 3
+
 ; Invalid registers
 ; MOV R8, R0                         ; expected: invalid register
 ; ADD R1, RA, R2                     ; expected: invalid register
@@ -29,6 +38,8 @@
 ; LI R1, hello                       ; expected: undefined symbol
 ; LI R1, 0xGG                        ; expected: invalid number
 ; LI R1, 0b102                       ; expected: invalid number
+; LDI R1, missing_label              ; expected: undefined symbol
+; LDI R1, 0xGG                       ; expected: invalid number
 ; SRA R1, R2, x                      ; expected: undefined symbol
 ; JMP missing_label                  ; expected: undefined symbol
 ; BNE missing_label                  ; expected: undefined symbol

@@ -66,18 +66,24 @@ LOAD R1, [R2]               ; 10010 001 010 00000
 LOAD R2, 15[R3]             ; 10010 010 011 01111
 LOAD R4, -1[R5]             ; 10010 100 101 11111
 load r6, -16[r7]            ; 10010 110 111 10000
+LOAD R7, -0x1[R0]           ; 10010 111 000 11111
 
 STORE 0[R0], R1             ; 10011 001 000 00000
 STORE [R3], R4              ; 10011 100 011 00000
 STORE 15[R2], R3            ; 10011 011 010 01111
 STORE -1[R4], R5            ; 10011 101 100 11111
 store -16[r6], r7           ; 10011 111 110 10000
+STORE -0b100[R1], R2        ; 10011 010 001 11100
 
 ; Symbols, absolute jumps, relative label branches, and raw numeric branch offsets
 limit_1: 0x0F
+alias_limit: limit_1
+plus_one: +1
+mem_off: -4
+max_word: 0xFFFF
 _entry:
-JMP jump_target              ; 01000 00000111100
-CALL subroutine              ; 01111 00000111101
+JMP jump_target              ; 01000 00000111110
+CALL subroutine              ; 01111 00000111111
 branch_back:
 BEQ branch_back              ; 01001 11111111111
 BNE jump_target              ; 01010 00000000100
@@ -92,5 +98,26 @@ RET                          ; 10000 00000000000
 BEQ -1                       ; 01001 11111111111
 BNE 4                        ; 01010 00000000100
 
-; This file intentionally avoids pseudo-instructions because they are not
-; implemented in the assembler yet.
+; Symbol operands and numeric control flow
+LI R0, alias_limit            ; 00011 000 00001111
+ADDI R2, plus_one             ; 10100 010 00000001
+LOAD R3, mem_off[R4]          ; 10010 011 100 11100
+STORE mem_off[R5], R6         ; 10011 110 101 11100
+JMP 0x000                     ; 01000 00000000000
+CALL 0b00000000001            ; 01111 00000000001
+BLT +3                        ; 01011 00000000011
+BGE 0                         ; 01110 00000000000
+
+; Pseudo-instructions
+LDI R1, 0x1234               ; expands to: LI R1, 0x34 -> 00011 001 00110100 / LIH R1, 0x12 -> 00100 001 00010010
+ldi r2, 0                    ; expands to: LI R2, 0x00 -> 00011 010 00000000 / LIH R2, 0x00 -> 00100 010 00000000
+LDI R3, limit_1              ; expands to: LI R3, 0x0F -> 00011 011 00001111 / LIH R3, 0x00 -> 00100 011 00000000
+LDI R4, max_word             ; expands to: LI R4, 0xFF -> 00011 100 11111111 / LIH R4, 0xFF -> 00100 100 11111111
+LDI R5, +0x00A5              ; expands to: LI R5, 0xA5 -> 00011 101 10100101 / LIH R5, 0x00 -> 00100 101 00000000
+LDI R6, 0b1010101001010101   ; expands to: LI R6, 0x55 -> 00011 110 01010101 / LIH R6, 0xAA -> 00100 110 10101010
+CLR R4                       ; expands to: MOV R4, R0  -> 00001 100 000 000 00
+clr r5                       ; expands to: MOV R5, R0  -> 00001 101 000 000 00
+INC R6                       ; expands to: ADDI R6, 1  -> 10100 110 00000001
+inc r7                       ; expands to: ADDI R7, 1  -> 10100 111 00000001
+DEC R0                       ; expands to: SUBI R0, 1  -> 10101 000 00000001
+dec r1                       ; expands to: SUBI R1, 1  -> 10101 001 00000001
