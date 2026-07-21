@@ -5,12 +5,21 @@ use crate::isa::{Instruction, Register};
 
 const INSTR_MEM_SIZE: i32 = 2048;
 
-type Symbols = HashMap<String, i32>;
+pub type Symbols = HashMap<String, i32>;
 
-pub fn parse_program(source: &str) -> Result<Vec<Instruction>> {
+pub struct ParsedProgram {
+    pub instructions: Vec<Instruction>,
+    pub symbols: Symbols,
+}
+
+pub fn parse_source(source: &str) -> Result<ParsedProgram> {
     let symbols = collect_symbols(source)?;
+    let instructions = parse_instructions(source, &symbols)?;
 
-    parse_instructions(source, &symbols)
+    Ok(ParsedProgram {
+        instructions,
+        symbols,
+    })
 }
 
 fn collect_symbols(source: &str) -> Result<Symbols> {

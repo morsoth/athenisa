@@ -22,6 +22,17 @@ pub fn to_hex(words: &[u16]) -> String {
     hex
 }
 
+pub fn to_bin(words: &[u16]) -> Vec<u8> {
+    let mut bytes = Vec::new();
+
+    for word in words {
+        bytes.push((*word & 0x00FF) as u8);
+        bytes.push((*word >> 8) as u8);
+    }
+
+    bytes
+}
+
 fn encode_instruction(instruction: Instruction) -> u16 {
     match instruction {
         Instruction::Nop | Instruction::Ret => opcode(instruction),
