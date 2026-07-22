@@ -3,7 +3,7 @@
 ###### Version: 0.1
 
 AthenISA is the 16-bit instruction set architecture implemented by the
-[Tydeus-16](../../README.md) processor core. It is a compact, fixed-width ISA
+[Tydeus-16](https://github.com/morsoth/tydeus16-core) processor core. It is a compact, fixed-width ISA
 designed for a small multicycle implementation, FPGA use, and educational CPU
 development.
 
