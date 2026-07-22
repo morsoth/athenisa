@@ -1,126 +1,148 @@
 # AthenISA Assembly Syntax
 
-AthenISA assembly source files use the `.athe` extension.
+This document defines the source language accepted by the reference AthenISA
+assembler. Source files conventionally use the `.athe` extension.
 
-## Comments
+For instruction behavior and binary encoding, see the
+[instruction set](../spec/03_instruction_set.md) and
+[encoding table](../spec/04_instruction_encoding.md).
 
-Comments start with `;` and continue until the end of the line.
+## Source lines
 
-```athe
-; this is a comment
-LI R1, 42   ; this is also a comment
+After removing comments and surrounding whitespace, each non-empty source line
+must contain exactly one of the following:
+
+```text
+label:
+constant: value
+instruction operands
 ```
 
-## Whitespace
-
-Whitespace is not significant except as a separator between tokens.
-
-These are equivalent:
+A label or constant definition cannot share a line with an instruction.
 
 ```athe
-ADD R1,R2,R3
+start:
+    LI R1, 10
+```
+
+The following form is not accepted:
+
+```athe
+start: LI R1, 10
+```
+
+The first emitted instruction is placed at address 0 and following instructions
+are laid out consecutively in source order. The assembler does not insert startup
+code or an implicit prologue. Sections, origin directives such as `.org`, include
+files, and data-emission directives are not supported in the current source
+language.
+
+## Comments and whitespace
+
+A semicolon starts a comment that continues to the end of the line:
+
+```athe
+; Full-line comment
+LI R1, 42                 ; End-of-line comment
+```
+
+Blank lines are ignored. Spaces and tabs separate tokens. Commas between
+instruction operands are optional, so these forms are equivalent:
+
+```athe
 ADD R1, R2, R3
-ADD   R1,   R2,   R3
 ADD R1 R2 R3
+ADD   R1,   R2,   R3
 ```
+
+Memory operands are a single token and cannot contain spaces inside the
+`off5[rb]` expression.
+
+## Case rules
+
+Instruction mnemonics and register names are case-insensitive:
+
+```athe
+add r1, R2, r3
+```
+
+Symbol names are case-sensitive. `loop`, `Loop`, and `LOOP` are three different
+symbols.
 
 ## Registers
 
-General registers are written as:
+Instructions may name `R0` through `R7`:
 
 ```athe
-R0
-R1
-R2
-R3
-R4
-R5
-R6
-R7
+MOV R1, R2
 ```
 
-Register names are case-insensitive in the reference assembler.
+`R0` is architecturally hardwired to zero. It is syntactically valid as either
+a source or destination; writes to it are discarded by the processor.
 
-## Immediates
+## Numeric literals
 
-Decimal:
+The assembler accepts decimal, hexadecimal, and binary integers:
 
 ```athe
 LI R1, 42
+LI R2, 0x2A
+LI R3, 0b00101010
 ```
 
-Hexadecimal:
+An optional `+` or `-` sign may precede a literal in any base:
 
 ```athe
-LI R1, 0x2A
+BEQ -1
+LOAD R1, -0x4[R2]
+ADDI R3, +10
 ```
 
-Binary:
+Hexadecimal and binary prefixes may use either case (`0x`/`0X`, `0b`/`0B`).
+Digit separators and arithmetic expressions are not supported. Parsed values
+must fit in a signed 32-bit integer before they are encoded.
 
-```athe
-LI R1, 0b00101010
-```
+## Encoded field ranges
 
-Negative decimal immediates are allowed for signed operands such as branch offsets and memory offsets:
+| Field | Valid range | Used by |
+| --- | --- | --- |
+| `imm4` | 0 to 15 | Shifts |
+| `imm8` | 0 to 255 | `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI` |
+| `imm16` | 0 to 65,535 | Pseudo-instruction `LDI` |
+| `off5` | -16 to +15 | `LOAD`, `STORE` |
+| `off11` | -1024 to +1023 | Conditional branches |
+| `addr11` | 0 to 2047 | `JMP`, `CALL` |
 
-```athe
-STORE -1[R7], R1
-```
+If a value does not fit its destination field, the reference assembler prints a
+warning and keeps the low field-width bits. It does not reject the instruction.
+For example, `LI R1, 0x123` encodes `imm8 = 0x23`.
 
-If a numeric value does not fit in the destination field, the assembler emits a warning and truncates the value to the encoded bit width.
+This truncation rule is mechanical. In particular, arithmetic `imm8` values are
+zero-extended by the processor, so writing `ADDI R1, -1` encodes `0xFF` and adds
+255; it is not a signed add-immediate operation.
 
-For example, `LI R1, 0x123` warns and encodes the low 8 bits, `0x23`.
+## Symbols
 
-Symbols may also be used wherever a numeric operand is accepted:
+Labels and constants share one numeric symbol table.
 
-```athe
-limit: 15
-ADDI R1, limit
-```
+### Names
 
-## Memory operands
-
-Memory operands use base + offset syntax:
-
-```athe
-LOAD  R1, 0[R2]
-STORE -1[R7], R3
-```
-
-The offset is a signed 5-bit value.
-
-When the offset is zero, it may be omitted:
-
-```athe
-LOAD  R1, [R2]    ; equivalent to LOAD R1, 0[R2]
-STORE [R7], R3    ; equivalent to STORE 0[R7], R3
-```
-
-## Labels
-
-Symbols are defined with `:`.
-
-Each source line may contain only one kind of item: a label, a constant, or an instruction.
-
-Symbol names must start with an ASCII letter or `_`. The remaining characters may be ASCII letters, digits, or `_`.
-
-Valid:
+A symbol name must begin with an ASCII letter or `_`. Remaining characters may
+be ASCII letters, digits, or `_`.
 
 ```athe
 loop:
 _start:
-limit_1: 0x0F
+limit_1: 15
 ```
 
-Invalid:
+Names such as `1loop`, `bad-name`, and `bad$name` are invalid. Defining the same
+name more than once is also an error.
 
-```athe
-1loop:
-bad-name:
-bad$name:
-```
+### Labels
 
-When no value follows the symbol name, the symbol receives the current instruction address:
+A definition without an explicit value creates a label at the current emitted
+instruction address:
 
 ```athe
 loop:
@@ -129,96 +151,114 @@ loop:
     BNE loop
 ```
 
-When a value follows the symbol name, the symbol receives that value and does not consume instruction memory:
+The address counts real instruction words after pseudo-instruction expansion.
+For example, `LDI` advances the current address by two words.
+
+### Constants
+
+A definition with a value creates a constant and emits no instruction:
 
 ```athe
 limit: 0x0F
 mask: 0b11110000
+alias: limit
 ```
 
-All symbols are numeric. The assembler does not distinguish labels from constants after the first pass.
+A constant value may be a literal or a previously defined symbol. Constant
+expressions and forward references between constant definitions are not
+supported.
 
-For branches, symbolic operands are assembled as signed offsets relative to `PC + 1`:
+### References
+
+Symbols may replace numeric operands:
+
+```athe
+limit: 15
+ADDI R1, limit
+JMP finish
+
+finish:
+RET
+```
+
+The assembler collects all label addresses before parsing instructions, so
+instructions may refer to labels defined later in the source.
+
+## Control-flow operands
+
+`JMP` and `CALL` always interpret their operand as an absolute `addr11`, whether
+it is written as a number or a symbol:
+
+```athe
+JMP 0x120
+CALL function
+```
+
+Conditional branches distinguish numeric and symbolic operands:
+
+- a numeric operand is the raw signed `off11` to encode;
+- a symbol is a target address, converted with
+  `off11 = symbol - (PC + 1)`.
 
 ```athe
 loop:
-    SUBI R1, 1
-    BNE loop      ; encoded offset = loop - (PC + 1)
+    BNE loop             ; assembler computes the relative offset
+
+BEQ -1                   ; raw offset: branch to this instruction
+BGE 4                    ; raw offset: four words after PC + 1
 ```
 
-Numeric branch operands are treated as raw signed offsets:
+Every symbol used by a branch is treated as a target address, including symbols
+defined with an explicit constant value.
+
+## Memory operands
+
+Loads and stores use a signed word offset followed by a base register in square
+brackets:
 
 ```athe
-BEQ -1            ; branch to itself
-BNE 4             ; branch four instructions forward
+LOAD  R1, 4[R2]
+STORE -1[R7], R3
 ```
 
-For `JMP` and `CALL`, label operands are assembled as absolute instruction addresses.
+The offset may be a literal or symbol. A missing offset means zero:
+
+```athe
+LOAD  R1, [R2]           ; equivalent to LOAD R1, 0[R2]
+STORE [R7], R3           ; equivalent to STORE 0[R7], R3
+```
+
+The complete memory expression must remain contiguous. `4 [R2]` is not accepted.
 
 ## Pseudo-instructions
 
-### `LDI`
+Pseudo-instructions are assembler conveniences. They expand before encoding and
+do not introduce new hardware operations.
 
-Loads a full 16-bit immediate.
+| Pseudo-instruction | Expansion | Emitted words |
+| --- | --- | --- |
+| `LDI rd, imm16` | `LI rd, imm16[7:0]` then `LIH rd, imm16[15:8]` | 2 |
+| `CLR rd` | `MOV rd, R0` | 1 |
+| `INC rd` | `ADDI rd, 1` | 1 |
+| `DEC rd` | `SUBI rd, 1` | 1 |
+
+Example:
 
 ```athe
 LDI R1, 0x1234
 ```
 
-The operand is parsed as `imm16`. If the value does not fit in 16 bits, the assembler emits a warning and encodes the low 16 bits.
-
-Expands to:
+emits:
 
 ```athe
 LI  R1, 0x34
 LIH R1, 0x12
 ```
 
-The low byte is emitted first with `LI`; the high byte is emitted second with `LIH`.
+Labels after an `LDI` account for both emitted words. The assembler's `.lst`
+output displays these real expanded instructions.
 
-### `CLR`
-
-Clears a register.
-
-```athe
-CLR R1
-```
-
-Expands to:
-
-```athe
-MOV R1, R0
-```
-
-### `INC`
-
-Increments a register by one.
-
-```athe
-INC R1
-```
-
-Expands to:
-
-```athe
-ADDI R1, 1
-```
-
-### `DEC`
-
-Decrements a register by one.
-
-```athe
-DEC R1
-```
-
-Expands to:
-
-```athe
-SUBI R1, 1
-```
-
-## Instruction syntax summary
+## Instruction syntax reference
 
 ```athe
 NOP
