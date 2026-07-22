@@ -1,23 +1,28 @@
 # AthenISA Instruction Formats
 
-All AthenISA instructions are 16 bits wide. Depending on the instruction, the encoded fields may represent registers, immediates, absolute addresses, or relative offsets.
+All AthenISA instructions are one 16-bit word. Bits are numbered from 15, the
+most significant bit, to 0, the least significant bit. The primary `opcode`
+always occupies bits `15:11`.
 
-### No-operand
+Register fields use the encodings from [01_registers.md](01_registers.md).
+Fields named `reserved` must be zero in a canonical encoding.
 
-`NOP`, `RET`
+## No operand
 
-<img src="imgs/no_op.png" alt="No-operand instruction format" style="max-width: 760px; width: 100%; height: auto;">
+Used by `NOP` and `RET`.
+
+![No-operand instruction format](imgs/no_op.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `reserved` | `10:0` | Reserved bits |
 
-### Register-register-register (RRR)
+## Register-register-register (RRR)
 
-`ADD`, `SUB`, `AND`, `OR`, `XOR`
+Used by `ADD`, `SUB`, `AND`, `OR`, and `XOR`.
 
-<img src="imgs/rrr.png" alt="Register-register-register instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Register-register-register instruction format](imgs/rrr.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -25,13 +30,13 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | `rd` | `10:8` | Destination register |
 | `rs1` | `7:5` | First source register |
 | `rs2` | `4:2` | Second source register |
-| `func` | `1:0` | Secondary function selector |
+| `func` | `1:0` | Secondary operation selector |
 
-### Register-register (RR)
+## Register-register (RR)
 
-`MOV`, `NOT`, `CMP`
+Used by `MOV`, `CMP`, and `NOT`.
 
-<img src="imgs/rr.png" alt="Register-register instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Register-register instruction format](imgs/rr.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -39,87 +44,87 @@ All AthenISA instructions are 16 bits wide. Depending on the instruction, the en
 | `rd` | `10:8` | Destination or first operand register |
 | `rs` | `7:5` | Source or second operand register |
 | `reserved` | `4:2` | Reserved bits |
-| `func` | `1:0` | Secondary function selector |
+| `func` | `1:0` | Secondary operation selector |
 
-### Register-immediate (RI)
+For `CMP`, `rd` is the first comparison operand and no register is written.
 
-`LI`, `LIH`, `ADDI`, `SUBI`, `CMPI`
+## Register-immediate (RI)
 
-<img src="imgs/ri.png" alt="Register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
+Used by `LI`, `LIH`, `ADDI`, `SUBI`, and `CMPI`.
+
+![Register-immediate instruction format](imgs/ri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination or operand register |
-| `imm(8)` | `7:0` | 8-bit immediate |
+| `rd` | `10:8` | Destination or first operand register |
+| `imm8` | `7:0` | Unsigned 8-bit immediate |
 
-### Register-register-immediate (RRI)
+## Register-register-immediate (RRI)
 
-`SLL`, `SRL`, `SRA`
+Used by `SLL`, `SRL`, and `SRA`.
 
-<img src="imgs/rri.png" alt="Register-register-immediate instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Register-register-immediate instruction format](imgs/rri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination register |
 | `rs` | `7:5` | Source register |
-| `reserved` | `4` | Reserved bit |
-| `imm(4)` | `3:0` | 4-bit shift amount |
+| `reserved` | `4` | Reserved bits |
+| `imm4` | `3:0` | Shift amount from 0 to 15 |
 
-> [!NOTE]
-> A 4-bit shift immediate is sufficient for a 16-bit architecture because meaningful shift amounts range from 0 to 15.
+## Absolute jump
 
-### Unconditional jump
+Used by `JMP` and `CALL`.
 
-`JMP`, `CALL`
-
-<img src="imgs/uncond_jump.png" alt="Unconditional jump instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Absolute jump instruction format](imgs/uncond_jump.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `addr(11)` | `10:0` | Absolute 11-bit instruction address |
+| `addr11` | `10:0` | Absolute instruction word address |
 
-> [!NOTE]
-> The 11 bits available for the absolute instruction address constrain instruction memory to `2^11` words. This ensures that an absolute jump can reach any instruction in memory.
+The field spans the complete 2048-word instruction address space.
 
-### Conditional branch
+## Conditional branch
 
-`BEQ`, `BNE`, `BLT`, `BGT`, `BLE`, `BGE`
+Used by `BEQ`, `BNE`, `BLT`, `BGT`, `BLE`, and `BGE`.
 
-<img src="imgs/cond_jump.png" alt="Conditional branch instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Conditional branch instruction format](imgs/cond_jump.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `off(11)` | `10:0` | Signed 11-bit PC-relative offset |
+| `off11` | `10:0` | Signed two's-complement PC-relative offset |
 
-> [!NOTE]
-> Conditional branch targets are computed relative to `PC+1`.
+A taken branch targets `PC + 1 + sext(off11)`.
 
-### Load
+## Load
 
-`LOAD`
+Used by `LOAD`.
 
-<img src="imgs/load.png" alt="Load instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Load instruction format](imgs/load.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination register |
-| `rb` | `7:5` | Base register |
-| `off(5)` | `4:0` | Signed 5-bit offset |
+| `rb` | `7:5` | Base-address register |
+| `off5` | `4:0` | Signed two's-complement data offset |
 
-### Store
+## Store
 
-`STORE`
+Used by `STORE`.
 
-<img src="imgs/store.png" alt="Store instruction format" style="max-width: 760px; width: 100%; height: auto;">
+![Store instruction format](imgs/store.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `rs` | `10:8` | Source data register |
-| `rb` | `7:5` | Base register |
-| `off(5)` | `4:0` | Signed 5-bit offset |
+| `rb` | `7:5` | Base-address register |
+| `off5` | `4:0` | Signed two's-complement data offset |
+
+Opcode and `func` assignments are listed in
+[04_instruction_encoding.md](04_instruction_encoding.md).
