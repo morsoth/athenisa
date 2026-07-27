@@ -1,10 +1,9 @@
 # AthenISA Instruction Formats
 
-All AthenISA instructions are one 16-bit word. Bits are numbered from 15, the
+All AthenISA instructions are 16-bit wide. Bits are numbered from 15, the
 most significant bit, to 0, the least significant bit. The primary `opcode`
 always occupies bits `15:11`.
 
-Register fields use the encodings from [01_registers.md](01_registers.md).
 Fields named `reserved` must be zero in a canonical encoding.
 
 ## No operand
@@ -72,7 +71,7 @@ Used by `SLL`, `SRL`, and `SRA`.
 | `rd` | `10:8` | Destination register |
 | `rs` | `7:5` | Source register |
 | `reserved` | `4` | Reserved bits |
-| `imm4` | `3:0` | Shift amount from 0 to 15 |
+| `imm4` | `3:0` | Shift amount |
 
 ## Absolute jump
 
@@ -83,7 +82,7 @@ Used by `JMP` and `CALL`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `addr11` | `10:0` | Absolute instruction word address |
+| `addr11` | `10:0` | Absolute instruction address |
 
 The field spans the complete 2048-word instruction address space.
 
@@ -96,7 +95,7 @@ Used by `BEQ`, `BNE`, `BLT`, `BGT`, `BLE`, and `BGE`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `off11` | `10:0` | Signed two's-complement PC-relative offset |
+| `off11` | `10:0` | PC-relative instruction offset |
 
 A taken branch targets `PC + 1 + sext(off11)`.
 
@@ -111,7 +110,7 @@ Used by `LOAD`.
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination register |
 | `rb` | `7:5` | Base-address register |
-| `off5` | `4:0` | Signed two's-complement data offset |
+| `off5` | `4:0` | Data offset |
 
 ## Store
 
@@ -124,7 +123,7 @@ Used by `STORE`.
 | `opcode` | `15:11` | Primary opcode |
 | `rs` | `10:8` | Source data register |
 | `rb` | `7:5` | Base-address register |
-| `off5` | `4:0` | Signed two's-complement data offset |
+| `off5` | `4:0` | Data offset |
 
 Opcode and `func` assignments are listed in
 [04_instruction_encoding.md](04_instruction_encoding.md).

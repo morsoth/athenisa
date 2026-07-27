@@ -28,7 +28,10 @@ from its computed result even when its destination is `R0`.
 instruction.
 
 > [!NOTE]
-> `PC` register is 11-bit wide due to the instruction memory size being `2^11 = 2048` words. This allows absolute jumps to reach all the instruction memory adressess with the 11 bits encoded in the instruction.
+> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048`
+> words. This allows an [absolute jump](02_instruction_formats.md#absolute-jump)
+> to reach every instruction-memory address using the 11-bit field encoded in
+> the instruction.
 
 Sequential execution advances `PC` by one. `PC` is not directly addressable by
 the general register fields.
