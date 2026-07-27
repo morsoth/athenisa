@@ -1,8 +1,6 @@
 # AthenISA Instruction Formats
 
-All AthenISA instructions are 16-bit wide. Bits are numbered from 15, the
-most significant bit, to 0, the least significant bit. The primary `opcode`
-always occupies bits `15:11`.
+All AthenISA instructions are 16-bit wide. Bits are numbered from 15, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `15:11`.
 
 Fields named `reserved` must be zero in a canonical encoding.
 
@@ -125,5 +123,4 @@ Used by `STORE`.
 | `rb` | `7:5` | Base-address register |
 | `off5` | `4:0` | Data offset |
 
-Opcode and `func` assignments are listed in
-[04_instruction_encoding.md](04_instruction_encoding.md).
+Opcode and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

@@ -1,7 +1,6 @@
 # AthenISA Registers
 
-The processor exposes a compact architectural register set composed of one zero register,
-seven general-purpose registers, the program counter, the stack pointer, and a flags register.
+The processor exposes a compact architectural register set composed of one zero register, seven general-purpose registers, the program counter, the stack pointer, and a flags register.
 
 ## Register file
 
@@ -18,32 +17,22 @@ Every encoded register field is three bits wide.
 | `110` | `R6` | 16 bits | General-purpose register |
 | `111` | `R7` | 16 bits | General-purpose register |
 
-`R0` always reads as `0x0000`. An instruction may name `R0` as a destination,
-but the write has no effect. A flag-setting instruction still updates `FLAGS`
-from its computed result even when its destination is `R0`.
+`R0` always reads as `0x0000`. An instruction may name `R0` as a destination, but the write has no effect. A flag-setting instruction still updates `FLAGS` from its computed result even when its destination is `R0`.
 
 ## Program counter
 
-`PC` is an 11-bit register containing the word address of the current
-instruction.
+`PC` is an 11-bit register containing the word address of the current instruction.
 
 > [!NOTE]
-> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048`
-> words. This allows an [absolute jump](02_instruction_formats.md#absolute-jump)
-> to reach every instruction-memory address using the 11-bit field encoded in
-> the instruction.
+> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an [absolute jump](02_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
 
-Sequential execution advances `PC` by one. `PC` is not directly addressable by
-the general register fields.
+Sequential execution advances `PC` by one. `PC` is not directly addressable by the general register fields.
 
 ## Stack pointer
 
-`SP` is a 16-bit register used implicitly by `CALL` and `RET`. The stack grows
-toward lower data-memory addresses. `SP = 0x0000` is the empty-stack marker, so
-the first `CALL` stores its return address at `0xFFFF`.
+`SP` is a 16-bit register used implicitly by `CALL` and `RET`. The stack grows toward lower data-memory addresses. `SP = 0x0000` is the empty-stack marker, so the first `CALL` stores its return address at `0xFFFF`.
 
-`SP` is not directly addressable by the general register fields. The complete
-stack convention is defined in [05_memory.md](05_memory.md#stack).
+`SP` is not directly addressable by the general register fields. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 
 ## Flags register
 
@@ -56,9 +45,7 @@ stack convention is defined in [05_memory.md](05_memory.md#stack).
 | `1` | `C` | Unsigned carry, or no-borrow indication for subtraction |
 | `0` | `Z` | Zero result |
 
-For addition, `C` is the carry out of bit 15. For subtraction, `C = 1` means no
-unsigned borrow occurred and `C = 0` means a borrow occurred. `V` reports signed
-two's-complement overflow.
+For addition, `C` is the carry out of bit 15. For subtraction, `C = 1` means no unsigned borrow occurred and `C = 0` means a borrow occurred. `V` reports signed two's-complement overflow.
 
 Flag updates are grouped as follows:
 
@@ -70,9 +57,7 @@ Flag updates are grouped as follows:
 | `SLL`, `SRL`, `SRA` | From result | Cleared | From result | Cleared |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |
 
-`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the
-subtraction result to the register file. Conditional branches read `Z`, `N`, and
-`V`.
+`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `N`, and `V`.
 
 ## Reset state
 
@@ -85,5 +70,4 @@ The reset profile is:
 | `SP` | `0x0000` (empty stack) |
 | `FLAGS` | `0000` |
 
-Instruction and data memory contents are not cleared by architectural reset.
-Program loading and memory initialization are platform responsibilities.
+Instruction and data memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.
