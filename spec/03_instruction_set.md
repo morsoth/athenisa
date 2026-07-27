@@ -1,254 +1,357 @@
-# AthenISA Instruction Set
+# 03. Instruction Set
 
-### No-operation instructions
+This chapter defines the architectural behavior of every real AthenISA instruction. Assembly-only pseudo-instructions are defined separately in [`asm/syntax.md`](../asm/syntax.md#pseudo-instructions).
 
-#### NOP
+By default the `FLAGS` register is unchanged.
 
-The `NOP` instruction performs no operation and does not modify the architectural state of the processor.
+## No-operation instructions
 
-```
-NOP                     // does nothing
-```
+### NOP
 
-### Data movement instructions
+`NOP` performs no operation.
 
-#### MOV
-
-The `MOV` instruction copies the contents of a source register into a destination register.
-
-```
-MOV rd, rs              // rd <- rs
+```text
+NOP                         // does nothing
 ```
 
-#### LI
+## Data movement instructions
 
-The `LI` instruction loads an 8-bit immediate into the lower half of the destination register and clears the upper half to zero. This instruction is used to efficiently load small constants.
+### MOV
 
+`MOV` copies the source register into the destination register.
+
+```text
+MOV rd, rs                  // rd <- rs
 ```
-LI rd, imm(8)           // rd[7:0] <- imm(8), rd[15:8] <- 0x00
+
+### LI
+
+`LI` loads an 8-bit immediate into the lower half of the destination register and clears the upper half to zero. This instruction is used to efficiently load small constants.
+
+```text
+LI rd, imm8                 // rd[7:0] <- imm8
+                            // rd[15:8] <- 0x00
 ```
 
-#### LIH
+### LIH
 
-The `LIH` instruction loads an 8-bit immediate into the upper half of the destination register while leaving the lower half unchanged. Combined with `LI`, it allows constructing a full 16-bit constant.
+`LIH` loads an 8-bit immediate into the upper half of the destination register while leaving the lower half unchanged. Combined with LI, it allows constructing a full 16-bit constant.
+
+```text
+LIH rd, imm8                // rd[15:8] <- imm8
+```
 
 > [!NOTE]
 > To successfully load a 16-bit immediate into a register it is mandatory to use `LI` first and then `LIH`.
 
-```
-LIH rd, imm(8)          // rd[15:8] <- imm(8)
-```
+## Arithmetic and logic instructions
 
-### Arithmetic and logic instructions
+### ADD
 
-#### ADD
+`ADD` adds two source registers and writes the result to the destination register.
 
-The `ADD` instruction adds two source registers and writes the result to the destination register.
-
-```
-ADD rd, rs1, rs2        // rd <- rs1 + rs2
+```text
+ADD rd, rs1, rs2            // rd <- rs1 + rs2
 ```
 
-#### ADDI
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the addition produces a carry out of bit 15; otherwise `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
-The `ADDI` instruction adds a zero-extended 8-bit immediate to the destination register.
+### ADDI
 
-```
-ADDI rd, imm(8)         // rd <- rd + zext(imm(8))
-```
+`ADDI` adds a zero-extended 8-bit immediate to the destination register.
 
-#### SUB
-
-The `SUB` instruction subtracts the second source register from the first source register and writes the result to the destination register.
-
-```
-SUB rd, rs1, rs2        // rd <- rs1 - rs2
-```
-
-#### SUBI
-
-The `SUBI` instruction subtracts a zero-extended 8-bit immediate from the destination register.
-
-```
-SUBI rd, imm(8)         // rd <- rd - zext(imm(8))
+```text
+ADDI rd, imm8               // rd <- rd + zext(imm8)
 ```
 
-#### AND
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the addition produces a carry out of bit 15; otherwise `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
-The `AND` instruction performs a bitwise AND between two source registers.
+### SUB
 
+`SUB` subtracts the second source register from the first and writes the result to the destination register.
+
+```text
+SUB rd, rs1, rs2            // rd <- rs1 - rs2
 ```
-AND rd, rs1, rs2        // rd <- rs1 & rs2
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### SUBI
+
+`SUBI` subtracts a zero-extended 8-bit immediate from the destination register.
+
+```text
+SUBI rd, imm8               // rd <- rd - zext(imm8)
 ```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### AND
+
+`AND` performs a bitwise AND between two source registers.
+
+```text
+AND rd, rs1, rs2            // rd <- rs1 & rs2
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
 > [!NOTE]
-> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in `RI` instructions is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
+> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in [`RI` instructions](./02_instruction_formats.md#register-immediate-ri) is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
 
-#### OR
+### OR
 
-The `OR` instruction performs a bitwise OR between two source registers.
+`OR` performs a bitwise OR between two source registers.
 
-```
-OR rd, rs1, rs2         // rd <- rs1 | rs2
-```
-
-#### XOR
-
-The `XOR` instruction performs a bitwise XOR between two source registers.
-
-```
-XOR rd, rs1, rs2        // rd <- rs1 ^ rs2
+```text
+OR rd, rs1, rs2             // rd <- rs1 | rs2
 ```
 
-#### NOT
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
-The `NOT` instruction performs a bitwise negation of the source register.
+### XOR
 
-```
-NOT rd, rs              // rd <- ~rs
-```
+`XOR` performs a bitwise XOR between two source registers.
 
-#### CMP
-
-The `CMP` instruction behaves like a subtraction operation, but the result is not written back to the register file. Instead, only the status flags are updated.
-
-```
-CMP rd, rs              // rd - rs
-```
-
-#### CMPI
-
-The `CMPI` compares the register operand with a zero-extended 8-bit immediate and acts as the `CMP` instruction.
-
-```
-CMPI rd, imm(8)         // rd - zext(imm(8))
+```text
+XOR rd, rs1, rs2            // rd <- rs1 ^ rs2
 ```
 
-### Shift instructions
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
-#### SLL
+### NOT
 
-The `SLL` instruction performs a logical left shift of the source register by an immediate amount.
+`NOT` inverts every bit of the source register.
 
+```text
+NOT rd, rs                  // rd <- ~rs
 ```
-SLL rd, rs, imm(4)      // rd <- rs << imm(4)
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### CMP
+
+`CMP` performs a register subtraction only to update the flags. The arithmetic result is not written to the register file.
+
+```text
+CMP rd, rs                  // rd - rs
 ```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### CMPI
+
+`CMPI` compares a register with a zero-extended 8-bit immediate. The arithmetic result is not written to the register file.
+
+```text
+CMPI rd, imm8               // rd - zext(imm8)
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+## Shift instructions
+
+### SLL
+
+`SLL` performs a logical left shift of the source register by an immediate amount.
+
+```text
+SLL rd, rs, imm4            // rd <- rs << imm4
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
 > [!NOTE]
 > Shift instructions use only a 4-bit immediate because this is sufficient to encode all meaningful shift amounts in a 16-bit architecture. A 4-bit field allows values from 0 to 15, which covers the full useful shift range for a 16-bit operand.
 
-#### SRL
+### SRL
 
-The `SRL` instruction performs a logical right shift of the source register by an immediate amount.
+`SRL` performs a logical right shift of the source register by an immediate amount.
 
-```
-SRL rd, rs, imm(4)      // rd <- rs >> imm(4)
-```
-
-#### SRA
-
-The `SRA` instruction performs an arithmetic right shift of the source register by an immediate amount.
-
-```
-SRA rd, rs, imm(4)      // rd <- rs >> imm(4) ; arithmetic
+```text
+SRL rd, rs, imm4            // rd <- zext(rs) >> imm4
 ```
 
-### Jump instructions
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
-#### JMP
+### SRA
 
-The `JMP` instruction performs an unconditional jump to an absolute 11-bit address in instruction memory.
+`SRA` performs an arithmetic right shift of the source register by an immediate amount.
 
-```
-JMP addr(11)            // PC <- addr(11)
-```
-
-#### BEQ
-
-The `BEQ` instruction performs a relative branch if the zero flag is set.
-
-```
-BEQ off(11)             // if Z = 1
-                        // then PC <- PC+1 + sext(off(11))
+```text
+SRA rd, rs, imm4            // rd <- sext(rs) >> imm4
 ```
 
-#### BNE
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
 
-The `BNE` instruction performs a relative branch if the zero flag is not set.
+## Jump instructions
 
-```
-BNE off(11)             // if Z = 0
-                        // then PC <- PC+1 + sext(off(11))
-```
+### JMP
 
-#### BLT
+`JMP` transfers execution to an absolute 11-bit instruction address.
 
-The `BLT` instruction performs a relative branch if the signed comparison indicates strictly less than.
-
-```
-BLT off(11)             // if (N xor V) = 1
-                        // then PC <- PC+1 + sext(off(11))
-```
-
-#### BGT
-
-The `BGT` instruction performs a relative branch if the signed comparison indicates strictly greater than.
-
-```
-BGT off(11)             // if Z = 0 and (N xor V) = 0
-                        // then PC <- PC+1 + sext(off(11))
+```text
+JMP addr11                  // PC <- addr11
 ```
 
-#### BLE
+### BEQ
 
-The `BLE` instruction performs a relative branch if the signed comparison indicates less than or equal.
+`BEQ` branches when the zero flag is set.
 
-```
-BLE off(11)             // if Z = 1 or (N xor V) = 1
-                        // then PC <- PC+1 + sext(off(11))
-```
-
-#### BGE
-
-The `BGE` instruction performs a relative branch if the signed comparison indicates greater than or equal.
-
-```
-BGE off(11)             // if (N xor V) = 0
-                        // then PC <- PC+1 + sext(off(11))
+```text
+BEQ off11                   // if Z = 1
+                            // then PC <- PC + 1 + sext(off11)
 ```
 
-### Flow control instructions
+### BNE
 
-#### CALL
+`BNE` branches when the zero flag is clear.
 
-The `CALL` instruction saves the return address on the stack and then transfers control to an absolute 11-bit address in instruction memory.
-
-```
-CALL addr(11)           // SP <- SP - 1 ; MEM[SP] <- PC + 1 ; PC <- addr(11)
-```
-
-#### RET
-
-The `RET` instruction restores the program counter from the stack and returns execution to the caller.
-
-```
-RET                     // PC <- MEM[SP] ; SP <- SP + 1
+```text
+BNE off11                   // if Z = 0
+                            // then PC <- PC + 1 + sext(off11)
 ```
 
-### Memory instructions
+### BLT
 
-#### LOAD
+`BLT` branches when the previous comparison indicates signed less than.
 
-The `LOAD` instruction reads a word from data memory using `BASE + offset` addressing. The effective address is computed as the contents of the base register plus the sign-extended 5-bit offset.
-
+```text
+BLT off11                   // if (N xor V) = 1
+                            // then PC <- PC + 1 + sext(off11)
 ```
-LOAD rd, off(5)[rb]     // rd <- MEM[rb + sext(off(5))]
+
+### BGT
+
+`BGT` branches when the previous comparison indicates signed greater than.
+
+```text
+BGT off11                   // if Z = 0 and (N xor V) = 0
+                            // then PC <- PC + 1 + sext(off11)
 ```
 
-#### STORE
+### BLE
 
-The `STORE` instruction writes a word into data memory using `BASE + offset` addressing. The effective address is computed as the contents of the base register plus the sign-extended 5-bit offset.
+`BLE` branches when the previous comparison indicates signed less than or equal.
 
+```text
+BLE off11                   // if Z = 1 or (N xor V) = 1
+                            // then PC <- PC + 1 + sext(off11)
 ```
-STORE off(5)[rb], rs    // MEM[rb + sext(off(5))] <- rs
+
+### BGE
+
+`BGE` branches when the previous comparison indicates signed greater than or equal.
+
+```text
+BGE off11                   // if (N xor V) = 0
+                            // then PC <- PC + 1 + sext(off11)
+```
+
+## Flow control instructions
+
+### CALL
+
+`CALL` stores the sequential return address on the stack and transfers execution to an absolute 11-bit instruction address.
+
+```text
+CALL addr11                 // SP <- SP - 1
+                            // MEM[SP] <- PC + 1
+                            // PC <- addr11
+```
+
+The subtraction uses 16-bit address arithmetic. With `SP` at its reset value of `0x0000`, the first return address is stored at `0xFFFF`.
+
+### RET
+
+`RET` restores the program counter from the stack and then removes that entry.
+
+```text
+RET                         // PC <- MEM[SP]
+                            // SP <- SP + 1
+```
+
+Executing `RET` while `SP = 0x0000` is a stack-underflow condition and has no normal return semantics. The way an implementation exposes that condition is outside the software-visible ISA.
+
+## Memory instructions
+
+### LOAD
+
+`LOAD` reads one 16-bit word from data memory into the destination register.
+
+```text
+LOAD rd, off5[rb]           // rd <- MEM[rb + sext(off5)]
+```
+
+### STORE
+
+`STORE` writes one 16-bit source-register value to data memory.
+
+```text
+STORE off5[rb], rs          // MEM[rb + sext(off5)] <- rs
 ```
