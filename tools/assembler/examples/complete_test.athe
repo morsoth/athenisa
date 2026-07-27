@@ -81,6 +81,12 @@ alias_limit: limit_1
 plus_one: +1
 mem_off: -4
 max_word: 0xFFFF
+expression_base: 10
+expression_precedence: expression_base + 2 * 3
+expression_grouped: (expression_base + 2) * 3
+expression_negative: -(expression_base - 4)
+expression_division: 17 / 5
+expression_remainder: 17 % 5
 _entry:
 JMP jump_target              ; 01000 00000111110
 CALL subroutine              ; 01111 00000111111

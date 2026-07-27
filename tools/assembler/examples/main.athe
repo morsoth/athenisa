@@ -1,0 +1,27 @@
+limite: 5
+resultado_esperado: limite * (limite + 1) / 2
+
+LI R1, 0
+LI R2, 1
+LI R3, limite
+
+bucle:
+    ADD R1, R1, R2
+    INC R2
+
+    CMP R2, R3
+    BLE bucle               ; loop mientras R2 <= limite
+
+CMPI R1, resultado_esperado
+BEQ igual                   ; branch si R1 == resultado_esperado
+JMP diferente
+
+igual:
+    LI R4, 1
+    JMP fin
+
+diferente:
+    LI R4, 0
+
+fin:
+    JMP fin

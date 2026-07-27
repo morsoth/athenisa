@@ -1,11 +1,10 @@
 use anyhow::{Context, Result, bail};
-use std::collections::HashMap;
 
 use crate::isa::{Instruction, Register};
 
 const INSTR_MEM_SIZE: i32 = 2048;
 
-pub type Symbols = HashMap<String, i32>;
+pub type Symbols = Vec<(String, i32)>;
 
 pub struct ParsedProgram {
     pub instructions: Vec<Instruction>,
@@ -23,7 +22,7 @@ pub fn parse_source(source: &str) -> Result<ParsedProgram> {
 }
 
 fn collect_symbols(source: &str) -> Result<Symbols> {
-    let mut symbols = HashMap::new();
+    let mut symbols = Vec::new();
     let mut pc = 0;
 
     for (line_idx, raw_line) in source.lines().enumerate() {
@@ -38,11 +37,11 @@ fn collect_symbols(source: &str) -> Result<Symbols> {
             let (name, value) = parse_symbol(line, pc, &symbols)
                 .with_context(|| format!("line {line_num}: {line}"))?;
 
-            if symbols.contains_key(&name) {
+            if symbols.iter().any(|(symbol_name, _)| symbol_name == &name) {
                 bail!("line {line_num}: symbol '{name}' is already defined");
             }
 
-            symbols.insert(name, value);
+            symbols.push((name, value));
 
             continue;
         }
@@ -137,13 +136,124 @@ fn parse_symbol_value(text: &str, pc: i32, symbols: &Symbols) -> Result<i32> {
         return Ok(pc);
     }
 
-    let parts: Vec<&str> = text.split_whitespace().collect();
+    parse_expression(text, symbols)
+}
 
-    if parts.len() != 1 {
-        bail!("symbol value must contain exactly one value");
+fn parse_expression(text: &str, symbols: &Symbols) -> Result<i32> {
+    let text = text.trim();
+
+    if text.is_empty() {
+        bail!("expected a value");
     }
 
-    parse_value(parts[0], symbols)
+    if let Some((operator_idx, operator)) = find_operator(text, &['+', '-'])? {
+        let left = parse_expression(&text[..operator_idx], symbols)?;
+        let right = parse_expression(&text[operator_idx + 1..], symbols)?;
+
+        return calculate_expression(left, operator, right);
+    }
+
+    if let Some((operator_idx, operator)) = find_operator(text, &['*', '/', '%'])? {
+        let left = parse_expression(&text[..operator_idx], symbols)?;
+        let right = parse_expression(&text[operator_idx + 1..], symbols)?;
+
+        return calculate_expression(left, operator, right);
+    }
+
+    if has_outer_parentheses(text) {
+        return parse_expression(&text[1..text.len() - 1], symbols);
+    }
+
+    if let Ok(value) = parse_number(text) {
+        return Ok(value);
+    }
+
+    if let Some(value_text) = text.strip_prefix('+') {
+        return parse_expression(value_text, symbols);
+    }
+
+    if let Some(value_text) = text.strip_prefix('-') {
+        let value = parse_expression(value_text, symbols)?;
+
+        return value
+            .checked_neg()
+            .context("expression result is out of i32 range");
+    }
+
+    parse_value(text, symbols)
+}
+
+fn find_operator(text: &str, operators: &[char]) -> Result<Option<(usize, char)>> {
+    let mut parentheses = 0;
+    let mut found_operator = None;
+
+    for (index, character) in text.char_indices() {
+        if character == '(' {
+            parentheses += 1;
+            continue;
+        }
+
+        if character == ')' {
+            if parentheses == 0 {
+                bail!("unexpected ')' in expression");
+            }
+
+            parentheses -= 1;
+            continue;
+        }
+
+        if parentheses == 0 && operators.contains(&character) && is_binary_operator(text, index) {
+            found_operator = Some((index, character));
+        }
+    }
+
+    if parentheses != 0 {
+        bail!("expected ')' in expression");
+    }
+
+    Ok(found_operator)
+}
+
+fn is_binary_operator(text: &str, operator_idx: usize) -> bool {
+    let previous = text[..operator_idx]
+        .chars()
+        .rev()
+        .find(|character| !character.is_whitespace());
+
+    match previous {
+        None => false,
+        Some('(' | '+' | '-' | '*' | '/' | '%') => false,
+        Some(_) => true,
+    }
+}
+
+fn has_outer_parentheses(text: &str) -> bool {
+    text.starts_with('(') && text.ends_with(')')
+}
+
+fn calculate_expression(left: i32, operator: char, right: i32) -> Result<i32> {
+    let result = match operator {
+        '+' => left.checked_add(right),
+        '-' => left.checked_sub(right),
+        '*' => left.checked_mul(right),
+        '/' => {
+            if right == 0 {
+                bail!("division by zero");
+            }
+
+            left.checked_div(right)
+        }
+        '%' => {
+            if right == 0 {
+                bail!("remainder by zero");
+            }
+
+            left.checked_rem(right)
+        }
+        _ => bail!("unknown operator '{}'", operator),
+    };
+
+    result.context("expression result is out of i32 range")
 }
 
 fn instruction_size(line: &str) -> usize {
@@ -422,10 +532,13 @@ fn parse_value(text: &str, symbols: &Symbols) -> Result<i32> {
         return parse_number(text);
     }
 
-    match symbols.get(text) {
-        Some(value) => Ok(*value),
-        None => bail!("undefined symbol '{}'", text),
+    for (name, value) in symbols {
+        if name == text {
+            return Ok(*value);
+        }
     }
+
+    bail!("undefined symbol '{}'", text)
 }
 
 fn is_number(text: &str) -> bool {

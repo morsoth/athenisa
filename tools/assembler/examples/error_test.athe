@@ -50,10 +50,24 @@
 ; bad$name:                          ; expected: invalid symbol name
 ; : 0x10                             ; expected: symbol name cannot be empty
 ; bad_const: 0xGG                    ; expected: invalid number
-; bad_const: 1 2                     ; expected: symbol value must contain exactly one value
-; loop: ADDI R1, 1                   ; expected: symbol value must contain exactly one value
+; bad_const: 1 2                     ; expected: invalid number
+; bad_expr: 1 +                      ; expected: expected a value
+; bad_expr: (1 + 2                   ; expected: missing closing parenthesis
+; bad_expr: 10 / 0                   ; expected: division by zero
+; bad_expr: 10 % 0                   ; expected: remainder by zero
+; bad_expr: unknown + 1              ; expected: undefined symbol
+; max: 2147483647                    ; expected: overflow, uncomment this line and the next line together
+; bad_expr: max + 1                  ; expected: overflow, uncomment this line and the previous line together
+; forward: later + 1                 ; expected: undefined symbol; constants cannot use forward references
+; later: 2                           ; helper for the previous case
+; loop: ADDI R1, 1                   ; expected: undefined symbol or unexpected token
 ; dup:                               ; expected: duplicate symbol, uncomment this line and the next line together
 ; dup:                               ; expected: duplicate symbol, uncomment this line and the previous line together
+
+; Expressions are only accepted in symbol definitions
+; LI R1, 2+3                         ; expected: invalid number
+; LI R1, limit_1+1                   ; expected: undefined symbol
+; LI R1, 2 + 3                       ; expected: wrong token count
 
 ; Invalid memory operand syntax
 ; LOAD R1, R2                        ; expected: memory operand must end with ']'

@@ -1,9 +1,6 @@
 # AthenISA Assembler
 
-The reference assembler translates AthenISA `.athe` source files into 16-bit
-machine code for the Tydeus-16 core. It supports every real AthenISA v0.1
-instruction, labels, numeric constants, and the pseudo-instructions documented in
-the [assembly syntax reference](../../asm/syntax.md).
+The reference assembler translates AthenISA `.athe` source files into 16-bit machine code for the Tydeus-16 core. It supports every real AthenISA instruction, labels, numeric constant expressions, and the pseudo-instructions documented in the [assembly syntax reference](../../asm/syntax.md).
 
 ## Requirements
 
@@ -68,8 +65,7 @@ cargo run -- program.athe -o examples/program.bin --hex --no-bin
 The assembler processes a source file in the following stages:
 
 1. Read the UTF-8 source text and ignore comments and blank lines.
-2. Scan the source to build the symbol table and calculate instruction
-   addresses. Pseudo-instruction sizes are included in this calculation.
+2. Scan the source to build the symbol table, evaluate constant expressions, and calculate instruction addresses. Pseudo-instruction sizes are included in this calculation.
 3. Parse instructions using the complete label table. Resolve operands and turn
    symbolic branch targets into offsets relative to `PC + 1`.
 4. Expand pseudo-instructions into real AthenISA instructions.
@@ -113,9 +109,7 @@ plus_one     1
 entry       24
 ```
 
-The name column is aligned. Entries are sorted first by numeric value and then by
-name. Labels and constants appear together because the assembler stores both as
-numeric symbols.
+The name column is aligned. Entries keep their order of appearance in the source file. Labels and constants appear together because the assembler stores both as numeric symbols.
 
 ### Instruction listing: `.lst`
 
@@ -134,10 +128,7 @@ through their expansion, so an `LDI R1, 0x1234` source line produces the `LI` an
 
 ## Diagnostics
 
-The assembler stops at the first hard error. Errors include unknown
-instructions, invalid registers, wrong operand counts, malformed literals,
-undefined or duplicate symbols, malformed memory operands, and programs larger
-than the 2048-word instruction memory.
+The assembler stops at the first hard error. Errors include unknown instructions, invalid registers, wrong operand counts, malformed literals, undefined or duplicate symbols, malformed constant expressions, arithmetic overflow or division by zero, malformed memory operands, and programs larger than the 2048-word instruction memory.
 
 Values outside an encoded field's range produce a warning instead of an error.
 The assembler keeps the low bits that fit in the field and continues. The exact

@@ -4,7 +4,9 @@ mod parser;
 
 use anyhow::{Result, bail};
 use clap::Parser;
+
 use isa::{Instruction, Register};
+
 use std::fs;
 use std::path::PathBuf;
 
@@ -72,12 +74,7 @@ fn output_path(output: &str, extension: &str) -> PathBuf {
 }
 
 fn format_symbols(symbols: &parser::Symbols) -> String {
-    let mut entries: Vec<_> = symbols.iter().collect();
-    entries.sort_by(|(name_a, value_a), (name_b, value_b)| {
-        value_a.cmp(value_b).then_with(|| name_a.cmp(name_b))
-    });
-
-    let name_width = entries
+    let name_width = symbols
         .iter()
         .map(|(name, _)| name.len())
         .max()
@@ -85,7 +82,7 @@ fn format_symbols(symbols: &parser::Symbols) -> String {
 
     let mut text = String::new();
 
-    for (name, value) in entries {
+    for (name, value) in symbols {
         text.push_str(&format!("{:<width$} {}\n", name, value, width = name_width));
     }
 
