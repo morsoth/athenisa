@@ -45,7 +45,7 @@ The specification under `spec/` is normative. The documents under `docs/` are ex
 asm/                    Assembly-language syntax
 docs/                   Design rationale and contributor conventions
 spec/                   Architectural specification
-tools/isa/              Shared instruction codec library
+tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler
 ```

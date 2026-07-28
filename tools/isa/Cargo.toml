@@ -2,7 +2,8 @@
 name = "athenisa-isa"
 version.workspace = true
 edition.workspace = true
-description = "Shared instruction definitions and codecs for AthenISA tools"
+description = "Shared instruction definitions and encoding for AthenISA tools"
 repository.workspace = true
 
 [dependencies]
+anyhow.workspace = true
