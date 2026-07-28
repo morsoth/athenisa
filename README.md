@@ -58,7 +58,7 @@ tools/disassembler/     Planned reference disassembler
 
 AthenISA source files use the `.athe` extension. From `tools/assembler`:
 
-```bash
+```sh
 cargo run -- program.athe --hex --sym --debug
 ```
 

@@ -8,7 +8,7 @@ The reference assembler translates AthenISA `.athe` source files into 16-bit mac
 
 Install a current stable Rust toolchain, clone the repository, and run the assembler from its directory:
 
-```bash
+```sh
 git clone https://github.com/morsoth/athenisa.git
 cd athenisa/tools/assembler
 cargo run -- examples/program.athe
@@ -27,7 +27,7 @@ Release binaries are specific to an operating system and CPU architecture. The e
 
 Download the Linux package from [GitHub Releases](https://github.com/morsoth/athenisa/releases), extract it, and run:
 
-```bash
+```sh
 chmod +x ./athenisa-asm
 ./athenisa-asm program.athe
 ```
@@ -44,7 +44,7 @@ Download the Windows package from [GitHub Releases](https://github.com/morsoth/a
 
 Assemble a program and generate all available output formats:
 
-```bash
+```sh
 cargo run -- program.athe --hex --sym --debug
 ```
 
@@ -76,7 +76,7 @@ Output options may be combined. Using `--no-bin` without selecting `--hex`,
 
 The output argument is a base path. Its existing extension, if any, is replaced for each selected format. When `--output` is omitted, the input path without its extension is used. All three commands below write `program.bin`:
 
-```bash
+```sh
 athenisa-asm program.athe
 athenisa-asm program.athe -o program
 athenisa-asm program.athe -o program.bin
@@ -89,7 +89,7 @@ athenisa-asm program.athe -o program.bin
 | `-h`, `--help` | Show command-line help |
 | `-V`, `--version` | Show the installed assembler version |
 
-```bash
+```sh
 athenisa-asm --help
 athenisa-asm --version
 ```

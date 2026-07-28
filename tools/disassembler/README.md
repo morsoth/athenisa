@@ -1,8 +1,6 @@
 # AthenISA Disassembler
 
-The reference AthenISA disassembler is planned but not implemented yet. This
-directory is reserved for the future tool; there is currently no executable or
-command-line interface to build.
+The reference AthenISA disassembler project is initialized, but instruction decoding and its command-line interface are not implemented yet.
 
 The disassembler is expected to decode 16-bit machine words according to the
 [instruction formats](../../spec/02_instruction_formats.md) and
