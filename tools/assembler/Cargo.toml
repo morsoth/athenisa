@@ -1,7 +1,10 @@
 [package]
-name = "assembler"
+name = "athenisa-asm"
 version = "0.1.0"
 edition = "2024"
+description = "Assembler for the AthenISA instruction set"
+readme = "README.md"
+repository = "https://github.com/morsoth/athenisa"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }

@@ -11,21 +11,28 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
+#[command(version, about = "Assembler for the AthenISA instruction set")]
 struct Args {
+    /// AthenISA source file to assemble
     input: String,
 
+    /// Base path for generated output files
     #[arg(short, long)]
     output: Option<String>,
 
+    /// Generate a hexadecimal memory image
     #[arg(long)]
     hex: bool,
 
+    /// Generate a symbol map
     #[arg(long)]
     sym: bool,
 
+    /// Generate an instruction listing
     #[arg(long)]
     debug: bool,
 
+    /// Do not generate the default binary file
     #[arg(long)]
     no_bin: bool,
 }
