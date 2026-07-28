@@ -1,6 +1,6 @@
 use crate::instruction::{Instruction, Register};
 
-pub fn instruction_to_assembly(instruction: Instruction) -> String {
+pub fn format_instruction(instruction: Instruction) -> String {
     match instruction {
         Instruction::Nop => "NOP".to_string(),
         Instruction::Ret => "RET".to_string(),

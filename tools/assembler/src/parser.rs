@@ -1,6 +1,5 @@
 use anyhow::{Context, Result, bail};
-
-use crate::isa::{Instruction, Register};
+use athenisa_isa::instruction::{Instruction, Register};
 
 const INSTR_MEM_SIZE: i32 = 2048;
 

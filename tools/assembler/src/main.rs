@@ -1,11 +1,12 @@
-mod encoder;
-mod isa;
 mod parser;
 
 use anyhow::{Result, bail};
 use clap::Parser;
 
-use isa::{Instruction, Register};
+use athenisa_isa::encoding::encode_program;
+use athenisa_isa::format::format_instruction;
+use athenisa_isa::image::{words_to_bytes, words_to_hex};
+use athenisa_isa::instruction::Instruction;
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -46,18 +47,18 @@ fn main() -> Result<()> {
 
     let source = fs::read_to_string(&args.input)?;
     let program = parser::parse_source(&source)?;
-    let words = encoder::encode_program(&program.instructions)?;
+    let words = encode_program(&program.instructions);
     let output = match &args.output {
         Some(output) => PathBuf::from(output),
         None => default_output_path(&args.input),
     };
 
     if !args.no_bin {
-        fs::write(output_path(&output, "bin"), encoder::to_bin(&words))?;
+        fs::write(output_path(&output, "bin"), words_to_bytes(&words))?;
     }
 
     if args.hex {
-        fs::write(output_path(&output, "hex"), encoder::to_hex(&words))?;
+        fs::write(output_path(&output, "hex"), words_to_hex(&words))?;
     }
 
     if args.sym {
@@ -118,70 +119,4 @@ fn format_debug(instructions: &[Instruction], words: &[u16]) -> String {
     }
 
     text
-}
-
-fn format_instruction(instruction: Instruction) -> String {
-    match instruction {
-        Instruction::Nop => "NOP".to_string(),
-        Instruction::Ret => "RET".to_string(),
-        Instruction::Mov { rd, rs } => format_rr("MOV", rd, rs),
-        Instruction::Cmp { rd, rs } => format_rr("CMP", rd, rs),
-        Instruction::Not { rd, rs } => format_rr("NOT", rd, rs),
-        Instruction::Add { rd, rs1, rs2 } => format_rrr("ADD", rd, rs1, rs2),
-        Instruction::Sub { rd, rs1, rs2 } => format_rrr("SUB", rd, rs1, rs2),
-        Instruction::And { rd, rs1, rs2 } => format_rrr("AND", rd, rs1, rs2),
-        Instruction::Or { rd, rs1, rs2 } => format_rrr("OR", rd, rs1, rs2),
-        Instruction::Xor { rd, rs1, rs2 } => format_rrr("XOR", rd, rs1, rs2),
-        Instruction::Li { rd, imm8 } => format_ri8("LI", rd, imm8),
-        Instruction::Lih { rd, imm8 } => format_ri8("LIH", rd, imm8),
-        Instruction::Addi { rd, imm8 } => format_ri8("ADDI", rd, imm8),
-        Instruction::Subi { rd, imm8 } => format_ri8("SUBI", rd, imm8),
-        Instruction::Cmpi { rd, imm8 } => format_ri8("CMPI", rd, imm8),
-        Instruction::Sll { rd, rs, imm4 } => format_shift("SLL", rd, rs, imm4),
-        Instruction::Srl { rd, rs, imm4 } => format_shift("SRL", rd, rs, imm4),
-        Instruction::Sra { rd, rs, imm4 } => format_shift("SRA", rd, rs, imm4),
-        Instruction::Load { rd, rb, off5 } => format_load(rd, rb, off5),
-        Instruction::Store { rb, off5, rs } => format_store(rb, off5, rs),
-        Instruction::Jmp { addr11 } => format!("JMP 0x{addr11:03X}"),
-        Instruction::Call { addr11 } => format!("CALL 0x{addr11:03X}"),
-        Instruction::Beq { off11 } => format!("BEQ {off11}"),
-        Instruction::Bne { off11 } => format!("BNE {off11}"),
-        Instruction::Blt { off11 } => format!("BLT {off11}"),
-        Instruction::Bgt { off11 } => format!("BGT {off11}"),
-        Instruction::Ble { off11 } => format!("BLE {off11}"),
-        Instruction::Bge { off11 } => format!("BGE {off11}"),
-    }
-}
-
-fn format_rr(op: &str, rd: Register, rs: Register) -> String {
-    format!("{op} {}, {}", format_reg(rd), format_reg(rs))
-}
-
-fn format_rrr(op: &str, rd: Register, rs1: Register, rs2: Register) -> String {
-    format!(
-        "{op} {}, {}, {}",
-        format_reg(rd),
-        format_reg(rs1),
-        format_reg(rs2)
-    )
-}
-
-fn format_ri8(op: &str, rd: Register, imm8: u8) -> String {
-    format!("{op} {}, 0x{imm8:02X}", format_reg(rd))
-}
-
-fn format_shift(op: &str, rd: Register, rs: Register, imm4: u8) -> String {
-    format!("{op} {}, {}, 0x{imm4:X}", format_reg(rd), format_reg(rs))
-}
-
-fn format_load(rd: Register, rb: Register, off5: i8) -> String {
-    format!("LOAD {}, {}[{}]", format_reg(rd), off5, format_reg(rb))
-}
-
-fn format_store(rb: Register, off5: i8, rs: Register) -> String {
-    format!("STORE {}[{}], {}", off5, format_reg(rb), format_reg(rs))
-}
-
-fn format_reg(reg: Register) -> String {
-    format!("R{}", reg.encode())
 }
