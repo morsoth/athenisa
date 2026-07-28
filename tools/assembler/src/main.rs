@@ -8,14 +8,14 @@ use clap::Parser;
 use isa::{Instruction, Register};
 
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 struct Args {
     input: String,
 
     #[arg(short, long)]
-    output: String,
+    output: Option<String>,
 
     #[arg(long)]
     hex: bool,
@@ -40,25 +40,29 @@ fn main() -> Result<()> {
     let source = fs::read_to_string(&args.input)?;
     let program = parser::parse_source(&source)?;
     let words = encoder::encode_program(&program.instructions)?;
+    let output = match &args.output {
+        Some(output) => PathBuf::from(output),
+        None => default_output_path(&args.input),
+    };
 
     if !args.no_bin {
-        fs::write(output_path(&args.output, "bin"), encoder::to_bin(&words))?;
+        fs::write(output_path(&output, "bin"), encoder::to_bin(&words))?;
     }
 
     if args.hex {
-        fs::write(output_path(&args.output, "hex"), encoder::to_hex(&words))?;
+        fs::write(output_path(&output, "hex"), encoder::to_hex(&words))?;
     }
 
     if args.sym {
         fs::write(
-            output_path(&args.output, "sym"),
+            output_path(&output, "sym"),
             format_symbols(&program.symbols),
         )?;
     }
 
     if args.debug {
         fs::write(
-            output_path(&args.output, "lst"),
+            output_path(&output, "lst"),
             format_debug(&program.instructions, &words),
         )?;
     }
@@ -66,8 +70,15 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn output_path(output: &str, extension: &str) -> PathBuf {
-    let mut path = PathBuf::from(output);
+fn default_output_path(input: &str) -> PathBuf {
+    let mut output = PathBuf::from(input);
+    output.set_extension("");
+
+    output
+}
+
+fn output_path(output: &Path, extension: &str) -> PathBuf {
+    let mut path = output.to_path_buf();
     path.set_extension(extension);
 
     path

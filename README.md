@@ -59,7 +59,7 @@ tools/disassembler/     Planned reference disassembler
 AthenISA source files use the `.athe` extension. From `tools/assembler`:
 
 ```bash
-cargo run -- examples/complete_test.athe -o examples/complete_test --hex --sym --debug
+cargo run -- program.athe --hex --sym --debug
 ```
 
 This generates the default raw binary plus the selected text outputs. See the
