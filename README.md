@@ -48,6 +48,7 @@ spec/                   Architectural specification
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler
+tools/examples/         Shared end-to-end tool example
 ```
 
 ## Command-line tools
@@ -55,7 +56,7 @@ tools/disassembler/     Reference disassembler
 From the `tools/` workspace, assemble a source program and disassemble the resulting binary with:
 
 ```sh
-cargo run -p athenisa-asm -- assembler/examples/program.athe -o target/program
+cargo run -p athenisa-asm -- examples/program.athe -o target/program
 cargo run -p athenisa-dis -- target/program.bin
 ```
 

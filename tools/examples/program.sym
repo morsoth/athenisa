@@ -1,0 +1,6 @@
+limit           5
+expected_result 15
+loop            3
+equal           10
+different       12
+finish          13
