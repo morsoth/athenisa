@@ -50,13 +50,13 @@ cargo run -- program.athe --hex --sym --debug
 
 ## Command line
 
-```text
+```
 athenisa-asm <input> [-o <output-base>] [--hex] [--sym] [--debug] [--no-bin]
 ```
 
 When running through Cargo, place assembler arguments after `--`:
 
-```bash
+```
 cargo run -- <input> [-o <output-base>] [--hex] [--sym] [--debug] [--no-bin]
 ```
 
