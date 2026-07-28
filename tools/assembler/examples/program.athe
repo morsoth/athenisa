@@ -1,27 +1,27 @@
-limite: 5
-resultado_esperado: limite * (limite + 1) / 2
+limit: 5
+expected_result: limit * (limit + 1) / 2
 
 LI R1, 0
 LI R2, 1
-LI R3, limite
+LI R3, limit
 
-bucle:
+loop:
     ADD R1, R1, R2
     INC R2
 
     CMP R2, R3
-    BLE bucle               ; loop mientras R2 <= limite
+    BLE loop                ; loop while R2 <= limit
 
-CMPI R1, resultado_esperado
-BEQ igual                   ; branch si R1 == resultado_esperado
-JMP diferente
+CMPI R1, expected_result
+BEQ equal                   ; branch if R1 == expected_result
+JMP different
 
-igual:
+equal:
     LI R4, 1
-    JMP fin
+    JMP finish
 
-diferente:
+different:
     LI R4, 0
 
-fin:
-    JMP fin
+finish:
+    JMP finish

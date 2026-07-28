@@ -1,12 +1,12 @@
 mod parser;
 
-use anyhow::{Result, bail};
-use clap::Parser;
-
 use athenisa_isa::encoding::encode_program;
 use athenisa_isa::format::format_instruction;
 use athenisa_isa::image::{words_to_bytes, words_to_hex};
 use athenisa_isa::instruction::Instruction;
+
+use anyhow::{Result, bail};
+use clap::Parser;
 
 use std::fs;
 use std::path::{Path, PathBuf};

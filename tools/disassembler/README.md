@@ -65,18 +65,17 @@ Both formats are compatible with the corresponding outputs of `athenisa-asm`.
 
 ## Generated assembly
 
-The output contains only real AthenISA instructions. Symbol names, constants, comments, source formatting, and pseudo-instructions cannot be recovered from machine code.
+The output contains only real AthenISA instructions. Symbol names, constants, comments, source formatting, labels, and pseudo-instructions cannot be recovered from machine code.
 
-Targets of `JMP`, `CALL`, and conditional branches that point inside the input image receive labels named `loc_XXXX`, where `XXXX` is the hexadecimal instruction address. Targets outside the image remain numeric. Reassembling valid canonical output produces the original instruction words.
+`JMP` and `CALL` operands are written as absolute addresses. Conditional branch operands are written as signed relative offsets. Reassembling valid canonical output produces the original instruction words.
 
 ## Disassembly flow
 
 1. Select the input format from the file extension and read its instruction words.
 2. Reject images larger than the 2048-word AthenISA instruction address space.
 3. Decode every word and validate its opcode and reserved fields.
-4. Find control-flow targets that can be represented by labels inside the image.
-5. Format real instructions using canonical AthenISA assembly syntax.
-6. Write the result to the selected file or standard output.
+4. Format each real instruction using canonical AthenISA assembly syntax.
+5. Write the result to the selected file or standard output.
 
 ## Diagnostics
 
