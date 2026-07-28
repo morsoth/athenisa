@@ -77,9 +77,21 @@ Output options may be combined. Using `--no-bin` without selecting `--hex`,
 The output argument is a base path. Its existing extension, if any, is replaced for each selected format. When `--output` is omitted, the input path without its extension is used. All three commands below write `program.bin`:
 
 ```bash
-cargo run -- program.athe
-cargo run -- program.athe -o program
-cargo run -- program.athe -o program.bin
+athenisa-asm program.athe
+athenisa-asm program.athe -o program
+athenisa-asm program.athe -o program.bin
+```
+
+### Help and version
+
+| Option | Effect |
+| --- | --- |
+| `-h`, `--help` | Show command-line help |
+| `-V`, `--version` | Show the installed assembler version |
+
+```bash
+athenisa-asm --help
+athenisa-asm --version
 ```
 
 ## Output files
@@ -161,5 +173,3 @@ an output file.
 | `src/parser.rs` | Source scanning, symbols, operand parsing, and pseudo-instruction expansion |
 | `src/isa.rs` | In-memory instruction and register representation plus opcode assignments |
 | `src/encoder.rs` | Conversion from instructions to words, hex text, and raw bytes |
-
-The normative machine encoding remains the [AthenISA specification](../../spec/04_instruction_encoding.md), not the Rust implementation itself.
