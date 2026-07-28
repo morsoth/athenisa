@@ -1,9 +1,12 @@
 [package]
 name = "athenisa-dis"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 description = "Disassembler for the AthenISA instruction set"
 readme = "README.md"
-repository = "https://github.com/morsoth/athenisa"
+repository.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+clap.workspace = true
+athenisa-isa.workspace = true

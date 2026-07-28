@@ -1,0 +1,8 @@
+[package]
+name = "athenisa-isa"
+version.workspace = true
+edition.workspace = true
+description = "Shared instruction definitions and codecs for AthenISA tools"
+repository.workspace = true
+
+[dependencies]
