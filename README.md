@@ -49,7 +49,6 @@ explanatory and do not change architectural behavior.
 ```text
 asm/                    Assembly-language syntax
 docs/                   Design rationale and contributor conventions
-encodings/              Reserved for machine-readable encoding descriptions
 spec/                   Versioned architectural specification
 tools/assembler/        Reference assembler
 tools/disassembler/     Planned reference disassembler
