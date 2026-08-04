@@ -4,7 +4,7 @@ This document defines the source language accepted by the reference AthenISA
 assembler. Source files conventionally use the `.athe` extension.
 
 For instruction behavior and binary encoding, see the
-[instruction set](../spec/03_instruction_set.md) and
+[instruction set](../spec/02_instruction_set.md) and
 [encoding table](../spec/04_instruction_encoding.md).
 
 ## Source lines
@@ -58,7 +58,7 @@ ADD   R1,   R2,   R3
 Memory operands are a single token and cannot contain spaces inside the
 `off5[rb]` expression.
 
-## Case rules
+## Case sensitivity
 
 Instruction mnemonics and register names are case-insensitive:
 
@@ -98,7 +98,7 @@ LOAD R1, -0x4[R2]
 ADDI R3, +10
 ```
 
-Hexadecimal and binary prefixes may use either case (`0x`/`0X`, `0b`/`0B`). Digit separators are not supported. Arithmetic expressions are accepted only when defining constants, as described in [Constants](#constants). Instruction operands must contain one literal or symbol. Parsed values must fit in a signed 32-bit integer before they are encoded.
+Hexadecimal and binary prefixes may use either case (`0x`/`0X`, `0b`/`0B`). Digit separators are not supported. Arithmetic expressions are accepted only when defining [constants](#constants). Instruction operands must contain one literal or symbol. Parsed values must fit in a signed 32-bit integer before they are encoded.
 
 ## Encoded field ranges
 
@@ -258,7 +258,7 @@ do not introduce new hardware operations.
 
 | Pseudo-instruction | Expansion | Emitted words |
 | --- | --- | --- |
-| `LDI rd, imm16` | `LI rd, imm16[7:0]` then `LIH rd, imm16[15:8]` | 2 |
+| `LDI rd, imm16` | `LI rd, imm16[7:0]`<br>`LIH rd, imm16[15:8]` | 2 |
 | `CLR rd` | `MOV rd, R0` | 1 |
 | `INC rd` | `ADDI rd, 1` | 1 |
 | `DEC rd` | `SUBI rd, 1` | 1 |

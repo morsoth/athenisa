@@ -128,4 +128,4 @@ Used by `STORE`.
 
 ---
 
-Opcode and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).
+`opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

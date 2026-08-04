@@ -34,8 +34,8 @@ Read the documents according to what you are trying to do:
 | --- | --- |
 | [ISA overview](spec/00_overview.md) | Architectural scope, execution model, notation, and specification conventions |
 | [Registers](spec/01_registers.md) | Register encodings, special registers, reset state, and flags |
-| [Instruction formats](spec/02_instruction_formats.md) | Bit layout of every 16-bit instruction format |
-| [Instruction set](spec/03_instruction_set.md) | Programmer-visible semantics of every real instruction |
+| [Instruction set](spec/02_instruction_set.md) | Programmer-visible semantics of every real instruction |
+| [Instruction formats](spec/03_instruction_formats.md) | Bit layout of every 16-bit instruction format |
 | [Instruction encoding](spec/04_instruction_encoding.md) | Opcode and function-field assignments |
 | [Memory model](spec/05_memory.md) | Address spaces, effective addresses, control-flow targets, and stack convention |
 | [Assembly syntax](asm/syntax.md) | Source syntax, literals, symbols, operands, and pseudo-instructions |

@@ -21,10 +21,10 @@ Every encoded register field is three bits wide.
 
 ## Program counter
 
-`PC` is an 11-bit register containing the word address of the current instruction.
+`PC` is an 11-bit register containing the address of the current instruction.
 
 > [!NOTE]
-> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an [absolute jump](02_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
+> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an [absolute jump](03_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
 
 Sequential execution advances `PC` by one. `PC` is not directly addressable by the general register fields.
 
@@ -57,7 +57,7 @@ Flag updates are grouped as follows:
 | `SLL`, `SRL`, `SRA` | From result | `0` | From result | `0` |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |
 
-`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `N`, and `V`.
+`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `N`, and `V` to determine whether their branch condition is satisfied.
 
 ## Reset state
 

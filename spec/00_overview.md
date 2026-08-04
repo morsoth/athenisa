@@ -18,8 +18,8 @@ AthenISA uses separate instruction and data address spaces. An instruction addre
 ## Specification chapters
 
 1. [Registers and flags](01_registers.md)
-2. [Instruction formats](02_instruction_formats.md)
-3. [Instruction semantics](03_instruction_set.md)
+2. [Instruction semantics](02_instruction_set.md)
+3. [Instruction formats](03_instruction_formats.md)
 4. [Opcode assignments](04_instruction_encoding.md)
 5. [Memory and stack model](05_memory.md)
 
