@@ -1,6 +1,6 @@
 # AthenISA Assembler
 
-The reference assembler translates AthenISA `.athe` source files into 16-bit machine code for the Tydeus-16 core. It supports every real AthenISA instruction, labels, numeric constant expressions, and the pseudo-instructions documented in the [assembly syntax reference](../../asm/syntax.md).
+The reference assembler translates AthenISA `.athe` source files into 16-bit machine code for the [Tydeus-16](https://github.com/morsoth/tydeus16-core) core. It supports every real AthenISA instruction, labels, numeric constant expressions, and the pseudo-instructions documented in the [assembly syntax reference](../../asm/syntax.md).
 
 ## Installation
 

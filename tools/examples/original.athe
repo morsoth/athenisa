@@ -1,3 +1,5 @@
+; Calculates the sum of the whole numbers from 1 to 'limit'.
+
 limit: 5
 expected_result: limit * (limit + 1) / 2
 

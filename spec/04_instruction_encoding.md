@@ -1,6 +1,6 @@
 # AthenISA Instruction Encoding
 
-| Instruction | Opcode `[15:11]` | `func [1:0]` | Instruction format |
+| Instruction | `opcode` | `func` | Instruction format |
 | --- | --- | --- | --- |
 | `NOP` | `00000` | - | No operand |
 | `MOV` | `00001` | `00` | RR |

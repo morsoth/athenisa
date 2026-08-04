@@ -69,6 +69,9 @@ ADD rd, rs1, rs2            // rd <- rs1 + rs2
 ADDI rd, imm8               // rd <- rd + zext(imm8)
 ```
 
+> [!NOTE]
+> `ADDI` uses `zext(imm8)` rather than `sext(imm8)` because adding a negative value would be equivalent to using `SUBI` with its positive magnitude, while zero extension allows `ADDI` to use the full unsigned immediate range from 0 to 255.
+
 | Flag | Value |
 | --- | --- |
 | `Z` | `1` if the result is zero; otherwise `0` |
@@ -114,15 +117,15 @@ SUBI rd, imm8               // rd <- rd - zext(imm8)
 AND rd, rs1, rs2            // rd <- rs1 & rs2
 ```
 
+> [!NOTE]
+> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in [`RI` instructions](./02_instruction_formats.md#register-immediate-ri) is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
+
 | Flag | Value |
 | --- | --- |
 | `Z` | `1` if the result is zero; otherwise `0` |
 | `C` | `0` |
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `0` |
-
-> [!NOTE]
-> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in [`RI` instructions](./02_instruction_formats.md#register-immediate-ri) is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
 
 ### OR
 
@@ -192,6 +195,9 @@ CMP rd, rs                  // rd - rs
 CMPI rd, imm8               // rd - zext(imm8)
 ```
 
+> [!NOTE]
+> `CMPI` uses `zext(imm8)` because comparisons against negative immediate values are expected to be less common. Zero extension gives the instruction the full unsigned immediate range from 0 to 255. A negative value can still be loaded into a register and compared using `CMP`.
+
 | Flag | Value |
 | --- | --- |
 | `Z` | `1` if the comparison result is zero; otherwise `0` |
@@ -209,15 +215,15 @@ CMPI rd, imm8               // rd - zext(imm8)
 SLL rd, rs, imm4            // rd <- rs << imm4
 ```
 
+> [!NOTE]
+> Shift instructions use only a 4-bit immediate because this is sufficient to encode all meaningful shift amounts in a 16-bit architecture. A 4-bit field allows values from 0 to 15, which covers the full useful shift range for a 16-bit operand.
+
 | Flag | Value |
 | --- | --- |
 | `Z` | `1` if the result is zero; otherwise `0` |
 | `C` | `0` |
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `0` |
-
-> [!NOTE]
-> Shift instructions use only a 4-bit immediate because this is sufficient to encode all meaningful shift amounts in a 16-bit architecture. A 4-bit field allows values from 0 to 15, which covers the full useful shift range for a 16-bit operand.
 
 ### SRL
 
@@ -325,8 +331,6 @@ CALL addr11                 // SP <- SP - 1
                             // PC <- addr11
 ```
 
-The subtraction uses 16-bit address arithmetic. With `SP` at its reset value of `0x0000`, the first return address is stored at `0xFFFF`.
-
 ### RET
 
 `RET` restores the program counter from the stack and then removes that entry.
@@ -335,8 +339,6 @@ The subtraction uses 16-bit address arithmetic. With `SP` at its reset value of 
 RET                         // PC <- MEM[SP]
                             // SP <- SP + 1
 ```
-
-Executing `RET` while `SP = 0x0000` is a stack-underflow condition and has no normal return semantics. The way an implementation exposes that condition is outside the software-visible ISA.
 
 ## Memory instructions
 

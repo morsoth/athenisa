@@ -1,10 +1,19 @@
 # AthenISA
 
-AthenISA is the 16-bit instruction set architecture implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor core. It is a compact, fixed-width ISA designed for a small multicycle implementation, FPGA use, and educational CPU development.
+AthenISA is the 16-bit Instruction Set Architecture (ISA) implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor core. It is a compact, fixed-width ISA designed for a small multicycle implementation, FPGA use, and educational CPU development.
 
 This repository is the source of truth for the programmer-visible architecture, assembly language, and reference tools.
 
-## Architecture at a glance
+## Environment
+
+| Name | Type | Version |
+| --- | --- | --- |
+| [Tydeus-16](https://github.com/morsoth/tydeus16-core) | Processor core | `0.1.0` |
+| [AthenISA](https://github.com/morsoth/athenisa) | Instruction Set Architecture | `0.1.0` |
+| Diomedes | Programming language | `-` |
+| ArgOS | Operating system | `-` |
+
+## Summary
 
 | Property | AthenISA |
 | --- | --- |
@@ -16,9 +25,8 @@ This repository is the source of truth for the programmer-visible architecture, 
 | Data address width | 16 bits |
 | Memory model | Separate instruction and data spaces, word-addressed |
 | Status flags | Zero, carry, negative, overflow (`Z`, `C`, `N`, `V`) |
-| Data-memory addressing | Base register plus signed 5-bit offset |
 
-## Documentation map
+## Documentation
 
 Read the documents according to what you are trying to do:
 
@@ -64,4 +72,4 @@ See the [tools guide](tools/README.md) for installation and the individual tool 
 
 ## Specification boundaries
 
-AthenISA defines software-visible state, instruction semantics, encodings, and the memory address model. It does not prescribe a pipeline, cycle count, memory latency, HDL structure, FPGA memory primitive, or external exception interface. Those choices belong to an implementation such as Tydeus-16.
+AthenISA defines software-visible state, instruction semantics, encodings, and the memory address model. It does not prescribe a pipeline, cycle count, memory latency, HDL structure, FPGA memory primitive, or external exception interface. Those choices belong to an implementation such as [Tydeus-16](https://github.com/morsoth/tydeus16-core).

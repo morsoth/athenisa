@@ -54,8 +54,11 @@ Used by `LI`, `LIH`, `ADDI`, `SUBI`, and `CMPI`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination or first operand register |
+| `rd` | `10:8` | Destination and first operand register |
 | `imm8` | `7:0` | Unsigned 8-bit immediate |
+
+
+For `CMPI`, `rd` is only used as the first comparison operand and not as a destination register.
 
 ## Register-register-immediate (RRI)
 
@@ -122,5 +125,7 @@ Used by `STORE`.
 | `rs` | `10:8` | Source data register |
 | `rb` | `7:5` | Base-address register |
 | `off5` | `4:0` | Data offset |
+
+---
 
 Opcode and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

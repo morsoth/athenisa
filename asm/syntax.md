@@ -98,9 +98,7 @@ LOAD R1, -0x4[R2]
 ADDI R3, +10
 ```
 
-Hexadecimal and binary prefixes may use either case (`0x`/`0X`, `0b`/`0B`).
-Digit separators and arithmetic expressions are not supported. Parsed values
-must fit in a signed 32-bit integer before they are encoded.
+Hexadecimal and binary prefixes may use either case (`0x`/`0X`, `0b`/`0B`). Digit separators are not supported. Arithmetic expressions are accepted only when defining constants, as described in [Constants](#constants). Instruction operands must contain one literal or symbol. Parsed values must fit in a signed 32-bit integer before they are encoded.
 
 ## Encoded field ranges
 
@@ -162,11 +160,34 @@ A definition with a value creates a constant and emits no instruction:
 limit: 0x0F
 mask: 0b11110000
 alias: limit
+size: (limit + 1) * 2
+negative_size: -size
 ```
 
-A constant value may be a literal or a previously defined symbol. Constant
-expressions and forward references between constant definitions are not
-supported.
+A constant value may contain literals, previously defined symbols, parentheses, and the following integer operators:
+
+| Precedence | Operators | Meaning |
+| --- | --- | --- |
+| Highest | unary `+`, unary `-` | Positive or negative value |
+| Middle | `*`, `/`, `%` | Multiplication, integer division, remainder |
+| Lowest | `+`, `-` | Addition, subtraction |
+
+Operators at the same precedence are evaluated from left to right. Parentheses may override the normal order. Division truncates toward zero. All operations are checked as signed 32-bit integers; overflow, division by zero, and remainder by zero are errors.
+
+Expressions may refer only to symbols defined earlier in the source. Forward references in constant definitions are not supported:
+
+```athe
+element_size: 2
+array_size: element_size * 16
+```
+
+An expression cannot be written directly as an instruction operand. Define a constant first and use its name:
+
+```athe
+value: 10 + 4
+LI R1, value              ; accepted
+LI R1, 10 + 4             ; not accepted
+```
 
 ### References
 

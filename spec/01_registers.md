@@ -53,8 +53,8 @@ Flag updates are grouped as follows:
 | --- | --- | --- | --- | --- |
 | `ADD`, `ADDI` | From result | Carry out | From result | Addition overflow |
 | `SUB`, `SUBI`, `CMP`, `CMPI` | From result | No borrow | From result | Subtraction overflow |
-| `AND`, `OR`, `XOR`, `NOT` | From result | Cleared | From result | Cleared |
-| `SLL`, `SRL`, `SRA` | From result | Cleared | From result | Cleared |
+| `AND`, `OR`, `XOR`, `NOT` | From result | `0` | From result | `0` |
+| `SLL`, `SRL`, `SRA` | From result | `0` | From result | `0` |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |
 
 `CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `N`, and `V`.
