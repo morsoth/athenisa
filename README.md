@@ -73,3 +73,7 @@ See the [tools guide](tools/README.md) for installation and the individual tool 
 ## Specification boundaries
 
 AthenISA defines software-visible state, instruction semantics, encodings, and the memory address model. It does not prescribe a pipeline, cycle count, memory latency, HDL structure, FPGA memory primitive, or external exception interface. Those choices belong to an implementation such as [Tydeus-16](https://github.com/morsoth/tydeus16-core).
+
+## License
+
+AthenISA is released under the [MIT License](LICENSE).

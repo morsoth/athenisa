@@ -5,6 +5,7 @@ edition.workspace = true
 description = "Assembler for the AthenISA instruction set"
 readme = "README.md"
 repository.workspace = true
+license.workspace = true
 
 [dependencies]
 anyhow.workspace = true
