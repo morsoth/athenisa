@@ -411,10 +411,7 @@ fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Vec<Instr
         "CLR" => {
             expect_tokens(&parts, 2)?;
             let rd = parse_reg(parts[1])?;
-            vec![Instruction::Mov {
-                rd,
-                rs: Register::R0,
-            }]
+            vec![Instruction::Li { rd, imm8: 0 }]
         }
         "INC" => {
             expect_tokens(&parts, 2)?;

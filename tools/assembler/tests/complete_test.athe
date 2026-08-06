@@ -121,8 +121,8 @@ LDI R3, limit_1              ; expands to: LI R3, 0x0F -> 00011 011 00001111 / L
 LDI R4, max_word             ; expands to: LI R4, 0xFF -> 00011 100 11111111 / LIH R4, 0xFF -> 00100 100 11111111
 LDI R5, +0x00A5              ; expands to: LI R5, 0xA5 -> 00011 101 10100101 / LIH R5, 0x00 -> 00100 101 00000000
 LDI R6, 0b1010101001010101   ; expands to: LI R6, 0x55 -> 00011 110 01010101 / LIH R6, 0xAA -> 00100 110 10101010
-CLR R4                       ; expands to: MOV R4, R0  -> 00001 100 000 000 00
-clr r5                       ; expands to: MOV R5, R0  -> 00001 101 000 000 00
+CLR R4                       ; expands to: LI R4, 0    -> 00011 100 00000000
+clr r5                       ; expands to: LI R5, 0    -> 00011 101 00000000
 INC R6                       ; expands to: ADDI R6, 1  -> 10100 110 00000001
 inc r7                       ; expands to: ADDI R7, 1  -> 10100 111 00000001
 DEC R0                       ; expands to: SUBI R0, 1  -> 10101 000 00000001

@@ -259,7 +259,7 @@ do not introduce new hardware operations.
 | Pseudo-instruction | Expansion | Emitted words |
 | --- | --- | --- |
 | `LDI rd, imm16` | `LI rd, imm16[7:0]`<br>`LIH rd, imm16[15:8]` | 2 |
-| `CLR rd` | `MOV rd, R0` | 1 |
+| `CLR rd` | `LI rd, 0` | 1 |
 | `INC rd` | `ADDI rd, 1` | 1 |
 | `DEC rd` | `SUBI rd, 1` | 1 |
 
