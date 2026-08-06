@@ -42,16 +42,11 @@ Read the documents according to what you are trying to do:
 | [Tool installation](tools/README.md) | Installing, running, and releasing the AthenISA command-line tools |
 | [Assembler guide](tools/assembler/README.md) | Assembler command line, outputs, diagnostics, and processing flow |
 | [Disassembler guide](tools/disassembler/README.md) | Disassembler command line, input formats, output, and limitations |
-| [Design decisions](docs/design_decisions.md) | Non-normative rationale behind the architecture |
-| [Naming conventions](docs/naming.md) | Terminology and style used across the specification and tools |
-
-The specification under `spec/` is normative. The documents under `docs/` are explanatory and do not change architectural behavior.
 
 ## Repository layout
 
 ```text
 asm/                    Assembly-language syntax
-docs/                   Design rationale and contributor conventions
 spec/                   Architectural specification
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
