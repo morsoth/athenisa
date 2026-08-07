@@ -5,7 +5,7 @@ Visual Studio Code language support for AthenISA `.athe` assembly files.
 ## Features
 
 - Highlighting for instructions and pseudo-instructions
-- Highlighting for registers, numbers, labels, constants, and symbols
+- Highlighting for sections, registers, numbers, labels, constants, data names, and symbols
 - Line comments beginning with `;`
 - Bracket and parenthesis matching
 

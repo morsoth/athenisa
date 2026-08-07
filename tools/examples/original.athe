@@ -1,20 +1,13 @@
-; Calculates the sum of the whole numbers from 1 to 'limit'.
-
-.include "lib.athe"
-
-.data
-
-item[1] 'A'
-
-vector[5] 0, 1, 2, 3, 4
-
-matrix[2*3] 0,   1,   2,
-            'a', 'b', 'c'
-
-.code
+; Calculates the sum of the whole numbers from 1 to 'limit'
 
 limit: 5
 expected_result: limit * (limit + 1) / 2
+
+.data
+
+result[1] -1
+
+.code
 
 LI R1, 0
 LI R2, 1
@@ -26,6 +19,9 @@ loop:
 
     CMP R2, R3
     BLE loop                ; loop while R2 <= limit
+
+LDI R5, result
+LOAD R1, 0[R5]              ; save result into memory
 
 CMPI R1, expected_result
 BEQ equal                   ; branch if R1 == expected_result

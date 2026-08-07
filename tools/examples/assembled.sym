@@ -1,6 +1,7 @@
 limit           5
 expected_result 15
+result          0
 loop            3
-equal           10
-different       12
-finish          13
+equal           13
+different       15
+finish          16

@@ -57,11 +57,11 @@ vscode/                 Visual Studio Code language support
 
 ## Command-line tools
 
-From the `tools/` workspace, assemble a source program and disassemble the resulting binary with:
+From the `tools/` workspace, assemble a source program and disassemble the resulting hexadecimal image with:
 
 ```sh
 cargo run -p athenisa-asm -- examples/program.athe -o target/program
-cargo run -p athenisa-dis -- target/program.bin
+cargo run -p athenisa-dis -- target/program.hex
 ```
 
 See the [tools guide](tools/README.md) for installation and the individual tool guides for their complete command-line interfaces.
