@@ -66,6 +66,10 @@ cargo run -p athenisa-dis -- target/program.hex
 
 See the [tools guide](tools/README.md) for installation and the individual tool guides for their complete command-line interfaces.
 
+## VS Code extension
+
+The [AthenISA Language Support extension](https://marketplace.visualstudio.com/items?itemName=morsoth.athenisa-language) can be installed from the Visual Studio Marketplace to add syntax highlighting and basic editing support for `.athe` files. See the [extension guide](vscode/README.md) for more information.
+
 ## Specification boundaries
 
 AthenISA defines software-visible state, instruction semantics, encodings, and the memory address model. It does not prescribe a pipeline, cycle count, memory latency, HDL structure, FPGA memory primitive, or external exception interface. Those choices belong to an implementation such as [Tydeus-16](https://github.com/morsoth/tydeus16-core).
