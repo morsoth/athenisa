@@ -183,35 +183,6 @@ array_size: element_size * 16
 
 A constant expression may only use symbols defined earlier in the source. Forward references are not supported in constant definitions.
 
-### Data symbols
-
-A data declaration automatically defines its name as a symbol. Its value is the data-memory address of the first word reserved by that declaration:
-
-```athe
-.data
-vector[4] 10, 20, 30, 40
-```
-
-Here, `vector` has value `0` because it is the first declaration in data memory. Data symbols are covered further in [data addresses](#data-addresses).
-
-### Symbol references
-
-A symbol may generally be used anywhere the assembler accepts a numeric value. Symbols are otherwise untyped, so the assembler does not reject a code address used as data or a data address used as code.
-
-There are two exceptions: data sizes may only reference constants, and `name(index)` requires `name` to be a data symbol.
-
-Whether a symbol can be used before its definition depends on the context:
-
-| Context | Forward reference | Example |
-| --- | --- | --- |
-| Instruction operand | Accepted | `JMP fwd_ref` |
-| Data index | Accepted | `data(fwd_ref + 1)` |
-| Data initializer | Accepted | `data[1] fwd_ref` |
-| Data size | Not accepted | `data[fwd_ref] 0` |
-| Constant definition | Not accepted | `const: fwd_ref + 1` |
-
-Instructions, data indexes and data initializers are evaluated after the complete symbol table has been collected. Data sizes and constant expressions are evaluated while addresses are being calculated, so they may only use symbols already known at that point.
-
 ## Expressions
 
 An expression calculates an integer value during assembly. Expressions are accepted in constant definitions, data sizes, data initializers, and data indexes. They are not accepted directly as an instruction operand. To use them define a constant first, or use the special `name(index)` data-address syntax:
@@ -235,26 +206,27 @@ Operators at the same precedence are evaluated from left to right. Parentheses m
 
 ## Data declarations
 
-A data declaration reserves one or more consecutive 16-bit words in data memory:
+A data declaration reserves and optionally initializes a block of consecutive 16-bit words. It may only appear in `.data` and uses the following form:
 
 ```text
 name[size] values
 ```
 
-`name` identifies the reserved area, `size` specifies its number of words, and `values` optionally specifies their initial contents:
+| Part | Meaning |
+| --- | --- |
+| `name` | Defines a data symbol for the address of the first reserved word |
+| `size` | Specifies how many words to reserve |
+| `values` | Optionally specifies the initial contents of those words |
+
+For example:
 
 ```athe
 .data
-
 item[1] 9
 vector[5] 0, 1, 2, 3, 4
 ```
 
-### Data size
-
-The size is measured in 16-bit words and must be greater than zero. The complete declaration must fit in the 65,536-word data memory.
-
-A size may be a literal or an arithmetic expression containing constants defined earlier in the source:
+The size is measured in words, must be greater than zero, and must fit together with the preceding declarations in the 65,536-word data memory. It may be a literal or an expression:
 
 ```athe
 .code
@@ -265,11 +237,11 @@ columns: 3
 matrix[rows * columns] 0
 ```
 
-Forward references are not accepted in data sizes.
+Forward references are not accepted in a data sizes.
 
-### Initial values
+### Initialization
 
-The number of initial values determines how the reserved words are filled:
+The `values` list determines the initial contents of the reserved words:
 
 | Initial values | Result |
 | --- | --- |
@@ -302,9 +274,9 @@ vector[3] 10, 20, 30
 
 Every initial value is stored as one 16-bit word. If a value does not fit, the assembler prints a warning and stores its low 16 bits.
 
-### Data addresses
+### Addresses and indexes
 
-The name of a data declaration represents an address, not the first value stored there:
+Every declaration defines a data symbol whose value is the address of its first reserved word. It represents an address, not the value stored at that address:
 
 ```athe
 .data
@@ -329,6 +301,24 @@ LOAD R1, [R5]
 ```
 
 The index is not restricted to the declared size, which permits calculations such as the address immediately after an array. The resulting address must fit in the 16-bit data address space. The complete `name(index)` expression must remain contiguous when used as an instruction operand.
+
+## Symbol references
+
+A symbol may generally be used anywhere the assembler accepts a numeric value. Symbols are otherwise untyped, so the assembler does not reject a code address used as data or a data address used as code.
+
+There are two exceptions: data sizes may only reference constants, and `name(index)` requires `name` to be a data symbol.
+
+Whether a symbol can be used before its definition depends on the context:
+
+| Context | Forward reference | Example |
+| --- | --- | --- |
+| Instruction operand | Accepted | `JMP fwd_ref` |
+| Data index | Accepted | `LDI R1, data(fwd_ref+1)` |
+| Data initializer | Accepted | `data[1] fwd_ref` |
+| Data size | Not accepted | `data[fwd_ref] 0` |
+| Constant definition | Not accepted | `const: fwd_ref + 1` |
+
+Instruction operands, data indexes, and data initializers are evaluated after the complete symbol table has been collected. Data sizes and constant expressions are evaluated while addresses are being calculated, so they may only use symbols already known at that point.
 
 ## Special operands
 
