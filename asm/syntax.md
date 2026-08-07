@@ -43,13 +43,13 @@ Sections may be selected any number of times. Code and data have independent add
 
 ```athe
 .code
-NOP                         ; code address 0
+NOP             ; code address 0
 
 .data
-value[1] 5                  ; data address 0
+value[1] 5      ; data address 0
 
 .code
-RET                         ; code address 1
+RET             ; code address 1
 ```
 
 Using a statement in the wrong section is an error.
@@ -181,11 +181,11 @@ element_size: 2
 array_size: element_size * 16
 ```
 
-A constant expression may only use symbols defined earlier in the source. Forward references are not supported in constant definitions.
+Forward references are not supported in constant definitions.
 
 ## Expressions
 
-An expression calculates an integer value during assembly. Expressions are accepted in constant definitions, data sizes, data initializers, and data indexes. They are not accepted directly as an instruction operand. To use them define a constant first, or use the special `name(index)` data-address syntax:
+An expression calculates an integer value during assembly. Expressions are accepted in constant definitions, data sizes, data initializers, and data indexes. They are not accepted directly as instruction operands. To use the result of an expression as an instruction operand, first assign it to a constant or use the `name(index)` data-address syntax:
 
 ```athe
 LI  R1, 10 + 4             ; not accepted
@@ -225,6 +225,8 @@ For example:
 item[1] 9
 vector[5] 0, 1, 2, 3, 4
 ```
+
+### Size
 
 The size is measured in words, must be greater than zero, and must fit together with the preceding declarations in the 65,536-word data memory. It may be a literal or an expression:
 
@@ -304,7 +306,7 @@ The index is not restricted to the declared size, which permits calculations suc
 
 ## Symbol references
 
-A symbol may generally be used anywhere the assembler accepts a numeric value. Symbols are otherwise untyped, so the assembler does not reject a code address used as data or a data address used as code.
+A symbol may generally be used anywhere the assembler accepts a numeric value. Symbols are untyped, so the assembler does not reject a code address used as data or a data address used as code.
 
 There are two exceptions: data sizes may only reference constants, and `name(index)` requires `name` to be a data symbol.
 
