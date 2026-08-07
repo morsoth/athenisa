@@ -42,6 +42,7 @@ Read the documents according to what you are trying to do:
 | [Tool installation](tools/README.md) | Installing, running, and releasing the AthenISA command-line tools |
 | [Assembler guide](tools/assembler/README.md) | Assembler command line, outputs, diagnostics, and processing flow |
 | [Disassembler guide](tools/disassembler/README.md) | Disassembler command line, input formats, output, and limitations |
+| [VS Code extension](vscode/README.md) | Syntax highlighting and basic editing support for `.athe` files |
 
 ## Repository layout
 
@@ -51,7 +52,7 @@ spec/                   Architectural specification
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler
-tools/examples/         Shared end-to-end tool example
+vscode/                 Visual Studio Code language support
 ```
 
 ## Command-line tools

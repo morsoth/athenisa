@@ -1,0 +1,108 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "AthenISA",
+  "scopeName": "source.athe",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#symbolDefinitions" },
+    { "include": "#instructions" },
+    { "include": "#pseudoInstructions" },
+    { "include": "#registers" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#punctuation" },
+    { "include": "#symbols" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.athe",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "symbolDefinitions": {
+      "patterns": [
+        {
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)(:)(?=\\s*[^;\\s])",
+          "captures": {
+            "1": { "name": "entity.name.type.label.athe" },
+            "2": { "name": "punctuation.separator.definition.athe" }
+          }
+        },
+        {
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)(:)",
+          "captures": {
+            "1": { "name": "entity.name.type.label.athe" },
+            "2": { "name": "punctuation.separator.definition.athe" }
+          }
+        }
+      ]
+    },
+    "instructions": {
+      "patterns": [
+        {
+          "name": "keyword.control.athe",
+          "match": "(?i:\\b(?:JMP|CALL|RET|BEQ|BNE|BLT|BGT|BLE|BGE)\\b)"
+        },
+        {
+          "name": "keyword.other.instruction.athe",
+          "match": "(?i:\\b(?:NOP|MOV|ADD|SUB|CMP|AND|OR|XOR|NOT|LI|LIH|SLL|SRL|SRA|LOAD|STORE|ADDI|SUBI|CMPI)\\b)"
+        }
+      ]
+    },
+    "pseudoInstructions": {
+      "patterns": [
+        {
+          "name": "support.function.pseudo.athe",
+          "match": "(?i:\\b(?:LDI|CLR|INC|DEC)\\b)"
+        }
+      ]
+    },
+    "registers": {
+      "patterns": [
+        {
+          "name": "variable.language.register.athe",
+          "match": "(?i:\\bR[0-7]\\b)"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.athe",
+          "match": "(?<![A-Za-z0-9_])[-+]?(?:0[xX][0-9A-Fa-f]+|0[bB][01]+|[0-9]+)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.athe",
+          "match": "[+\\-*/%]"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.operand.athe",
+          "match": ","
+        },
+        {
+          "name": "punctuation.section.brackets.athe",
+          "match": "[\\[\\]()]"
+        }
+      ]
+    },
+    "symbols": {
+      "patterns": [
+        {
+          "name": "variable.other.symbol.athe",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

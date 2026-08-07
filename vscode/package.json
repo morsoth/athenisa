@@ -1,0 +1,41 @@
+{
+  "name": "athenisa-language",
+  "displayName": "AthenISA Language Support",
+  "description": "Syntax highlighting for AthenISA assembly",
+  "version": "0.1.0",
+  "publisher": "morsoth",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/morsoth/athenisa.git",
+    "directory": "vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "athenisa",
+        "aliases": [
+          "AthenISA",
+          "athe"
+        ],
+        "extensions": [
+          ".athe"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "athenisa",
+        "scopeName": "source.athe",
+        "path": "./syntaxes/athenisa.tmLanguage.json"
+      }
+    ]
+  }
+}

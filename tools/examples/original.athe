@@ -1,5 +1,18 @@
 ; Calculates the sum of the whole numbers from 1 to 'limit'.
 
+.include "lib.athe"
+
+.data
+
+item[1] 'A'
+
+vector[5] 0, 1, 2, 3, 4
+
+matrix[2*3] 0,   1,   2,
+            'a', 'b', 'c'
+
+.code
+
 limit: 5
 expected_result: limit * (limit + 1) / 2
 
