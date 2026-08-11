@@ -37,7 +37,7 @@ A section directive changes the active section for the statements that follow it
 ; Data declarations go here.
 ```
 
-The active section is `.code` when assembly begins. Programs that contain no data therefore do not need to write `.code` explicitly.
+By default the active section is `.code` when assembly begins. Programs that contain no data therefore do not need to write `.code` explicitly.
 
 Sections may be selected any number of times. Code and data have independent address counters, and each counter resumes from its previous value when its section is selected again:
 
@@ -75,7 +75,7 @@ ADD R1 R2 R3
 ADD   R1,   R2,   R3
 ```
 
-Commas are required between multiple data initializers.
+Commas are required between multiple data initializers:
 
 ```athe
 vector[3] 1, 2, 3
@@ -326,13 +326,13 @@ Instruction operands, data indexes, and data initializers are evaluated after th
 
 ### Memory operands
 
-`LOAD` and `STORE` address data memory using a base register and a signed word offset:
+`LOAD` and `STORE` address data memory using a base register (`rb`) and a signed word offset (`off5`):
 
 ```text
-effective address = base register + off5
+address = rb + off5
 ```
 
-The assembly syntax writes the offset immediately before the base register:
+The assembly syntax writes the offset immediately before the base register (`off5[rb]`):
 
 ```athe
 LOAD  R1, 4[R2]
