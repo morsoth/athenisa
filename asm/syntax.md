@@ -110,7 +110,7 @@ Instructions may name `R0` through `R7`:
 MOV R1, R2
 ```
 
-`R0` is architecturally hardwired to zero. It is valid as either a source or destination, but the processor discards any value written to it.
+All eight registers are general-purpose and may be used as source or destination operands.
 
 ### Numeric literals
 

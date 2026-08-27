@@ -1,6 +1,6 @@
 # AthenISA Registers
 
-The processor exposes a compact architectural register set composed of one zero register, seven general-purpose registers, the program counter, the stack pointer, and a flags register.
+The processor exposes a compact architectural register set composed of eight general-purpose registers, the program counter, the stack pointer, and a flags register.
 
 ## Register file
 
@@ -8,7 +8,7 @@ Every encoded register field is three bits wide.
 
 | Encoding | Register | Width | Behavior |
 | --- | --- | --- | --- |
-| `000` | `R0` | 16 bits | Constant zero; writes are ignored |
+| `000` | `R0` | 16 bits | General-purpose register |
 | `001` | `R1` | 16 bits | General-purpose register |
 | `010` | `R2` | 16 bits | General-purpose register |
 | `011` | `R3` | 16 bits | General-purpose register |
@@ -17,7 +17,7 @@ Every encoded register field is three bits wide.
 | `110` | `R6` | 16 bits | General-purpose register |
 | `111` | `R7` | 16 bits | General-purpose register |
 
-`R0` always reads as `0x0000`. An instruction may name `R0` as a destination, but the write has no effect. A flag-setting instruction still updates `FLAGS` from its computed result even when its destination is `R0`.
+`R0` through `R7` can be used as source or destination registers. Each register stores an independent 16-bit value.
 
 ## Program counter
 
