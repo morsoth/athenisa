@@ -8,8 +8,8 @@ This repository is the source of truth for the programmer-visible architecture, 
 
 | Name | Type | Version |
 | --- | --- | --- |
-| [Tydeus-16](https://github.com/morsoth/tydeus16-core) | Processor core | `0.1.0` |
 | [AthenISA](https://github.com/morsoth/athenisa) | Instruction Set Architecture | `0.1.0` |
+| [Tydeus-16](https://github.com/morsoth/tydeus16-core) | Processor core | `0.1.0` |
 | Diomedes | Programming language | `-` |
 | ArgOS | Operating system | `-` |
 
