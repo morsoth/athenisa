@@ -1,7 +1,7 @@
 ; Complete valid test for the current AthenISA assembler.
 ; Covers comments, blank lines, case-insensitive mnemonics/registers,
 ; comma-separated operands, whitespace-separated operands, immediates,
-; shifts, memory operands, symbols, and jumps.
+; shifts, memory operands, symbols, jumps, sections, and initialized data.
 ; Binary comments are split by encoded fields.
 
 ; No-operand instructions
@@ -127,3 +127,31 @@ INC R6                       ; expands to: ADDI R6, 1  -> 10100 110 00000001
 inc r7                       ; expands to: ADDI R7, 1  -> 10100 111 00000001
 DEC R0                       ; expands to: SUBI R0, 1  -> 10101 000 00000001
 dec r1                       ; expands to: SUBI R1, 1  -> 10101 001 00000001
+
+; Code and data sections
+data_rows: 2
+data_columns: 3
+LDI R2, later_data           ; expands to: LI R2, 0x0D -> 00011 010 00001101 / LIH R2, 0x00 -> 00100 010 00000000
+LDI R3, later_data(1)        ; expands to: LI R3, 0x0E -> 00011 011 00001110 / LIH R3, 0x00 -> 00100 011 00000000
+
+.data
+
+empty[2]
+filled[3] 7
+matrix[data_rows * data_columns] 0, 1, 2,
+                                        3, 4, 5
+forward_pointer[1] later_data
+forward_value[1] late_value
+
+.code
+
+late_value: 0x1234
+NOP                          ; 00000 00000000000
+
+.data
+
+later_data[2] 0xAA, 0xBB
+
+.code
+
+RET                          ; 10000 00000000000

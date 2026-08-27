@@ -79,3 +79,14 @@
 
 ; Invalid memory offsets and symbols
 ; STORE nope[R1], R2                 ; expected: undefined symbol
+
+; Invalid sections and data declarations
+; .unknown                           ; expected: unknown directive
+; value[2] 0                         ; expected: data declarations are only allowed in .data
+; .data                              ; helper: uncomment with one of the following data-section errors
+; NOP                                ; expected: instruction is not a data declaration
+; data_constant: 10                  ; expected: labels and constants are only allowed in .code
+; bad[0]                             ; expected: data size must be greater than zero
+; bad[missing] 0                     ; expected: undefined constant
+; bad[2] 1, 2, 3                    ; expected: initializer count does not match the size
+; bad[2] 1,                          ; expected: initializer cannot end with a comma

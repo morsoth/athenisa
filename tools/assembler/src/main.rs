@@ -21,9 +21,9 @@ struct Args {
     #[arg(short, long)]
     output: Option<String>,
 
-    /// Generate a hexadecimal memory image
+    /// Generate raw binary instruction and data memory images
     #[arg(long)]
-    hex: bool,
+    bin: bool,
 
     /// Generate a symbol map
     #[arg(long)]
@@ -33,32 +33,52 @@ struct Args {
     #[arg(long)]
     debug: bool,
 
-    /// Do not generate the default binary file
+    /// Do not generate the default hexadecimal output
     #[arg(long)]
-    no_bin: bool,
+    no_hex: bool,
 }
 
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    if args.no_bin && !args.hex && !args.sym && !args.debug {
-        bail!("no output selected: use --hex, --sym, --debug, or remove --no-bin");
+    if args.no_hex && !args.bin && !args.sym && !args.debug {
+        bail!("no output selected: use --bin, --sym, --debug, or remove --no-hex");
     }
 
     let source = fs::read_to_string(&args.input)?;
     let program = parser::parse_source(&source)?;
-    let words = encode_program(&program.instructions);
+    let instruction_words = encode_program(&program.instructions);
     let output = match &args.output {
         Some(output) => PathBuf::from(output),
         None => default_output_path(&args.input),
     };
 
-    if !args.no_bin {
-        fs::write(output_path(&output, "bin"), words_to_bytes(&words))?;
+    if !args.no_hex {
+        fs::write(
+            output_path(&output, "hex"),
+            words_to_hex(&instruction_words),
+        )?;
+
+        if !program.data.is_empty() {
+            fs::write(
+                output_path(&output, "data.hex"),
+                words_to_hex(&program.data),
+            )?;
+        }
     }
 
-    if args.hex {
-        fs::write(output_path(&output, "hex"), words_to_hex(&words))?;
+    if args.bin {
+        fs::write(
+            output_path(&output, "bin"),
+            words_to_bytes(&instruction_words),
+        )?;
+
+        if !program.data.is_empty() {
+            fs::write(
+                output_path(&output, "data.bin"),
+                words_to_bytes(&program.data),
+            )?;
+        }
     }
 
     if args.sym {
@@ -71,7 +91,7 @@ fn main() -> Result<()> {
     if args.debug {
         fs::write(
             output_path(&output, "lst"),
-            format_debug(&program.instructions, &words),
+            format_debug(&program.instructions, &instruction_words),
         )?;
     }
 
@@ -95,14 +115,19 @@ fn output_path(output: &Path, extension: &str) -> PathBuf {
 fn format_symbols(symbols: &parser::Symbols) -> String {
     let name_width = symbols
         .iter()
-        .map(|(name, _)| name.len())
+        .map(|symbol| symbol.name.len())
         .max()
         .unwrap_or(0);
 
     let mut text = String::new();
 
-    for (name, value) in symbols {
-        text.push_str(&format!("{:<width$} {}\n", name, value, width = name_width));
+    for symbol in symbols {
+        text.push_str(&format!(
+            "{:<width$} {}\n",
+            symbol.name,
+            symbol.value,
+            width = name_width
+        ));
     }
 
     text

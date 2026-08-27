@@ -2,97 +2,262 @@ use anyhow::{Context, Result, bail};
 use athenisa_isa::instruction::{Instruction, Register};
 
 const INSTR_MEM_SIZE: i32 = 2048;
+const DATA_MEM_SIZE: i32 = 65536;
 
-pub type Symbols = Vec<(String, i32)>;
+#[derive(Clone, Copy, PartialEq)]
+enum Section {
+    Code,
+    Data,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum SymbolKind {
+    Label,
+    Constant,
+    Data,
+}
+
+pub struct Symbol {
+    pub name: String,
+    pub value: i32,
+    kind: SymbolKind,
+}
+
+pub type Symbols = Vec<Symbol>;
+
+struct SourceLine {
+    number: usize,
+    text: String,
+}
+
+struct DataDeclaration {
+    name: String,
+    size: usize,
+    values: String,
+}
 
 pub struct ParsedProgram {
     pub instructions: Vec<Instruction>,
+    pub data: Vec<u16>,
     pub symbols: Symbols,
 }
 
 pub fn parse_source(source: &str) -> Result<ParsedProgram> {
-    let symbols = collect_symbols(source)?;
-    let instructions = parse_instructions(source, &symbols)?;
+    let lines = prepare_lines(source)?;
+    let symbols = collect_symbols(&lines)?;
+    let (instructions, data) = parse_program(&lines, &symbols)?;
 
     Ok(ParsedProgram {
         instructions,
+        data,
         symbols,
     })
 }
 
-fn collect_symbols(source: &str) -> Result<Symbols> {
-    let mut symbols = Vec::new();
-    let mut pc = 0;
+fn prepare_lines(source: &str) -> Result<Vec<SourceLine>> {
+    let mut lines = Vec::new();
+    let mut section = Section::Code;
+    let mut continued_line: Option<SourceLine> = None;
 
     for (line_idx, raw_line) in source.lines().enumerate() {
-        let line_num = line_idx + 1;
-        let line = strip_comment(raw_line).trim();
+        let number = line_idx + 1;
+        let text = strip_comment(raw_line).trim();
 
-        if line.is_empty() {
+        if text.is_empty() {
             continue;
         }
 
-        if is_symbol_line(line) {
-            let (name, value) = parse_symbol(line, pc, &symbols)
-                .with_context(|| format!("line {line_num}: {line}"))?;
+        if let Some(mut current_line) = continued_line.take() {
+            let next_section =
+                parse_section(text).with_context(|| format!("line {number}: {text}"))?;
 
-            if symbols.iter().any(|(symbol_name, _)| symbol_name == &name) {
-                bail!("line {line_num}: symbol '{name}' is already defined");
+            if next_section.is_some() {
+                bail!(
+                    "line {number}: section directive cannot continue a data declaration from line {}",
+                    current_line.number
+                );
             }
 
-            symbols.push((name, value));
+            current_line.text.push(' ');
+            current_line.text.push_str(text);
+
+            if current_line.text.ends_with(',') {
+                continued_line = Some(current_line);
+            } else {
+                lines.push(current_line);
+            }
 
             continue;
         }
 
-        let size = instruction_size(line) as i32;
+        let new_section = parse_section(text).with_context(|| format!("line {number}: {text}"))?;
 
-        if pc + size > INSTR_MEM_SIZE {
-            bail!(
-                "line {line_num}: program exceeds instruction memory size of {INSTR_MEM_SIZE} words"
-            );
+        if let Some(new_section) = new_section {
+            section = new_section;
+            lines.push(SourceLine {
+                number,
+                text: text.to_string(),
+            });
+            continue;
+        }
+
+        let source_line = SourceLine {
+            number,
+            text: text.to_string(),
+        };
+
+        if section == Section::Data && text.ends_with(',') {
+            continued_line = Some(source_line);
         } else {
-            pc += size;
+            lines.push(source_line);
+        }
+    }
+
+    if let Some(line) = continued_line {
+        bail!(
+            "line {}: data initializer cannot end with a comma",
+            line.number
+        );
+    }
+
+    Ok(lines)
+}
+
+fn collect_symbols(lines: &[SourceLine]) -> Result<Symbols> {
+    let mut symbols = Vec::new();
+    let mut section = Section::Code;
+    let mut code_pc = 0;
+    let mut data_pc = 0;
+
+    for source_line in lines {
+        let line_num = source_line.number;
+        let line = source_line.text.as_str();
+
+        if let Some(new_section) = parse_section(line)? {
+            section = new_section;
+            continue;
+        }
+
+        if section == Section::Code {
+            if is_symbol_line(line) {
+                let symbol = parse_symbol(line, code_pc, &symbols)
+                    .with_context(|| format!("line {line_num}: {line}"))?;
+
+                define_symbol(&mut symbols, symbol, line_num)?;
+                continue;
+            }
+
+            if is_data_declaration(line) {
+                bail!("line {line_num}: data declarations are only allowed in .data");
+            }
+
+            let size = instruction_size(line) as i32;
+
+            if code_pc + size > INSTR_MEM_SIZE {
+                bail!(
+                    "line {line_num}: program exceeds instruction memory size of {INSTR_MEM_SIZE} words"
+                );
+            }
+
+            code_pc += size;
+        } else {
+            if is_symbol_line(line) {
+                bail!("line {line_num}: labels and constants are only allowed in .code");
+            }
+
+            let declaration = parse_data_declaration(line, &symbols)
+                .with_context(|| format!("line {line_num}: {line}"))?;
+            let size = declaration.size as i32;
+
+            if size > DATA_MEM_SIZE - data_pc {
+                bail!("line {line_num}: data exceeds data memory size of {DATA_MEM_SIZE} words");
+            }
+
+            let symbol = Symbol {
+                name: declaration.name,
+                value: data_pc,
+                kind: SymbolKind::Data,
+            };
+
+            define_symbol(&mut symbols, symbol, line_num)?;
+            data_pc += size;
         }
     }
 
     Ok(symbols)
 }
 
-fn parse_instructions(source: &str, symbols: &Symbols) -> Result<Vec<Instruction>> {
+fn parse_program(lines: &[SourceLine], symbols: &Symbols) -> Result<(Vec<Instruction>, Vec<u16>)> {
     let mut instructions = Vec::new();
-    let mut pc = 0;
+    let mut data = Vec::new();
+    let mut section = Section::Code;
+    let mut code_pc = 0;
 
-    for (line_idx, raw_line) in source.lines().enumerate() {
-        let line_num = line_idx + 1;
-        let line = strip_comment(raw_line).trim();
+    for source_line in lines {
+        let line_num = source_line.number;
+        let line = source_line.text.as_str();
 
-        if line.is_empty() {
+        if let Some(new_section) = parse_section(line)? {
+            section = new_section;
             continue;
         }
 
-        if is_symbol_line(line) {
-            continue;
-        }
+        if section == Section::Code {
+            if is_symbol_line(line) {
+                continue;
+            }
 
-        let new_instructions = parse_instruction(line, pc, symbols)
-            .with_context(|| format!("line {line_num}: {line}"))?;
-        pc += new_instructions.len() as i32;
-        instructions.extend(new_instructions);
+            let new_instructions = parse_instruction(line, code_pc, symbols)
+                .with_context(|| format!("line {line_num}: {line}"))?;
+            code_pc += new_instructions.len() as i32;
+            instructions.extend(new_instructions);
+        } else {
+            let declaration = parse_data_declaration(line, symbols)
+                .with_context(|| format!("line {line_num}: {line}"))?;
+            let words = parse_data_values(&declaration, symbols)
+                .with_context(|| format!("line {line_num}: {line}"))?;
+            data.extend(words);
+        }
     }
 
-    Ok(instructions)
+    Ok((instructions, data))
+}
+
+fn parse_section(line: &str) -> Result<Option<Section>> {
+    if line.eq_ignore_ascii_case(".code") {
+        return Ok(Some(Section::Code));
+    }
+
+    if line.eq_ignore_ascii_case(".data") {
+        return Ok(Some(Section::Data));
+    }
+
+    if line.starts_with('.') {
+        bail!("unknown directive '{line}'");
+    }
+
+    Ok(None)
 }
 
 fn is_symbol_line(line: &str) -> bool {
     line.contains(':')
 }
 
+fn is_data_declaration(line: &str) -> bool {
+    let Some(open_bracket) = line.find('[') else {
+        return false;
+    };
+
+    let name = &line[..open_bracket];
+
+    is_symbol_name(name)
+}
+
 fn strip_comment(line: &str) -> &str {
     line.split(';').next().unwrap()
 }
 
-fn parse_symbol(line: &str, pc: i32, symbols: &Symbols) -> Result<(String, i32)> {
+fn parse_symbol(line: &str, pc: i32, symbols: &Symbols) -> Result<Symbol> {
     let colon_idx = line.find(':').unwrap();
     let name = line[..colon_idx].trim();
     let value_text = line[colon_idx + 1..].trim();
@@ -105,9 +270,31 @@ fn parse_symbol(line: &str, pc: i32, symbols: &Symbols) -> Result<(String, i32)>
         bail!("invalid symbol name '{}'", name);
     }
 
+    let kind = if value_text.is_empty() {
+        SymbolKind::Label
+    } else {
+        SymbolKind::Constant
+    };
     let value = parse_symbol_value(value_text, pc, symbols)?;
 
-    Ok((name.to_string(), value))
+    Ok(Symbol {
+        name: name.to_string(),
+        value,
+        kind,
+    })
+}
+
+fn define_symbol(symbols: &mut Symbols, symbol: Symbol, line_num: usize) -> Result<()> {
+    if symbols.iter().any(|existing| existing.name == symbol.name) {
+        bail!(
+            "line {line_num}: symbol '{}' is already defined",
+            symbol.name
+        );
+    }
+
+    symbols.push(symbol);
+
+    Ok(())
 }
 
 fn is_symbol_name(name: &str) -> bool {
@@ -139,6 +326,14 @@ fn parse_symbol_value(text: &str, pc: i32, symbols: &Symbols) -> Result<i32> {
 }
 
 fn parse_expression(text: &str, symbols: &Symbols) -> Result<i32> {
+    parse_expression_inner(text, symbols, false)
+}
+
+fn parse_size_expression(text: &str, symbols: &Symbols) -> Result<i32> {
+    parse_expression_inner(text, symbols, true)
+}
+
+fn parse_expression_inner(text: &str, symbols: &Symbols, constants_only: bool) -> Result<i32> {
     let text = text.trim();
 
     if text.is_empty() {
@@ -146,21 +341,21 @@ fn parse_expression(text: &str, symbols: &Symbols) -> Result<i32> {
     }
 
     if let Some((operator_idx, operator)) = find_operator(text, &['+', '-'])? {
-        let left = parse_expression(&text[..operator_idx], symbols)?;
-        let right = parse_expression(&text[operator_idx + 1..], symbols)?;
+        let left = parse_expression_inner(&text[..operator_idx], symbols, constants_only)?;
+        let right = parse_expression_inner(&text[operator_idx + 1..], symbols, constants_only)?;
 
         return calculate_expression(left, operator, right);
     }
 
     if let Some((operator_idx, operator)) = find_operator(text, &['*', '/', '%'])? {
-        let left = parse_expression(&text[..operator_idx], symbols)?;
-        let right = parse_expression(&text[operator_idx + 1..], symbols)?;
+        let left = parse_expression_inner(&text[..operator_idx], symbols, constants_only)?;
+        let right = parse_expression_inner(&text[operator_idx + 1..], symbols, constants_only)?;
 
         return calculate_expression(left, operator, right);
     }
 
     if has_outer_parentheses(text) {
-        return parse_expression(&text[1..text.len() - 1], symbols);
+        return parse_expression_inner(&text[1..text.len() - 1], symbols, constants_only);
     }
 
     if let Ok(value) = parse_number(text) {
@@ -168,18 +363,22 @@ fn parse_expression(text: &str, symbols: &Symbols) -> Result<i32> {
     }
 
     if let Some(value_text) = text.strip_prefix('+') {
-        return parse_expression(value_text, symbols);
+        return parse_expression_inner(value_text, symbols, constants_only);
     }
 
     if let Some(value_text) = text.strip_prefix('-') {
-        let value = parse_expression(value_text, symbols)?;
+        let value = parse_expression_inner(value_text, symbols, constants_only)?;
 
         return value
             .checked_neg()
             .context("expression result is out of i32 range");
     }
 
-    parse_value(text, symbols)
+    if constants_only {
+        parse_constant_value(text, symbols)
+    } else {
+        parse_value(text, symbols)
+    }
 }
 
 fn find_operator(text: &str, operators: &[char]) -> Result<Option<(usize, char)>> {
@@ -253,6 +452,79 @@ fn calculate_expression(left: i32, operator: char, right: i32) -> Result<i32> {
     };
 
     result.context("expression result is out of i32 range")
+}
+
+fn parse_data_declaration(line: &str, symbols: &Symbols) -> Result<DataDeclaration> {
+    let Some(open_bracket) = line.find('[') else {
+        bail!("expected a data declaration in the form name[size] values");
+    };
+
+    let Some(close_offset) = line[open_bracket + 1..].find(']') else {
+        bail!("data declaration is missing ']'");
+    };
+
+    let close_bracket = open_bracket + 1 + close_offset;
+    let name = line[..open_bracket].trim();
+    let size_text = line[open_bracket + 1..close_bracket].trim();
+    let values = line[close_bracket + 1..].trim();
+
+    if !is_symbol_name(name) {
+        bail!("invalid data name '{name}'");
+    }
+
+    let size = parse_size_expression(size_text, symbols)?;
+
+    if size <= 0 {
+        bail!("data size must be greater than zero");
+    }
+
+    Ok(DataDeclaration {
+        name: name.to_string(),
+        size: size as usize,
+        values: values.to_string(),
+    })
+}
+
+fn parse_data_values(declaration: &DataDeclaration, symbols: &Symbols) -> Result<Vec<u16>> {
+    if declaration.values.is_empty() {
+        return Ok(vec![0; declaration.size]);
+    }
+
+    let mut values = Vec::new();
+
+    for value_text in declaration.values.split(',') {
+        let value_text = value_text.trim();
+
+        if value_text.is_empty() {
+            bail!("expected a value between commas");
+        }
+
+        let value = parse_expression(value_text, symbols)?;
+        values.push(encode_data_word(value));
+    }
+
+    if values.len() == 1 {
+        return Ok(vec![values[0]; declaration.size]);
+    }
+
+    if values.len() != declaration.size {
+        bail!(
+            "data declaration '{}' reserves {} words but provides {} values",
+            declaration.name,
+            declaration.size,
+            values.len()
+        );
+    }
+
+    Ok(values)
+}
+
+fn encode_data_word(value: i32) -> u16 {
+    if value < i16::MIN as i32 || value > u16::MAX as i32 {
+        eprintln!("warning: data value {value} does not fit in 16 bits");
+    }
+
+    value as u16
 }
 
 fn instruction_size(line: &str) -> usize {
@@ -528,13 +800,71 @@ fn parse_value(text: &str, symbols: &Symbols) -> Result<i32> {
         return parse_number(text);
     }
 
-    for (name, value) in symbols {
-        if name == text {
-            return Ok(*value);
+    if let Some(value) = parse_data_address(text, symbols)? {
+        return Ok(value);
+    }
+
+    for symbol in symbols {
+        if symbol.name == text {
+            return Ok(symbol.value);
         }
     }
 
     bail!("undefined symbol '{}'", text)
+}
+
+fn parse_constant_value(text: &str, symbols: &Symbols) -> Result<i32> {
+    if is_number(text) {
+        return parse_number(text);
+    }
+
+    for symbol in symbols {
+        if symbol.name == text {
+            if symbol.kind != SymbolKind::Constant {
+                bail!("data size can only reference constants");
+            }
+
+            return Ok(symbol.value);
+        }
+    }
+
+    bail!("undefined constant '{}'", text)
+}
+
+fn parse_data_address(text: &str, symbols: &Symbols) -> Result<Option<i32>> {
+    if !text.ends_with(')') {
+        return Ok(None);
+    }
+
+    let Some(open_parenthesis) = text.find('(') else {
+        return Ok(None);
+    };
+
+    let name = text[..open_parenthesis].trim();
+    let index_text = text[open_parenthesis + 1..text.len() - 1].trim();
+
+    if !is_symbol_name(name) {
+        return Ok(None);
+    }
+
+    let Some(symbol) = symbols.iter().find(|symbol| symbol.name == name) else {
+        bail!("undefined symbol '{name}'");
+    };
+
+    if symbol.kind != SymbolKind::Data {
+        bail!("symbol '{name}' is not a data declaration");
+    }
+
+    let index = parse_expression(index_text, symbols)?;
+    let Some(address) = symbol.value.checked_add(index) else {
+        bail!("data address is out of range");
+    };
+
+    if !(0..DATA_MEM_SIZE).contains(&address) {
+        bail!("data address {address} is out of range");
+    }
+
+    Ok(Some(address))
 }
 
 fn is_number(text: &str) -> bool {
