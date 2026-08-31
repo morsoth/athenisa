@@ -47,8 +47,6 @@ For `CMP`, `rd` is the first comparison operand and no register is written.
 
 ## Register (R)
 
-![Register instruction format](imgs/r.png)
-
 Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
 
 | Field | Bits | Description |

@@ -17,8 +17,8 @@ This repository is the source of truth for the programmer-visible architecture, 
 
 | Architecture | Status | Documentation |
 | --- | --- | --- |
-| A16 | Defined | [A16 overview](A16/spec/00_overview.md) |
-| A32 | In development | Architecture not yet specified |
+| A16 | Defined | [A16 documentation](A16/) |
+| A32 | In development | [A32 documentation](A32/) |
 
 ## Documentation
 
@@ -26,12 +26,8 @@ Read the documents according to what you are trying to do:
 
 | Document | Purpose |
 | --- | --- |
-| [A16 overview](A16/spec/00_overview.md) | Architectural scope, execution model, notation, and specification conventions |
-| [A16 registers](A16/spec/01_registers.md) | Register encodings, special registers, reset state, and flags |
-| [A16 instruction set](A16/spec/02_instruction_set.md) | Programmer-visible semantics of every real instruction |
-| [A16 instruction formats](A16/spec/03_instruction_formats.md) | Bit layout of every 16-bit instruction format |
-| [A16 instruction encoding](A16/spec/04_instruction_encoding.md) | Opcode and function-field assignments |
-| [A16 memory model](A16/spec/05_memory.md) | Address spaces, effective addresses, control-flow targets, and stack convention |
+| [A16 documentation](A16/) | A16 specification chapters, extensions, and supported instructions |
+| [A32 documentation](A32/) | Current status of the A32 specification, extensions, and instruction set |
 | [Assembly syntax](asm/syntax.md) | Source structure, literals, symbols, expressions, and data declarations shared by all profiles |
 | [A16 assembly reference](asm/A16.md) | A16 registers, operands, ranges, pseudo-instructions, and accepted instruction forms |
 | [A32 assembly reference](asm/A32.md) | Status of the A32 assembly profile |
@@ -43,10 +39,8 @@ Read the documents according to what you are trying to do:
 ## Repository layout
 
 ```text
-A16/spec/               A16 architectural specification
-A16/extensions/         A16 architectural extensions
-A32/spec/               A32 architectural specification
-A32/extensions/         A32 architectural extensions
+A16/                    A16 architecture and extensions
+A32/                    A32 architecture and extensions
 asm/                    Assembly-language syntax
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler

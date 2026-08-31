@@ -34,7 +34,7 @@ LOAD  R1, 4[R2]             ; load from address R2 + 4
 STORE -1[R6], R3            ; store at address R6 - 1
 ```
 
-The source-language shorthand for a zero offset is defined in the [A16 assembly reference](../../asm/A16.md#memory-operands).
+The source-language shorthand for a zero offset is defined in the [A16 assembly reference](../asm/A16.md#memory-operands).
 
 ## Instruction memory addressing
 
@@ -113,7 +113,7 @@ A16 does not track a stack base, limit, depth, or empty state. Software is respo
 
 A16 uses little-endian byte order. Base-architecture memory accesses transfer complete 16-bit words, so byte order is not observable through `LOAD` or `STORE`.
 
-When the assembler generates a raw `.bin` file, it serializes each 16-bit instruction in little-endian order: the low byte is written first, followed by the high byte. Text `.hex` files represent complete 16-bit words and therefore have no byte-order ambiguity. The exact output formats are documented in the [assembler guide](../../tools/assembler/README.md#output-files).
+When the assembler generates a raw `.bin` file, it serializes each 16-bit instruction in little-endian order: the low byte is written first, followed by the high byte. Text `.hex` files represent complete 16-bit words and therefore have no byte-order ambiguity. The exact output formats are documented in the [assembler guide](../tools/assembler/README.md#output-files).
 
 ## Timing and physical memory
 
