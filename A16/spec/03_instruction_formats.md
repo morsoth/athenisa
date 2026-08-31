@@ -93,7 +93,7 @@ Used by `SLL`, `SRL`, and `SRA`.
 
 Used by `JMP` and `CALL`.
 
-![Absolute jump instruction format](imgs/uncond_jump.png)
+![Absolute jump instruction format](imgs/abs_jumps.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ The field spans the complete 2048-word instruction address space.
 
 Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
-![Relative branch instruction format](imgs/cond_jump.png)
+![Relative branch instruction format](imgs/rel_jumps.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |

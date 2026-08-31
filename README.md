@@ -32,12 +32,12 @@ Read the documents according to what you are trying to do:
 
 | Document | Purpose |
 | --- | --- |
-| [ISA overview](spec/00_overview.md) | Architectural scope, execution model, notation, and specification conventions |
-| [Registers](spec/01_registers.md) | Register encodings, special registers, reset state, and flags |
-| [Instruction set](spec/02_instruction_set.md) | Programmer-visible semantics of every real instruction |
-| [Instruction formats](spec/03_instruction_formats.md) | Bit layout of every 16-bit instruction format |
-| [Instruction encoding](spec/04_instruction_encoding.md) | Opcode and function-field assignments |
-| [Memory model](spec/05_memory.md) | Address spaces, effective addresses, control-flow targets, and stack convention |
+| [A16 overview](A16/spec/00_overview.md) | Architectural scope, execution model, notation, and specification conventions |
+| [A16 registers](A16/spec/01_registers.md) | Register encodings, special registers, reset state, and flags |
+| [A16 instruction set](A16/spec/02_instruction_set.md) | Programmer-visible semantics of every real instruction |
+| [A16 instruction formats](A16/spec/03_instruction_formats.md) | Bit layout of every 16-bit instruction format |
+| [A16 instruction encoding](A16/spec/04_instruction_encoding.md) | Opcode and function-field assignments |
+| [A16 memory model](A16/spec/05_memory.md) | Address spaces, effective addresses, control-flow targets, and stack convention |
 | [Assembly syntax](asm/syntax.md) | Source syntax, literals, symbols, operands, and pseudo-instructions |
 | [Tool installation](tools/README.md) | Installing, running, and releasing the AthenISA command-line tools |
 | [Assembler guide](tools/assembler/README.md) | Assembler command line, outputs, diagnostics, and processing flow |
@@ -47,8 +47,11 @@ Read the documents according to what you are trying to do:
 ## Repository layout
 
 ```text
+A16/spec/               A16 architectural specification
+A16/extensions/         A16 architectural extensions
+A32/spec/               A32 architectural specification
+A32/extensions/         A32 architectural extensions
 asm/                    Assembly-language syntax
-spec/                   Architectural specification
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler

@@ -2,7 +2,7 @@
 
 This document defines the source language accepted by the reference AthenISA assembler. Source files conventionally use the `.athe` extension.
 
-For instruction behavior and binary encoding, see the [instruction set](../spec/02_instruction_set.md) and [encoding table](../spec/04_instruction_encoding.md).
+For instruction behavior and binary encoding, see the [A16 instruction set](../A16/spec/02_instruction_set.md) and [encoding table](../A16/spec/04_instruction_encoding.md).
 
 ## Source structure
 
@@ -100,7 +100,7 @@ An instruction starts with a mnemonic that identifies an operation. Any values n
 LI R1, 0xF0
 ```
 
-In this example, `LI` is the mnemonic, `R1` is the destination register, and `0xF0` is an immediate value. Each instruction defines the type, number, order, and meaning of its own operands. See the [instruction syntax reference](#instruction-syntax-reference) for every instruction operand form. Consult the [AthenISA instruction set](../spec/02_instruction_set.md) for the architectural behavior of each instruction.
+In this example, `LI` is the mnemonic, `R1` is the destination register, and `0xF0` is an immediate value. Each instruction defines the type, number, order, and meaning of its own operands. See the [instruction syntax reference](#instruction-syntax-reference) for every instruction operand form. Consult the [A16 instruction set](../A16/spec/02_instruction_set.md) for the architectural behavior of each instruction.
 
 ### Registers
 

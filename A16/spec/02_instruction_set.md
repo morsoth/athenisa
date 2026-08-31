@@ -1,6 +1,6 @@
 # AthenISA Instruction Set
 
-This chapter defines the architectural behavior of every real AthenISA instruction. Assembly-only pseudo-instructions are defined separately in [`asm/syntax.md`](../asm/syntax.md#pseudo-instructions).
+This chapter defines the architectural behavior of every real AthenISA instruction. Assembly-only pseudo-instructions are defined separately in [`asm/syntax.md`](../../asm/syntax.md#pseudo-instructions).
 
 In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. The prefixes `imm`, `addr`, and `off` identify immediate values, absolute addresses, and offsets, while the numeric suffix gives the field width. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
 
