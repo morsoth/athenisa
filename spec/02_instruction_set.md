@@ -267,6 +267,14 @@ SRA rd, rs, imm4            // rd <- sext(rs) >> imm4
 JMP addr11                  // PC <- addr11
 ```
 
+### BRA
+
+`BRA` always branches by a signed offset relative to the instruction that follows it.
+
+```text
+BRA off11                  // PC <- PC + 1 + sext(off11)
+```
+
 ### BEQ
 
 `BEQ` branches when the zero flag is set.
@@ -294,24 +302,6 @@ BLT off11                   // if (N xor V) = 1
                             // then PC <- PC + 1 + sext(off11)
 ```
 
-### BGT
-
-`BGT` branches when the previous comparison indicates signed greater than.
-
-```text
-BGT off11                   // if Z = 0 and (N xor V) = 0
-                            // then PC <- PC + 1 + sext(off11)
-```
-
-### BLE
-
-`BLE` branches when the previous comparison indicates signed less than or equal.
-
-```text
-BLE off11                   // if Z = 1 or (N xor V) = 1
-                            // then PC <- PC + 1 + sext(off11)
-```
-
 ### BGE
 
 `BGE` branches when the previous comparison indicates signed greater than or equal.
@@ -321,7 +311,28 @@ BGE off11                   // if (N xor V) = 0
                             // then PC <- PC + 1 + sext(off11)
 ```
 
-## Flow control instructions
+### BLTU
+
+`BLTU` branches when the previous comparison indicates unsigned less than.
+
+```text
+BLTU off11                  // if C = 0
+                            // then PC <- PC + 1 + sext(off11)
+```
+
+### BGEU
+
+`BGEU` branches when the previous comparison indicates unsigned greater than or equal.
+
+```text
+BGEU off11                  // if C = 1
+                            // then PC <- PC + 1 + sext(off11)
+```
+
+> [!NOTE]
+> `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
+
+## Stack instructions
 
 ### CALL
 
@@ -341,6 +352,26 @@ CALL addr11                 // SP <- SP - 1
 RET                         // PC <- MEM[SP]
                             // SP <- SP + 1
 ```
+
+### PUSH
+
+`PUSH` adds one register value to the stack.
+
+```text
+PUSH rs                     // SP <- SP - 1
+                            // MEM[SP] <- rs
+```
+
+### POP
+
+`POP` removes the top value from the stack and writes it to a register.
+
+```text
+POP rd                      // rd <- MEM[SP]
+                            // SP <- SP + 1
+```
+
+Executing `POP` when the stack is empty causes a stack-underflow exception.
 
 ## Memory instructions
 

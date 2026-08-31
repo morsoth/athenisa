@@ -17,19 +17,20 @@
 | `SRL` | `00110` | - | RRI |
 | `SRA` | `00111` | - | RRI |
 | `JMP` | `01000` | - | Absolute jump |
-| `BEQ` | `01001` | - | Conditional branch |
-| `BNE` | `01010` | - | Conditional branch |
-| `BLT` | `01011` | - | Conditional branch |
-| `BGT` | `01100` | - | Conditional branch |
-| `BLE` | `01101` | - | Conditional branch |
-| `BGE` | `01110` | - | Conditional branch |
-| `CALL` | `01111` | - | Absolute jump |
-| `RET` | `10000` | - | No operand |
-| Reserved | `10001` | - | - |
-| `LOAD` | `10010` | - | Load |
-| `STORE` | `10011` | - | Store |
-| `ADDI` | `10100` | - | RI |
-| `SUBI` | `10101` | - | RI |
-| `CMPI` | `10110` | - | RI |
-| Reserved | `10111` | - | - |
+| `BRA` | `01001` | - | Relative branch |
+| `BEQ` | `01010` | - | Relative branch |
+| `BNE` | `01011` | - | Relative branch |
+| `BLT` | `01100` | - | Relative branch |
+| `BGE` | `01101` | - | Relative branch |
+| `BLTU` | `01110` | - | Relative branch |
+| `BGEU` | `01111` | - | Relative branch |
+| `CALL` | `10000` | - | Absolute jump |
+| `RET` | `10001` | - | No operand |
+| `PUSH` | `10010` | `00` | R |
+| `POP` | `10010` | `01` | R |
+| `LOAD` | `10011` | - | Load |
+| `STORE` | `10100` | - | Store |
+| `ADDI` | `10101` | - | RI |
+| `SUBI` | `10110` | - | RI |
+| `CMPI` | `10111` | - | RI |
 | Reserved | `11xxx` | - | - |

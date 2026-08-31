@@ -30,7 +30,7 @@ Sequential execution advances `PC` by one. `PC` is not directly addressable by t
 
 ## Stack pointer
 
-`SP` is a 16-bit register used implicitly by `CALL` and `RET`. The stack grows toward lower data-memory addresses. `SP = 0x0000` is the empty-stack marker, so the first `CALL` stores its return address at `0xFFFF`.
+`SP` is a 16-bit register used implicitly by `CALL`, `RET`, `PUSH`, and `POP`. The stack grows toward lower data-memory addresses. `SP = 0x0000` is the empty-stack marker, so the first value added to the stack is stored at `0xFFFF`.
 
 `SP` is not directly addressable by the general register fields. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 
@@ -57,7 +57,7 @@ Flag updates are grouped as follows:
 | `SLL`, `SRL`, `SRA` | From result | `0` | From result | `0` |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |
 
-`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `N`, and `V` to determine whether their branch condition is satisfied.
+`CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `C`, `N`, and `V` as required to determine whether their branch condition is satisfied.
 
 ## Reset state
 

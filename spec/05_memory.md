@@ -9,7 +9,7 @@ AthenISA uses separate instruction and data address spaces. Both spaces are word
 | Number of words | 2048 | 65,536 |
 | Word width | 16 bits | 16 bits |
 | Byte capacity | 4 KiB | 128 KiB |
-| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `RET` |
+| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `RET`, `PUSH`, `POP` |
 
 Both memory spaces are word-addressed: each address refers to one complete 16-bit word. For example, address `0x0000` selects the first word and address `0x0001` selects the second word; addresses do not identify individual bytes.
 
@@ -52,7 +52,7 @@ Because `addr11` is 11 bits wide, these instructions can target any word in inst
 
 ### Relative branch targets
 
-Conditional branches contain a signed 11-bit offset relative to the instruction after the branch:
+Relative branches contain a signed 11-bit offset from the instruction after the branch:
 
 ```text
 PC = PC + 1 + off11
@@ -61,17 +61,17 @@ PC = PC + 1 + off11
 The `off11` field has a signed range of `-1024` to `+1023` instructions. A positive offset branches forward and a negative offset branches backward.
 
 > [!WARNING]
-> An `off11` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). Because conditional branches do not modify the flags, a branch that is taken with this offset repeats indefinitely.
+> An `off11` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this offset also repeats while its condition remains satisfied.
 
 The calculation uses 11-bit address arithmetic and therefore wraps at the instruction-memory boundary. For example, advancing beyond `0x7FF` continues from `0x000`.
 
 ## Stack
 
-The call stack resides in data memory. It starts at the end of the memory and grows toward lower addresses. `SP` identifies the word holding the most recently stored return address. The value `SP = 0x0000` is reserved as the empty-stack marker.
+The stack resides in data memory. It starts at the end of the memory and grows toward lower addresses. `SP` identifies the most recently stored stack word, which may contain a return address or a value saved by software. The value `SP = 0x0000` is reserved as the empty-stack marker.
 
 After reset: `SP = 0x0000`.
 
-`CALL` decrements `SP` before writing, so the first call uses the highest data address:
+`CALL` decrements `SP` before storing its return address, so the first stack entry uses the highest data address:
 
 ```text
 SP       = SP - 1
@@ -85,7 +85,19 @@ PC = DMEM[SP]
 SP = SP + 1
 ```
 
-`RET` with `SP = 0x0000` is a stack-underflow condition. Address `0x0000` must remain outside the valid call stack so the empty marker remains unambiguous; therefore the architectural call stack can hold at most 65,535 return addresses. AthenISA does not define a stack-overflow exception, so software must avoid exceeding that depth.
+`PUSH` and `POP` use the same stack convention:
+
+```text
+SP       = SP - 1           // PUSH
+DMEM[SP] = rs
+
+rd = DMEM[SP]               // POP
+SP = SP + 1
+```
+
+Stack entries are untyped. Software must balance any `PUSH` operations performed after a `CALL` with corresponding `POP` operations before executing `RET`.
+
+`RET` or `POP` with `SP = 0x0000` is a stack-underflow condition. Address `0x0000` must remain outside the valid stack so the empty marker remains unambiguous; therefore the architectural stack can hold at most 65,535 words. AthenISA does not define a stack-overflow exception, so software must avoid exceeding that depth.
 
 ## Byte order and serialized programs
 

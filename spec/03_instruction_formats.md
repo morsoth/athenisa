@@ -45,6 +45,21 @@ Used by `MOV`, `CMP`, and `NOT`.
 
 For `CMP`, `rd` is the first comparison operand and no register is written.
 
+## Register (R)
+
+![Register instruction format](imgs/r.png)
+
+Used by `PUSH` and `POP`.
+
+| Field | Bits | Description |
+| --- | --- | --- |
+| `opcode` | `15:11` | Primary opcode |
+| `r` | `10:8` | Register operand |
+| `reserved` | `7:2` | Reserved bits |
+| `func` | `1:0` | Secondary operation selector |
+
+For `PUSH`, `r` is the source register. For `POP`, `r` is the destination register.
+
 ## Register-immediate (RI)
 
 Used by `LI`, `LIH`, `ADDI`, `SUBI`, and `CMPI`.
@@ -87,18 +102,18 @@ Used by `JMP` and `CALL`.
 
 The field spans the complete 2048-word instruction address space.
 
-## Conditional branch
+## Relative branch
 
-Used by `BEQ`, `BNE`, `BLT`, `BGT`, `BLE`, and `BGE`.
+Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
-![Conditional branch instruction format](imgs/cond_jump.png)
+![Relative branch instruction format](imgs/cond_jump.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `off11` | `10:0` | PC-relative instruction offset |
 
-A taken branch targets `PC + 1 + sext(off11)`.
+`BRA` always targets `PC + 1 + sext(off11)`. A conditional branch uses the same target when its condition is satisfied.
 
 ## Load
 
