@@ -1,30 +1,30 @@
-# A16 Registers
+# A32 Registers
 
-The processor exposes a compact architectural register set composed of seven general-purpose registers, the program counter, the stack pointer, and a flags register.
+The processor exposes 31 general-purpose registers, the stack pointer, the program counter, and a flags register.
 
 ## Register file
 
-Every encoded register field is three bits wide.
+Every encoded register field is five bits wide.
 
 | Encoding | Register | Width | Behavior |
 | --- | --- | --- | --- |
-| `000` to `110` | `R0` to `R6` | 16 bits | General-purpose registers |
-| `111` | `SP` | 16 bits | Stack pointer |
+| `00000` to `11110` | `R0` to `R30` | 32 bits | General-purpose registers |
+| `11111` | `SP` | 32 bits | Stack pointer |
 
-`R0` through `R6` are general-purpose registers. `SP` shares the same encoded register fields and can also be used as a source, destination, or base register where the instruction permits it.
+`R0` through `R30` are general-purpose registers. `SP` shares the same encoded register fields and can also be used as a source, destination, or base register where the instruction permits it.
 
 ## Program counter
 
-`PC` is an 11-bit register containing the address of the current instruction.
+`PC` is a 26-bit register containing the address of the current instruction.
 
 > [!NOTE]
-> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an [absolute jump](03_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
+> `PC` is 26 bits wide because instruction memory contains `2^26` words. This allows an [absolute jump](03_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 26-bit field encoded in the instruction.
 
 Sequential execution advances `PC` by one. `PC` is not directly addressable by the general register fields.
 
 ## Stack pointer
 
-`SP` is a 16-bit register used both explicitly through register encoding `111` and implicitly by `CALL`, `CALLR`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
+`SP` is a 32-bit register used both explicitly through register encoding `11111` and implicitly by `CALL`, `CALLR`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
 
 Software is responsible for initializing `SP`, assigning the valid stack region, and preventing stack overflow or underflow. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 
@@ -35,11 +35,11 @@ Software is responsible for initializing `SP`, assigning the valid stack region,
 | Bit | Flag | Meaning |
 | --- | --- | --- |
 | `3` | `V` | Signed overflow |
-| `2` | `N` | Negative result; equal to result bit 15 |
+| `2` | `N` | Negative result; equal to result bit 31 |
 | `1` | `C` | Unsigned carry, or no-borrow indication for subtraction |
 | `0` | `Z` | Zero result |
 
-For addition, `C` is the carry out of bit 15. For subtraction, `C = 1` means no unsigned borrow occurred and `C = 0` means a borrow occurred. `V` reports signed two's-complement overflow.
+For addition, `C` is the carry out of bit 31. For subtraction, `C = 1` means no unsigned borrow occurred and `C = 0` means a borrow occurred. `V` reports signed two's-complement overflow.
 
 Flag updates are grouped as follows:
 
@@ -59,9 +59,9 @@ The reset profile is:
 
 | State | Reset value |
 | --- | --- |
-| `R0` to `R6` | `0x0000` |
-| `PC` | `0x000` |
-| `SP` | `0x0000` |
+| `R0` to `R30` | `0x00000000` |
+| `PC` | `0x0000000` |
+| `SP` | `0x00000000` |
 | `FLAGS` | `0000` |
 
 The reset value of `SP` does not establish a valid stack. Software must initialize it before executing stack instructions. Instruction and data memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.

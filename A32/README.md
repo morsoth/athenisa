@@ -1,17 +1,17 @@
 # AthenISA A32
 
-A32 is the planned 32-bit base architecture of the AthenISA family. Its architectural state, instruction set, formats, encoding, and extensions remain to be specified.
+A32 is the 32-bit base architecture of the AthenISA family. This page provides an index of its specification, extensions, and instruction set.
 
 ## Specification
 
-| Chapter | Status |
+| Chapter | Contents |
 | --- | --- |
-| [00 - Overview](00_overview.md) | Placeholder |
-| 01 - Registers | Not yet created |
-| 02 - Instruction set | Not yet created |
-| 03 - Instruction formats | Not yet created |
-| 04 - Instruction encoding | Not yet created |
-| 05 - Memory | Not yet created |
+| [00 - Overview](00_overview.md) | Architectural profile, scope, and relationship with A16 |
+| [01 - Registers](01_registers.md) | Register encodings, `PC`, `SP`, flags, and reset state |
+| [02 - Instruction set](02_instruction_set.md) | Programmer-visible behavior of every base instruction |
+| [03 - Instruction formats](03_instruction_formats.md) | Bit fields used by each instruction format |
+| [04 - Instruction encoding](04_instruction_encoding.md) | Opcode and function assignments |
+| [05 - Memory](05_memory.md) | Address spaces, control-flow targets, data addressing, and stack behavior |
 
 ## Extensions
 
@@ -21,8 +21,19 @@ A32 is the planned 32-bit base architecture of the AthenISA family. Its architec
 | [`F`](extensions/F/00_overview.md) | Floating-point | - |
 | [`V`](extensions/V/00_overview.md) | Vector operations | - |
 
-## Instructions
+An extension only defines the state, instructions, formats, and encodings added to the A32 base architecture. Extension documents are stored under [`extensions/`](extensions/).
 
-| Component | Instructions |
-| --- | --- |
-| A32 base | Not yet specified |
+## All supported instructions
+
+| Category | Instructions | Extension |
+| --- | --- | --- |
+| No operation | `NOP` | |
+| Data movement | `MOV`, `LI`, `LIH` | |
+| Arithmetic and comparison | `ADD`, `ADDI`, `SUB`, `SUBI`, `CMP`, `CMPI` | |
+| Logic | `AND`, `OR`, `XOR`, `NOT` | |
+| Shifts | `SLL`, `SRL`, `SRA` | |
+| Jumps and branches | `JMP`, `JMPR`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
+| Stack and calls | `CALL`, `CALLR`, `RET`, `PUSH`, `POP` | |
+| Memory | `LOAD`, `STORE` | |
+
+Pseudo-instructions will be listed separately in the [A32 assembly reference](../asm/A32.md).
