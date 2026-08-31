@@ -111,7 +111,7 @@ MOV R1, R2
 LDI SP, stack_top
 ```
 
-`R0` through `R6` are general-purpose registers. `SP` may be used explicitly as a source, destination, or memory base, and `CALL`, `RET`, `PUSH`, and `POP` also use it implicitly. `PUSH SP` and `POP SP` are not accepted.
+`R0` through `R6` are general-purpose registers. `SP` may be used explicitly as a source, destination, or memory base, and `CALL`, `CALLR`, `RET`, `PUSH`, and `POP` also use it implicitly. `PUSH SP` and `POP SP` are not accepted.
 
 ### Numeric literals
 
@@ -453,7 +453,9 @@ SRL  rd, rs, imm4
 SRA  rd, rs, imm4
 
 JMP  addr11
+JMPR rs
 CALL addr11
+CALLR rs
 BRA  off11
 BEQ  off11
 BNE  off11

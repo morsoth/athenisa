@@ -49,7 +49,7 @@ For `CMP`, `rd` is the first comparison operand and no register is written.
 
 ![Register instruction format](imgs/r.png)
 
-Used by `PUSH` and `POP`.
+Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ Used by `PUSH` and `POP`.
 | `reserved` | `7:2` | Reserved bits |
 | `func` | `1:0` | Secondary operation selector |
 
-For `PUSH`, `r` is the source register. For `POP`, `r` is the destination register. The `111` encoding is illegal in this format because both instructions modify `SP` implicitly.
+For `JMPR`, `CALLR`, and `PUSH`, `r` is a source register. For `POP`, `r` is a destination register. The `111` encoding is illegal for `PUSH` and `POP` because both instructions modify `SP` implicitly.
 
 ## Register-immediate (RI)
 

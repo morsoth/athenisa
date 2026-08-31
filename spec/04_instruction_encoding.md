@@ -26,8 +26,10 @@
 | `BGEU` | `01111` | - | Relative branch |
 | `CALL` | `10000` | - | Absolute jump |
 | `RET` | `10001` | - | No operand |
-| `PUSH` | `10010` | `00` | R |
-| `POP` | `10010` | `01` | R |
+| `JMPR` | `10010` | `00` | R |
+| `CALLR` | `10010` | `01` | R |
+| `PUSH` | `10010` | `10` | R |
+| `POP` | `10010` | `11` | R |
 | `LOAD` | `10011` | - | Load |
 | `STORE` | `10100` | - | Store |
 | `ADDI` | `10101` | - | RI |

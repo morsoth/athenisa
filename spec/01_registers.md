@@ -30,7 +30,7 @@ Sequential execution advances `PC` by one. `PC` is not directly addressable by t
 
 ## Stack pointer
 
-`SP` is a 16-bit register used both explicitly through register encoding `111` and implicitly by `CALL`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
+`SP` is a 16-bit register used both explicitly through register encoding `111` and implicitly by `CALL`, `CALLR`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
 
 Software is responsible for initializing `SP`, assigning the valid stack region, and preventing stack overflow or underflow. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 

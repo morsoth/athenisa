@@ -267,6 +267,14 @@ SRA rd, rs, imm4            // rd <- sext(rs) >> imm4
 JMP addr11                  // PC <- addr11
 ```
 
+### JMPR
+
+`JMPR` transfers execution to the instruction address stored in a register. Only the low 11 bits of the register are used.
+
+```text
+JMPR rs                     // PC <- rs[10:0]
+```
+
 ### BRA
 
 `BRA` always branches by a signed offset relative to the instruction that follows it.
@@ -342,6 +350,17 @@ BGEU off11                  // if C = 1
 CALL addr11                 // SP <- SP - 1
                             // MEM[SP] <- PC + 1
                             // PC <- addr11
+```
+
+### CALLR
+
+`CALLR` stores the sequential return address on the stack and transfers execution to the instruction address stored in a register. The target is read before `SP` is modified, and only its low 11 bits are used.
+
+```text
+CALLR rs                    // target <- rs[10:0]
+                            // SP <- SP - 1
+                            // MEM[SP] <- PC + 1
+                            // PC <- target
 ```
 
 ### RET

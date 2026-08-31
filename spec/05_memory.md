@@ -9,7 +9,7 @@ AthenISA uses separate instruction and data address spaces. Both spaces are word
 | Number of words | 2048 | 65,536 |
 | Word width | 16 bits | 16 bits |
 | Byte capacity | 4 KiB | 128 KiB |
-| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `RET`, `PUSH`, `POP` |
+| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `CALLR`, `RET`, `PUSH`, `POP` |
 
 Both memory spaces are word-addressed: each address refers to one complete 16-bit word. For example, address `0x0000` selects the first word and address `0x0001` selects the second word; addresses do not identify individual bytes.
 
@@ -50,6 +50,16 @@ PC = addr11
 
 Because `addr11` is 11 bits wide, these instructions can target any word in instruction memory.
 
+### Register targets
+
+`JMPR` and `CALLR` take their target from the low 11 bits of a source register:
+
+```text
+PC = rs[10:0]
+```
+
+The upper five bits of the source register do not affect the target address.
+
 ### Relative branch targets
 
 Relative branches contain a signed 11-bit offset from the instruction after the branch:
@@ -71,7 +81,7 @@ The stack resides in data memory and grows toward lower addresses. `SP` identifi
 
 Software chooses the initial value and valid memory region of each stack. After reset, `SP` contains `0x0000`, but this value does not indicate an empty or initialized stack.
 
-`CALL` decrements `SP` before storing its return address, so the first stack entry uses the highest data address:
+`CALL` and `CALLR` decrement `SP` before storing their return address:
 
 ```text
 SP       = SP - 1
@@ -97,7 +107,7 @@ SP = SP + 1
 
 Stack entries are untyped. Software must balance any `PUSH` operations performed after a `CALL` with corresponding `POP` operations before executing `RET`.
 
-AthenISA does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `RET`, `PUSH`, or `POP` to access any data-memory address.
+AthenISA does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `CALLR`, `RET`, `PUSH`, or `POP` to access any data-memory address.
 
 ## Byte order and serialized programs
 
