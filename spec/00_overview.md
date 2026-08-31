@@ -10,7 +10,7 @@ This document introduces the architectural contract of AthenISA. The following c
 | Data width | 16 bits |
 | Instruction addresses | 11 bits, word-addressed |
 | Data addresses | 16 bits, word-addressed |
-| Register operands | `R0` to `R7` |
+| Register operands | `R0` to `R6` and `SP` |
 | Instruction byte order | Little-endian |
 
 AthenISA uses separate instruction and data address spaces. An instruction address selects one 16-bit instruction word; a data address selects one 16-bit data word. The base ISA has no byte load, byte store, or unaligned access.

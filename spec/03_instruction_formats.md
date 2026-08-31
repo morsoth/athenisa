@@ -58,7 +58,7 @@ Used by `PUSH` and `POP`.
 | `reserved` | `7:2` | Reserved bits |
 | `func` | `1:0` | Secondary operation selector |
 
-For `PUSH`, `r` is the source register. For `POP`, `r` is the destination register.
+For `PUSH`, `r` is the source register. For `POP`, `r` is the destination register. The `111` encoding is illegal in this format because both instructions modify `SP` implicitly.
 
 ## Register-immediate (RI)
 

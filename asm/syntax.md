@@ -104,13 +104,14 @@ In this example, `LI` is the mnemonic, `R1` is the destination register, and `0x
 
 ### Registers
 
-Instructions may name `R0` through `R7`:
+Instructions may name `R0` through `R6` and `SP`:
 
 ```athe
 MOV R1, R2
+LDI SP, stack_top
 ```
 
-All eight registers are general-purpose and may be used as source or destination operands.
+`R0` through `R6` are general-purpose registers. `SP` may be used explicitly as a source, destination, or memory base, and `CALL`, `RET`, `PUSH`, and `POP` also use it implicitly. `PUSH SP` and `POP SP` are not accepted.
 
 ### Numeric literals
 
@@ -336,14 +337,14 @@ The assembly syntax writes the offset immediately before the base register (`off
 
 ```athe
 LOAD  R1, 4[R2]
-STORE -1[R7], R3
+STORE -1[R6], R3
 ```
 
 The offset may be a literal or symbol. Omitting it means zero:
 
 ```athe
 LOAD  R1, [R2]           ; equivalent to LOAD R1, 0[R2]
-STORE [R7], R3           ; equivalent to STORE 0[R7], R3
+STORE [R6], R3           ; equivalent to STORE 0[R6], R3
 ```
 
 The complete memory operand is one token and cannot contain spaces. `4 [R2]` is not accepted.
@@ -364,7 +365,7 @@ JMP 0x120
 CALL function
 ```
 
-Conditional branches use relative offsets measured from the instruction after the branch. Numeric and symbolic operands are interpreted differently:
+Relative branches use offsets measured from the instruction after the branch. Numeric and symbolic operands are interpreted differently:
 
 - A numeric operand is the signed `off11` encoded directly.
 - A symbol is a target instruction address, converted with `off11 = symbol - (PC + 1)`.
@@ -389,7 +390,7 @@ Instruction fields have fixed widths. The following table shows the values that 
 | `imm8` | 0 to 255 | `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI` |
 | `imm16` | 0 to 65,535 | Pseudo-instruction `LDI` |
 | `off5` | -16 to +15 | `LOAD`, `STORE` |
-| `off11` | -1024 to +1023 | Conditional branches |
+| `off11` | -1024 to +1023 | Relative branches |
 | `addr11` | 0 to 2047 | `JMP`, `CALL` |
 
 If a value does not fit its field, the assembler prints a warning, keeps the low field-width bits, and continues. For example, `LI R1, 0x123` encodes `imm8 = 0x23`.
@@ -453,12 +454,16 @@ SRA  rd, rs, imm4
 
 JMP  addr11
 CALL addr11
+BRA  off11
 BEQ  off11
 BNE  off11
 BLT  off11
-BGT  off11
-BLE  off11
 BGE  off11
+BLTU off11
+BGEU off11
+
+PUSH rs
+POP  rd
 
 LOAD  rd, off5[rb]
 LOAD  rd, [rb]

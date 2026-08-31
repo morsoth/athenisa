@@ -19,7 +19,8 @@ This repository is the source of truth for the programmer-visible architecture, 
 | --- | --- |
 | Instruction width | 16 bits |
 | Data width | 16 bits |
-| General-purpose registers | 8 (`R0` to `R7`) |
+| General-purpose registers | 7 (`R0` to `R6`) |
+| Stack pointer | `SP` |
 | Instruction address width | 11 bits |
 | Data address width | 16 bits |
 | Memory model | Separate instruction and data spaces, word-addressed |

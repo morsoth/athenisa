@@ -31,7 +31,7 @@ Assembly represents these operands as follows:
 
 ```athe
 LOAD  R1, 4[R2]             ; load from address R2 + 4
-STORE -1[R7], R3            ; store at address R7 - 1
+STORE -1[R6], R3            ; store at address R6 - 1
 ```
 
 The source-language shorthand for a zero offset is defined in [`asm/syntax.md`](../asm/syntax.md#memory-operands).
@@ -67,9 +67,9 @@ The calculation uses 11-bit address arithmetic and therefore wraps at the instru
 
 ## Stack
 
-The stack resides in data memory. It starts at the end of the memory and grows toward lower addresses. `SP` identifies the most recently stored stack word, which may contain a return address or a value saved by software. The value `SP = 0x0000` is reserved as the empty-stack marker.
+The stack resides in data memory and grows toward lower addresses. `SP` identifies the most recently stored stack word, which may contain a return address or a value saved by software. Register encoding `111` allows software to read and write `SP` directly.
 
-After reset: `SP = 0x0000`.
+Software chooses the initial value and valid memory region of each stack. After reset, `SP` contains `0x0000`, but this value does not indicate an empty or initialized stack.
 
 `CALL` decrements `SP` before storing its return address, so the first stack entry uses the highest data address:
 
@@ -97,7 +97,7 @@ SP = SP + 1
 
 Stack entries are untyped. Software must balance any `PUSH` operations performed after a `CALL` with corresponding `POP` operations before executing `RET`.
 
-`RET` or `POP` with `SP = 0x0000` is a stack-underflow condition. Address `0x0000` must remain outside the valid stack so the empty marker remains unambiguous; therefore the architectural stack can hold at most 65,535 words. AthenISA does not define a stack-overflow exception, so software must avoid exceeding that depth.
+AthenISA does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `RET`, `PUSH`, or `POP` to access any data-memory address.
 
 ## Byte order and serialized programs
 

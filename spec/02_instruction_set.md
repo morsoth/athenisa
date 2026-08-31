@@ -371,7 +371,9 @@ POP rd                      // rd <- MEM[SP]
                             // SP <- SP + 1
 ```
 
-Executing `POP` when the stack is empty causes a stack-underflow exception.
+The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
+
+Software must initialize `SP` and keep every stack access within its assigned memory region. AthenISA does not detect an empty stack, stack underflow, or stack overflow.
 
 ## Memory instructions
 

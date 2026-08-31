@@ -1,6 +1,6 @@
 # AthenISA Registers
 
-The processor exposes a compact architectural register set composed of eight general-purpose registers, the program counter, the stack pointer, and a flags register.
+The processor exposes a compact architectural register set composed of seven general-purpose registers, the program counter, the stack pointer, and a flags register.
 
 ## Register file
 
@@ -15,9 +15,9 @@ Every encoded register field is three bits wide.
 | `100` | `R4` | 16 bits | General-purpose register |
 | `101` | `R5` | 16 bits | General-purpose register |
 | `110` | `R6` | 16 bits | General-purpose register |
-| `111` | `R7` | 16 bits | General-purpose register |
+| `111` | `SP` | 16 bits | Stack pointer |
 
-`R0` through `R7` can be used as source or destination registers. Each register stores an independent 16-bit value.
+`R0` through `R6` are general-purpose registers. `SP` shares the same encoded register fields and can also be used as a source, destination, or base register where the instruction permits it.
 
 ## Program counter
 
@@ -30,9 +30,9 @@ Sequential execution advances `PC` by one. `PC` is not directly addressable by t
 
 ## Stack pointer
 
-`SP` is a 16-bit register used implicitly by `CALL`, `RET`, `PUSH`, and `POP`. The stack grows toward lower data-memory addresses. `SP = 0x0000` is the empty-stack marker, so the first value added to the stack is stored at `0xFFFF`.
+`SP` is a 16-bit register used both explicitly through register encoding `111` and implicitly by `CALL`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
 
-`SP` is not directly addressable by the general register fields. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
+Software is responsible for initializing `SP`, assigning the valid stack region, and preventing stack overflow or underflow. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 
 ## Flags register
 
@@ -65,9 +65,9 @@ The reset profile is:
 
 | State | Reset value |
 | --- | --- |
-| `R0` to `R7` | `0x0000` |
+| `R0` to `R6` | `0x0000` |
 | `PC` | `0x000` |
-| `SP` | `0x0000` (empty stack) |
+| `SP` | `0x0000` |
 | `FLAGS` | `0000` |
 
-Instruction and data memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.
+The reset value of `SP` does not establish a valid stack. Software must initialize it before executing stack instructions. Instruction and data memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.
