@@ -1,4 +1,4 @@
-# AthenISA Instruction Encoding
+# A16 Instruction Encoding
 
 | Instruction | `opcode` | `func` | Instruction format |
 | --- | --- | --- | --- |

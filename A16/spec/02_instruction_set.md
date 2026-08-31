@@ -1,6 +1,6 @@
-# AthenISA Instruction Set
+# A16 Instruction Set
 
-This chapter defines the architectural behavior of every real AthenISA instruction. Assembly-only pseudo-instructions are defined separately in [`asm/syntax.md`](../../asm/syntax.md#pseudo-instructions).
+This chapter defines the architectural behavior of every real A16 instruction. Assembly-only pseudo-instructions are defined separately in the [A16 assembly reference](../../asm/A16.md#pseudo-instructions).
 
 In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. The prefixes `imm`, `addr`, and `off` identify immediate values, absolute addresses, and offsets, while the numeric suffix gives the field width. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
 
@@ -392,7 +392,7 @@ POP rd                      // rd <- MEM[SP]
 
 The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
 
-Software must initialize `SP` and keep every stack access within its assigned memory region. AthenISA does not detect an empty stack, stack underflow, or stack overflow.
+Software must initialize `SP` and keep every stack access within its assigned memory region. A16 does not detect an empty stack, stack underflow, or stack overflow.
 
 ## Memory instructions
 

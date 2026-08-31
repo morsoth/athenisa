@@ -1,6 +1,6 @@
-# AthenISA Overview
+# A16 Overview
 
-This document introduces the architectural contract of AthenISA. The following chapters define the complete programmer-visible state, binary encoding, instruction behavior, and memory model.
+This document introduces the architectural contract of A16. The following chapters define the complete programmer-visible state, binary encoding, instruction behavior, and memory model.
 
 ## Architectural profile
 
@@ -13,7 +13,7 @@ This document introduces the architectural contract of AthenISA. The following c
 | Register operands | `R0` to `R6` and `SP` |
 | Instruction byte order | Little-endian |
 
-AthenISA uses separate instruction and data address spaces. An instruction address selects one 16-bit instruction word; a data address selects one 16-bit data word. The base ISA has no byte load, byte store, or unaligned access.
+A16 uses separate instruction and data address spaces. An instruction address selects one 16-bit instruction word; a data address selects one 16-bit data word. The base architecture has no byte load, byte store, or unaligned access.
 
 ## Specification chapters
 
@@ -25,4 +25,4 @@ AthenISA uses separate instruction and data address spaces. An instruction addre
 
 ## Implementation independence
 
-AthenISA does not prescribe how many cycles an instruction takes, whether the processor is pipelined or multicycle, how RAM is inferred, or when an external memory returns data. Such details do not change the architectural result of an instruction and belong to the processor implementation.
+A16 does not prescribe how many cycles an instruction takes, whether the processor is pipelined or multicycle, how RAM is inferred, or when an external memory returns data. Such details do not change the architectural result of an instruction and belong to the processor implementation.

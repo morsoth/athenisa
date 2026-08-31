@@ -9,8 +9,6 @@ Visual Studio Code language support for AthenISA `.athe` assembly files.
 - Line comments beginning with `;`
 - Bracket and parenthesis matching
 
-The extension recognizes registers from `R0` to `R7` and decimal, hexadecimal, and binary numbers.
-
 ## Installation
 
 When available from the Visual Studio Marketplace, install `AthenISA Language Support` from the Extensions view in Visual Studio Code.

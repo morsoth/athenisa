@@ -1,6 +1,6 @@
 # AthenISA
 
-AthenISA is the 16-bit Instruction Set Architecture (ISA) implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor core. It is a compact, fixed-width ISA designed for a small multicycle implementation, FPGA use, and educational CPU development.
+AthenISA is a family of compact, fixed-width Instruction Set Architectures (ISA) designed for small multicycle implementations, FPGA use, and educational CPU development. The A16 base architecture is implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor.
 
 This repository is the source of truth for the programmer-visible architecture, assembly language, and reference tools.
 
@@ -13,18 +13,12 @@ This repository is the source of truth for the programmer-visible architecture, 
 | Diomedes | Programming language | `-` |
 | ArgOS | Operating system | `-` |
 
-## Summary
+## Architectures
 
-| Property | AthenISA |
-| --- | --- |
-| Instruction width | 16 bits |
-| Data width | 16 bits |
-| General-purpose registers | 7 (`R0` to `R6`) |
-| Stack pointer | `SP` |
-| Instruction address width | 11 bits |
-| Data address width | 16 bits |
-| Memory model | Separate instruction and data spaces, word-addressed |
-| Status flags | Zero, carry, negative, overflow (`Z`, `C`, `N`, `V`) |
+| Architecture | Status | Documentation |
+| --- | --- | --- |
+| A16 | Defined | [A16 overview](A16/spec/00_overview.md) |
+| A32 | In development | Architecture not yet specified |
 
 ## Documentation
 
@@ -38,7 +32,9 @@ Read the documents according to what you are trying to do:
 | [A16 instruction formats](A16/spec/03_instruction_formats.md) | Bit layout of every 16-bit instruction format |
 | [A16 instruction encoding](A16/spec/04_instruction_encoding.md) | Opcode and function-field assignments |
 | [A16 memory model](A16/spec/05_memory.md) | Address spaces, effective addresses, control-flow targets, and stack convention |
-| [Assembly syntax](asm/syntax.md) | Source syntax, literals, symbols, operands, and pseudo-instructions |
+| [Assembly syntax](asm/syntax.md) | Source structure, literals, symbols, expressions, and data declarations shared by all profiles |
+| [A16 assembly reference](asm/A16.md) | A16 registers, operands, ranges, pseudo-instructions, and accepted instruction forms |
+| [A32 assembly reference](asm/A32.md) | Status of the A32 assembly profile |
 | [Tool installation](tools/README.md) | Installing, running, and releasing the AthenISA command-line tools |
 | [Assembler guide](tools/assembler/README.md) | Assembler command line, outputs, diagnostics, and processing flow |
 | [Disassembler guide](tools/disassembler/README.md) | Disassembler command line, input formats, output, and limitations |
@@ -55,6 +51,7 @@ asm/                    Assembly-language syntax
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler
+tools/examples/         Example programs and generated outputs
 vscode/                 Visual Studio Code language support
 ```
 
@@ -63,7 +60,7 @@ vscode/                 Visual Studio Code language support
 From the `tools/` workspace, assemble a source program and disassemble the resulting hexadecimal image with:
 
 ```sh
-cargo run -p athenisa-asm -- examples/program.athe -o target/program
+cargo run -p athenisa-asm -- examples/original.athe -o target/program
 cargo run -p athenisa-dis -- target/program.hex
 ```
 

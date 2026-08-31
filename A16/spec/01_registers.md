@@ -1,4 +1,4 @@
-# AthenISA Registers
+# A16 Registers
 
 The processor exposes a compact architectural register set composed of seven general-purpose registers, the program counter, the stack pointer, and a flags register.
 

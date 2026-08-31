@@ -1,6 +1,6 @@
-# AthenISA Memory and Addressing
+# A16 Memory and Addressing
 
-AthenISA uses separate instruction and data address spaces. Both spaces are word-addressed and contain 16-bit words.
+A16 uses separate instruction and data address spaces. Both spaces are word-addressed and contain 16-bit words.
 
 | Property | Instruction memory | Data memory |
 | --- | --- | --- |
@@ -13,7 +13,7 @@ AthenISA uses separate instruction and data address spaces. Both spaces are word
 
 Both memory spaces are word-addressed: each address refers to one complete 16-bit word. For example, address `0x0000` selects the first word and address `0x0001` selects the second word; addresses do not identify individual bytes.
 
-The instruction space is read-only from the perspective of AthenISA instructions. Loading a program into it is a platform responsibility performed before normal execution or through an external programming interface.
+The instruction space is read-only from the perspective of A16 instructions. Loading a program into it is a platform responsibility performed before normal execution or through an external programming interface.
 
 ## Data memory addressing
 
@@ -34,7 +34,7 @@ LOAD  R1, 4[R2]             ; load from address R2 + 4
 STORE -1[R6], R3            ; store at address R6 - 1
 ```
 
-The source-language shorthand for a zero offset is defined in [`asm/syntax.md`](../../asm/syntax.md#memory-operands).
+The source-language shorthand for a zero offset is defined in the [A16 assembly reference](../../asm/A16.md#memory-operands).
 
 ## Instruction memory addressing
 
@@ -107,11 +107,11 @@ SP = SP + 1
 
 Stack entries are untyped. Software must balance any `PUSH` operations performed after a `CALL` with corresponding `POP` operations before executing `RET`.
 
-AthenISA does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `CALLR`, `RET`, `PUSH`, or `POP` to access any data-memory address.
+A16 does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `CALLR`, `RET`, `PUSH`, or `POP` to access any data-memory address.
 
 ## Byte order and serialized programs
 
-AthenISA uses little-endian byte order. Base-ISA memory accesses transfer complete 16-bit words, so byte order is not observable through `LOAD` or `STORE`.
+A16 uses little-endian byte order. Base-architecture memory accesses transfer complete 16-bit words, so byte order is not observable through `LOAD` or `STORE`.
 
 When the assembler generates a raw `.bin` file, it serializes each 16-bit instruction in little-endian order: the low byte is written first, followed by the high byte. Text `.hex` files represent complete 16-bit words and therefore have no byte-order ambiguity. The exact output formats are documented in the [assembler guide](../../tools/assembler/README.md#output-files).
 

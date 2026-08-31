@@ -1,6 +1,6 @@
-# AthenISA Instruction Formats
+# A16 Instruction Formats
 
-All AthenISA instructions are 16-bit wide. Bits are numbered from 15, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `15:11`.
+All A16 instructions are 16-bit wide. Bits are numbered from 15, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `15:11`.
 
 Fields named `reserved` must be zero in a canonical encoding.
 
