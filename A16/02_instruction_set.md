@@ -2,7 +2,7 @@
 
 This chapter defines the architectural behavior of every real A16 instruction. Assembly-only pseudo-instructions are defined separately in the [A16 assembly reference](../asm/A16.md#pseudo-instructions).
 
-In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. The prefixes `imm`, `addr`, and `off` identify immediate values, absolute addresses, and offsets, while the numeric suffix gives the field width. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
+In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. `imm` identifies an encoded immediate field, while its numeric suffix gives the field width. Each instruction defines whether that field represents a value, an address, or an offset. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
 
 By default the `FLAGS` register is unchanged.
 
@@ -264,7 +264,7 @@ SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 `JMP` transfers execution to an absolute 11-bit instruction address.
 
 ```text
-JMP addr11                  // PC <- addr11
+JMP imm11                   // PC <- imm11
 ```
 
 ### JMPR
@@ -280,7 +280,7 @@ JMPR rs                     // PC <- rs[10:0]
 `BRA` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-BRA off11                  // PC <- PC + 1 + sext(off11)
+BRA imm11                   // PC <- PC + 1 + sext(imm11)
 ```
 
 ### BEQ
@@ -288,8 +288,8 @@ BRA off11                  // PC <- PC + 1 + sext(off11)
 `BEQ` branches when the zero flag is set.
 
 ```text
-BEQ off11                   // if Z = 1
-                            // then PC <- PC + 1 + sext(off11)
+BEQ imm11                   // if Z = 1
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 ### BNE
@@ -297,8 +297,8 @@ BEQ off11                   // if Z = 1
 `BNE` branches when the zero flag is clear.
 
 ```text
-BNE off11                   // if Z = 0
-                            // then PC <- PC + 1 + sext(off11)
+BNE imm11                   // if Z = 0
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 ### BLT
@@ -306,8 +306,8 @@ BNE off11                   // if Z = 0
 `BLT` branches when the previous comparison indicates signed less than.
 
 ```text
-BLT off11                   // if (N xor V) = 1
-                            // then PC <- PC + 1 + sext(off11)
+BLT imm11                   // if (N xor V) = 1
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 ### BGE
@@ -315,8 +315,8 @@ BLT off11                   // if (N xor V) = 1
 `BGE` branches when the previous comparison indicates signed greater than or equal.
 
 ```text
-BGE off11                   // if (N xor V) = 0
-                            // then PC <- PC + 1 + sext(off11)
+BGE imm11                   // if (N xor V) = 0
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 ### BLTU
@@ -324,8 +324,8 @@ BGE off11                   // if (N xor V) = 0
 `BLTU` branches when the previous comparison indicates unsigned less than.
 
 ```text
-BLTU off11                  // if C = 0
-                            // then PC <- PC + 1 + sext(off11)
+BLTU imm11                  // if C = 0
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 ### BGEU
@@ -333,8 +333,8 @@ BLTU off11                  // if C = 0
 `BGEU` branches when the previous comparison indicates unsigned greater than or equal.
 
 ```text
-BGEU off11                  // if C = 1
-                            // then PC <- PC + 1 + sext(off11)
+BGEU imm11                  // if C = 1
+                            // then PC <- PC + 1 + sext(imm11)
 ```
 
 > [!NOTE]
@@ -347,9 +347,9 @@ BGEU off11                  // if C = 1
 `CALL` stores the sequential return address on the stack and transfers execution to an absolute 11-bit instruction address.
 
 ```text
-CALL addr11                 // SP <- SP - 1
+CALL imm11                  // SP <- SP - 1
                             // MEM[SP] <- PC + 1
-                            // PC <- addr11
+                            // PC <- imm11
 ```
 
 ### CALLR
@@ -401,7 +401,7 @@ Software must initialize `SP` and keep every stack access within its assigned me
 `LOAD` reads one 16-bit word from data memory into the destination register.
 
 ```text
-LOAD rd, off5[rb]           // rd <- MEM[rb + sext(off5)]
+LOAD rd, imm5[rb]           // rd <- MEM[rb + sext(imm5)]
 ```
 
 ### STORE
@@ -409,5 +409,5 @@ LOAD rd, off5[rb]           // rd <- MEM[rb + sext(off5)]
 `STORE` writes one 16-bit source-register value to data memory.
 
 ```text
-STORE off5[rb], rs          // MEM[rb + sext(off5)] <- rs
+STORE imm5[rb], rs          // MEM[rb + sext(imm5)] <- rs
 ```

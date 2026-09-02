@@ -17,10 +17,10 @@ The instruction space is read-only from the perspective of A16 instructions. Loa
 
 ## Data memory addressing
 
-`LOAD` and `STORE` calculate a data-memory address by adding the signed `off5` field to the base register `rb`:
+`LOAD` and `STORE` calculate a data-memory address by adding the signed `imm5` field to the base register `rb`:
 
 ```text
-d_addr = rb + sext(off5)
+d_addr = rb + sext(imm5)
 ```
 
 The offset is measured in 16-bit words and has a range of `-16` to `+15`.
@@ -42,13 +42,13 @@ The program counter (`PC`) contains the 11-bit word address of the current instr
 
 ### Absolute targets
 
-`JMP` and `CALL` contain an `addr11` field that directly replaces the program counter:
+`JMP` and `CALL` contain an `imm11` field that directly replaces the program counter:
 
 ```text
-PC = addr11
+PC = imm11
 ```
 
-Because `addr11` is 11 bits wide, these instructions can target any word in instruction memory.
+Because `imm11` is 11 bits wide, these instructions can target any word in instruction memory.
 
 ### Register targets
 
@@ -65,13 +65,13 @@ The upper five bits of the source register do not affect the target address.
 Relative branches contain a signed 11-bit offset from the instruction after the branch:
 
 ```text
-PC = PC + 1 + off11
+PC = PC + 1 + imm11
 ```
 
-The `off11` field has a signed range of `-1024` to `+1023` instructions. A positive offset branches forward and a negative offset branches backward.
+When used by a relative branch, the `imm11` field has a signed range of `-1024` to `+1023` instructions. A positive value branches forward and a negative value branches backward.
 
 > [!WARNING]
-> An `off11` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this offset also repeats while its condition remains satisfied.
+> An `imm11` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this value also repeats while its condition remains satisfied.
 
 The calculation uses 11-bit address arithmetic and therefore wraps at the instruction-memory boundary. For example, advancing beyond `0x7FF` continues from `0x000`.
 

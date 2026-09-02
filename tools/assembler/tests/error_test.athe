@@ -75,7 +75,7 @@
 ; LOAD R1, 0[]                       ; expected: missing base register
 ; LOAD R1, []                        ; expected: missing base register
 ; LOAD R1, 0[R2]x                    ; expected: memory operand must end with ']'
-; LOAD R1, 0 [R2]                    ; expected: wrong token count, spaces inside off5[rb] are not supported
+; LOAD R1, 0 [R2]                    ; expected: wrong token count, spaces inside imm5[rb] are not supported
 
 ; Invalid memory offsets and symbols
 ; STORE nope[R1], R2                 ; expected: undefined symbol

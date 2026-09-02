@@ -17,10 +17,10 @@ The instruction space is read-only from the perspective of A32 instructions. Loa
 
 ## Data memory addressing
 
-`LOAD` and `STORE` add the signed `off16` field to the base register `rb`:
+`LOAD` and `STORE` add the signed `imm16` field to the base register `rb`:
 
 ```text
-d_addr = rb + sext(off16)
+d_addr = rb + sext(imm16)
 ```
 
 The offset is measured in 32-bit words and has a range from `-32,768` to `+32,767`. The calculation uses 32-bit wrapping arithmetic.
@@ -38,10 +38,10 @@ The program counter contains the 26-bit word address of the current instruction.
 
 ### Absolute targets
 
-`JMP` and `CALL` replace the program counter with their `addr26` field:
+`JMP` and `CALL` replace the program counter with their `imm26` field:
 
 ```text
-PC = addr26
+PC = imm26
 ```
 
 The field can target any word in instruction memory.
@@ -61,13 +61,13 @@ The upper six bits of the source register do not affect the target address.
 Relative branches add a signed 26-bit offset to the address of the following instruction:
 
 ```text
-PC = PC + 1 + off26
+PC = PC + 1 + imm26
 ```
 
-The `off26` field has a signed range from `-33,554,432` to `+33,554,431` instructions. The calculation uses 26-bit wrapping arithmetic.
+When used by a relative branch, the `imm26` field has a signed range from `-33,554,432` to `+33,554,431` instructions. The calculation uses 26-bit wrapping arithmetic.
 
 > [!WARNING]
-> An `off26` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. A taken conditional branch with the same offset also repeats while its condition remains satisfied.
+> An `imm26` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
 
 ## Stack
 

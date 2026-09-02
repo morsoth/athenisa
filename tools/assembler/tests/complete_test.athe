@@ -60,7 +60,7 @@ srl r6 r7 0b1010            ; 00110 110 111 0 1010
 SRA R1, R2, 1               ; 00111 001 010 0 0001
 sra r3 r4 0b1111            ; 00111 011 100 0 1111
 
-; Memory operands: signed off5 limits and normal cases
+; Memory operands: signed imm5 limits and normal cases
 LOAD R0, 0[R1]              ; 10010 000 001 00000
 LOAD R1, [R2]               ; 10010 001 010 00000
 LOAD R2, 15[R3]             ; 10010 010 011 01111

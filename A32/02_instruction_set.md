@@ -259,15 +259,15 @@ A five-bit shift amount represents every useful shift from 0 to 31 positions.
 `JMP` transfers execution to an absolute 26-bit instruction address.
 
 ```text
-JMP addr26                  // PC <- addr26
+JMP imm26                   // PC <- imm26
 ```
 
 ### JMPR
 
-`JMPR` transfers execution to the instruction address stored in a register. Only the low 26 bits of the register are used.
+`JMPR` transfers execution to the instruction address stored in a register.
 
 ```text
-JMPR rs                     // PC <- rs[25:0]
+JMPR rs                     // PC <- rs
 ```
 
 ### BRA
@@ -275,7 +275,7 @@ JMPR rs                     // PC <- rs[25:0]
 `BRA` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-BRA off26                   // PC <- PC + 1 + off26
+BRA imm26                   // PC <- PC + 1 + imm26
 ```
 
 ### BEQ
@@ -283,8 +283,8 @@ BRA off26                   // PC <- PC + 1 + off26
 `BEQ` branches when the zero flag is set.
 
 ```text
-BEQ off26                   // if Z = 1
-                            // then PC <- PC + 1 + off26
+BEQ imm26                   // if Z = 1
+                            // then PC <- PC + 1 + imm26
 ```
 
 ### BNE
@@ -292,8 +292,8 @@ BEQ off26                   // if Z = 1
 `BNE` branches when the zero flag is clear.
 
 ```text
-BNE off26                   // if Z = 0
-                            // then PC <- PC + 1 + off26
+BNE imm26                   // if Z = 0
+                            // then PC <- PC + 1 + imm26
 ```
 
 ### BLT
@@ -301,8 +301,8 @@ BNE off26                   // if Z = 0
 `BLT` branches when the previous comparison indicates signed less than.
 
 ```text
-BLT off26                   // if (N xor V) = 1
-                            // then PC <- PC + 1 + off26
+BLT imm26                   // if (N xor V) = 1
+                            // then PC <- PC + 1 + imm26
 ```
 
 ### BGE
@@ -310,8 +310,8 @@ BLT off26                   // if (N xor V) = 1
 `BGE` branches when the previous comparison indicates signed greater than or equal.
 
 ```text
-BGE off26                   // if (N xor V) = 0
-                            // then PC <- PC + 1 + off26
+BGE imm26                   // if (N xor V) = 0
+                            // then PC <- PC + 1 + imm26
 ```
 
 ### BLTU
@@ -319,8 +319,8 @@ BGE off26                   // if (N xor V) = 0
 `BLTU` branches when the previous comparison indicates unsigned less than.
 
 ```text
-BLTU off26                  // if C = 0
-                            // then PC <- PC + 1 + off26
+BLTU imm26                  // if C = 0
+                            // then PC <- PC + 1 + imm26
 ```
 
 ### BGEU
@@ -328,11 +328,11 @@ BLTU off26                  // if C = 0
 `BGEU` branches when the previous comparison indicates unsigned greater than or equal.
 
 ```text
-BGEU off26                  // if C = 1
-                            // then PC <- PC + 1 + off26
+BGEU imm26                  // if C = 1
+                            // then PC <- PC + 1 + imm26
 ```
 
-The `off26` field is interpreted as a signed two's-complement value. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
+The `imm26` field is interpreted as a signed two's-complement offset. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
 
 ## Stack instructions
 
@@ -341,9 +341,9 @@ The `off26` field is interpreted as a signed two's-complement value. `BGT`, `BLE
 `CALL` stores the sequential return address on the stack and transfers execution to an absolute 26-bit instruction address.
 
 ```text
-CALL addr26                 // SP <- SP - 1
+CALL imm26                  // SP <- SP - 1
                             // MEM[SP] <- zext(PC + 1)
-                            // PC <- addr26
+                            // PC <- imm26
 ```
 
 ### CALLR
@@ -351,10 +351,9 @@ CALL addr26                 // SP <- SP - 1
 `CALLR` stores the sequential return address on the stack and transfers execution to the instruction address stored in a register. The target is read before `SP` is modified.
 
 ```text
-CALLR rs                    // target <- rs[25:0]
-                            // SP <- SP - 1
+CALLR rs                    // SP <- SP - 1
                             // MEM[SP] <- zext(PC + 1)
-                            // PC <- target
+                            // PC <- rs
 ```
 
 ### RET
@@ -393,7 +392,7 @@ The register operand of `PUSH` or `POP` must be one of `R0` through `R30`. `PUSH
 `LOAD` reads one 32-bit word from data memory into the destination register.
 
 ```text
-LOAD rd, off16[rb]          // rd <- MEM[rb + sext(off16)]
+LOAD rd, imm16[rb]          // rd <- MEM[rb + sext(imm16)]
 ```
 
 ### STORE
@@ -401,5 +400,5 @@ LOAD rd, off16[rb]          // rd <- MEM[rb + sext(off16)]
 `STORE` writes one 32-bit source-register value to data memory.
 
 ```text
-STORE off16[rb], rs         // MEM[rb + sext(off16)] <- rs
+STORE imm16[rb], rs         // MEM[rb + sext(imm16)] <- rs
 ```

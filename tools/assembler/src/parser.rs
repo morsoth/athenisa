@@ -624,44 +624,44 @@ fn parse_instruction(line: &str, pc: i32, symbols: &Symbols) -> Result<Vec<Instr
             vec![Instruction::Sra { rd, rs, imm4 }]
         }
         "LOAD" => {
-            let (rd, rb, off5) = parse_load(&parts, symbols)?;
-            vec![Instruction::Load { rd, rb, off5 }]
+            let (rd, rb, imm5) = parse_load(&parts, symbols)?;
+            vec![Instruction::Load { rd, rb, imm5 }]
         }
         "STORE" => {
-            let (rb, off5, rs) = parse_store(&parts, symbols)?;
-            vec![Instruction::Store { rb, off5, rs }]
+            let (rb, imm5, rs) = parse_store(&parts, symbols)?;
+            vec![Instruction::Store { rb, imm5, rs }]
         }
         "JMP" => {
-            let addr11 = parse_jump(&parts, symbols)?;
-            vec![Instruction::Jmp { addr11 }]
+            let imm11 = parse_jump(&parts, symbols)?;
+            vec![Instruction::Jmp { imm11 }]
         }
         "CALL" => {
-            let addr11 = parse_jump(&parts, symbols)?;
-            vec![Instruction::Call { addr11 }]
+            let imm11 = parse_jump(&parts, symbols)?;
+            vec![Instruction::Call { imm11 }]
         }
         "BEQ" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Beq { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Beq { imm11 }]
         }
         "BNE" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Bne { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Bne { imm11 }]
         }
         "BLT" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Blt { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Blt { imm11 }]
         }
         "BGT" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Bgt { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Bgt { imm11 }]
         }
         "BLE" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Ble { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Ble { imm11 }]
         }
         "BGE" => {
-            let off11 = parse_branch(&parts, pc, symbols)?;
-            vec![Instruction::Bge { off11 }]
+            let imm11 = parse_branch(&parts, pc, symbols)?;
+            vec![Instruction::Bge { imm11 }]
         }
         "LDI" => {
             expect_tokens(&parts, 3)?;
@@ -747,30 +747,30 @@ fn parse_load(parts: &[&str], symbols: &Symbols) -> Result<(Register, Register, 
     expect_tokens(parts, 3)?;
 
     let rd = parse_reg(parts[1])?;
-    let (rb, off5) = parse_mem_operand(parts[2], symbols)?;
+    let (rb, imm5) = parse_mem_operand(parts[2], symbols)?;
 
-    Ok((rd, rb, off5))
+    Ok((rd, rb, imm5))
 }
 
 fn parse_store(parts: &[&str], symbols: &Symbols) -> Result<(Register, i8, Register)> {
     expect_tokens(parts, 3)?;
 
-    let (rb, off5) = parse_mem_operand(parts[1], symbols)?;
+    let (rb, imm5) = parse_mem_operand(parts[1], symbols)?;
     let rs = parse_reg(parts[2])?;
 
-    Ok((rb, off5, rs))
+    Ok((rb, imm5, rs))
 }
 
 fn parse_jump(parts: &[&str], symbols: &Symbols) -> Result<u16> {
     expect_tokens(parts, 2)?;
 
-    parse_addr11(parts[1], symbols)
+    parse_unsigned_imm11(parts[1], symbols)
 }
 
 fn parse_branch(parts: &[&str], pc: i32, symbols: &Symbols) -> Result<i16> {
     expect_tokens(parts, 2)?;
 
-    parse_branch_off11(parts[1], pc, symbols)
+    parse_relative_imm11(parts[1], pc, symbols)
 }
 
 fn expect_tokens(parts: &[&str], expected: usize) -> Result<()> {
@@ -938,15 +938,15 @@ fn parse_imm4(text: &str, symbols: &Symbols) -> Result<u8> {
     Ok((value & 0xF) as u8)
 }
 
-fn parse_addr11(text: &str, symbols: &Symbols) -> Result<u16> {
+fn parse_unsigned_imm11(text: &str, symbols: &Symbols) -> Result<u16> {
     let value = parse_value(text, symbols)?;
 
-    warn_if_unsigned_truncates(value, 11, "addr11");
+    warn_if_unsigned_truncates(value, 11, "imm11");
 
     Ok((value & 0x7FF) as u16)
 }
 
-fn parse_branch_off11(text: &str, pc: i32, symbols: &Symbols) -> Result<i16> {
+fn parse_relative_imm11(text: &str, pc: i32, symbols: &Symbols) -> Result<i16> {
     let offset = if is_number(text) {
         parse_number(text)?
     } else {
@@ -955,7 +955,7 @@ fn parse_branch_off11(text: &str, pc: i32, symbols: &Symbols) -> Result<i16> {
         target - (pc + 1)
     };
 
-    warn_if_signed_truncates(offset, 11, "off11");
+    warn_if_signed_truncates(offset, 11, "imm11");
 
     Ok(cut_signed(offset, 11) as i16)
 }
@@ -983,7 +983,7 @@ fn parse_mem_operand(text: &str, symbols: &Symbols) -> Result<(Register, i8)> {
         parse_value(offset_text, symbols)?
     };
 
-    warn_if_signed_truncates(offset, 5, "off5");
+    warn_if_signed_truncates(offset, 5, "imm5");
 
     Ok((rb, cut_signed(offset, 5) as i8))
 }

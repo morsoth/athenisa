@@ -36,20 +36,20 @@ pub fn encode_instruction(instruction: Instruction) -> u16 {
         | Instruction::Srl { rd, rs, imm4 }
         | Instruction::Sra { rd, rs, imm4 } => encode_rri(instruction, rd, rs, imm4),
 
-        Instruction::Load { rd, rb, off5 } => encode_load(instruction, rd, rb, off5),
+        Instruction::Load { rd, rb, imm5 } => encode_load(instruction, rd, rb, imm5),
 
-        Instruction::Store { rb, off5, rs } => encode_store(instruction, rb, off5, rs),
+        Instruction::Store { rb, imm5, rs } => encode_store(instruction, rb, imm5, rs),
 
-        Instruction::Jmp { addr11 } | Instruction::Call { addr11 } => {
-            encode_addr11(instruction, addr11)
+        Instruction::Jmp { imm11 } | Instruction::Call { imm11 } => {
+            encode_unsigned_imm11(instruction, imm11)
         }
 
-        Instruction::Beq { off11 }
-        | Instruction::Bne { off11 }
-        | Instruction::Blt { off11 }
-        | Instruction::Bgt { off11 }
-        | Instruction::Ble { off11 }
-        | Instruction::Bge { off11 } => encode_off11(instruction, off11),
+        Instruction::Beq { imm11 }
+        | Instruction::Bne { imm11 }
+        | Instruction::Blt { imm11 }
+        | Instruction::Bgt { imm11 }
+        | Instruction::Ble { imm11 }
+        | Instruction::Bge { imm11 } => encode_signed_imm11(instruction, imm11),
     }
 }
 
@@ -103,38 +103,38 @@ pub fn decode_instruction(word: u16) -> Result<Instruction> {
             })
         }
         OP_JMP => Ok(Instruction::Jmp {
-            addr11: word & 0x07FF,
+            imm11: word & 0x07FF,
         }),
         OP_BEQ => Ok(Instruction::Beq {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_BNE => Ok(Instruction::Bne {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_BLT => Ok(Instruction::Blt {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_BGT => Ok(Instruction::Bgt {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_BLE => Ok(Instruction::Ble {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_BGE => Ok(Instruction::Bge {
-            off11: signed_field(word & 0x07FF, 11),
+            imm11: signed_field(word & 0x07FF, 11),
         }),
         OP_CALL => Ok(Instruction::Call {
-            addr11: word & 0x07FF,
+            imm11: word & 0x07FF,
         }),
         OP_RET => decode_no_operand(word, Instruction::Ret),
         OP_LOAD => Ok(Instruction::Load {
             rd: rd(word),
             rb: rs1(word),
-            off5: signed_field(word & 0x001F, 5) as i8,
+            imm5: signed_field(word & 0x001F, 5) as i8,
         }),
         OP_STORE => Ok(Instruction::Store {
             rb: rs1(word),
-            off5: signed_field(word & 0x001F, 5) as i8,
+            imm5: signed_field(word & 0x001F, 5) as i8,
             rs: rd(word),
         }),
         OP_ADDI => Ok(Instruction::Addi {
@@ -259,24 +259,24 @@ fn encode_rri(instruction: Instruction, rd: Register, rs: Register, imm4: u8) ->
     opcode(instruction) | (rd.encode() << 8) | (rs.encode() << 5) | imm4 as u16
 }
 
-fn encode_load(instruction: Instruction, rd: Register, rb: Register, off5: i8) -> u16 {
-    opcode(instruction) | (rd.encode() << 8) | (rb.encode() << 5) | encode_off5(off5)
+fn encode_load(instruction: Instruction, rd: Register, rb: Register, imm5: i8) -> u16 {
+    opcode(instruction) | (rd.encode() << 8) | (rb.encode() << 5) | encode_signed_imm5(imm5)
 }
 
-fn encode_store(instruction: Instruction, rb: Register, off5: i8, rs: Register) -> u16 {
-    opcode(instruction) | (rs.encode() << 8) | (rb.encode() << 5) | encode_off5(off5)
+fn encode_store(instruction: Instruction, rb: Register, imm5: i8, rs: Register) -> u16 {
+    opcode(instruction) | (rs.encode() << 8) | (rb.encode() << 5) | encode_signed_imm5(imm5)
 }
 
-fn encode_off5(off5: i8) -> u16 {
-    (off5 as i16 as u16) & 0x1F
+fn encode_signed_imm5(imm5: i8) -> u16 {
+    (imm5 as i16 as u16) & 0x1F
 }
 
-fn encode_addr11(instruction: Instruction, addr11: u16) -> u16 {
-    opcode(instruction) | (addr11 & 0x07FF)
+fn encode_unsigned_imm11(instruction: Instruction, imm11: u16) -> u16 {
+    opcode(instruction) | (imm11 & 0x07FF)
 }
 
-fn encode_off11(instruction: Instruction, off11: i16) -> u16 {
-    opcode(instruction) | ((off11 as u16) & 0x07FF)
+fn encode_signed_imm11(instruction: Instruction, imm11: i16) -> u16 {
+    opcode(instruction) | ((imm11 as u16) & 0x07FF)
 }
 
 fn rd(word: u16) -> Register {

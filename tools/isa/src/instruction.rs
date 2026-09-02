@@ -89,36 +89,36 @@ pub enum Instruction {
     Load {
         rd: Register,
         rb: Register,
-        off5: i8,
+        imm5: i8,
     },
     Store {
         rb: Register,
-        off5: i8,
+        imm5: i8,
         rs: Register,
     },
     Jmp {
-        addr11: u16,
+        imm11: u16,
     },
     Call {
-        addr11: u16,
+        imm11: u16,
     },
     Beq {
-        off11: i16,
+        imm11: i16,
     },
     Bne {
-        off11: i16,
+        imm11: i16,
     },
     Blt {
-        off11: i16,
+        imm11: i16,
     },
     Bgt {
-        off11: i16,
+        imm11: i16,
     },
     Ble {
-        off11: i16,
+        imm11: i16,
     },
     Bge {
-        off11: i16,
+        imm11: i16,
     },
 }
 

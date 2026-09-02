@@ -20,16 +20,16 @@ pub fn format_instruction(instruction: Instruction) -> String {
         Instruction::Sll { rd, rs, imm4 } => format_shift("SLL", rd, rs, imm4),
         Instruction::Srl { rd, rs, imm4 } => format_shift("SRL", rd, rs, imm4),
         Instruction::Sra { rd, rs, imm4 } => format_shift("SRA", rd, rs, imm4),
-        Instruction::Load { rd, rb, off5 } => format_load(rd, rb, off5),
-        Instruction::Store { rb, off5, rs } => format_store(rb, off5, rs),
-        Instruction::Jmp { addr11 } => format!("JMP 0x{addr11:03X}"),
-        Instruction::Call { addr11 } => format!("CALL 0x{addr11:03X}"),
-        Instruction::Beq { off11 } => format!("BEQ {off11}"),
-        Instruction::Bne { off11 } => format!("BNE {off11}"),
-        Instruction::Blt { off11 } => format!("BLT {off11}"),
-        Instruction::Bgt { off11 } => format!("BGT {off11}"),
-        Instruction::Ble { off11 } => format!("BLE {off11}"),
-        Instruction::Bge { off11 } => format!("BGE {off11}"),
+        Instruction::Load { rd, rb, imm5 } => format_load(rd, rb, imm5),
+        Instruction::Store { rb, imm5, rs } => format_store(rb, imm5, rs),
+        Instruction::Jmp { imm11 } => format!("JMP 0x{imm11:03X}"),
+        Instruction::Call { imm11 } => format!("CALL 0x{imm11:03X}"),
+        Instruction::Beq { imm11 } => format!("BEQ {imm11}"),
+        Instruction::Bne { imm11 } => format!("BNE {imm11}"),
+        Instruction::Blt { imm11 } => format!("BLT {imm11}"),
+        Instruction::Bgt { imm11 } => format!("BGT {imm11}"),
+        Instruction::Ble { imm11 } => format!("BLE {imm11}"),
+        Instruction::Bge { imm11 } => format!("BGE {imm11}"),
     }
 }
 
@@ -66,19 +66,19 @@ fn format_shift(op: &str, rd: Register, rs: Register, imm4: u8) -> String {
     )
 }
 
-fn format_load(rd: Register, rb: Register, off5: i8) -> String {
+fn format_load(rd: Register, rb: Register, imm5: i8) -> String {
     format!(
         "LOAD {}, {}[{}]",
         register_to_assembly(rd),
-        off5,
+        imm5,
         register_to_assembly(rb)
     )
 }
 
-fn format_store(rb: Register, off5: i8, rs: Register) -> String {
+fn format_store(rb: Register, imm5: i8, rs: Register) -> String {
     format!(
         "STORE {}[{}], {}",
-        off5,
+        imm5,
         register_to_assembly(rb),
         register_to_assembly(rs)
     )
