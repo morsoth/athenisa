@@ -14,11 +14,10 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `XOR` | `000010` | `010` | RRR |
 | `NOT` | `000010` | `011` | RR |
 | `LI` | `000011` | - | RI |
-| `LIH` | `000100` | - | UI |
-| `SLL` | `000101` | `000` | RSI |
-| `SRL` | `000101` | `001` | RSI |
-| `SRA` | `000101` | `010` | RSI |
-| Reserved | `000110`-`000111` | - | - |
+| `LIH` | `000100` | - | RI |
+| `SLL` | `000101` | - | RRI |
+| `SRL` | `000110` | - | RRI |
+| `SRA` | `000111` | - | RRI |
 | `JMP` | `001000` | - | Absolute jump |
 | `BRA` | `001001` | - | Relative branch |
 | `BEQ` | `001010` | - | Relative branch |
@@ -33,8 +32,8 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `CALLR` | `010010` | `001` | R |
 | `PUSH` | `010010` | `010` | R |
 | `POP` | `010010` | `011` | R |
-| `LOAD` | `010011` | - | Memory |
-| `STORE` | `010100` | - | Memory |
+| `LOAD` | `010011` | - | Load |
+| `STORE` | `010100` | - | Store |
 | `ADDI` | `010101` | - | RRI |
 | `SUBI` | `010110` | - | RRI |
 | `CMPI` | `010111` | - | RI |

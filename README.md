@@ -17,8 +17,8 @@ This repository is the source of truth for the programmer-visible architecture, 
 
 | Architecture | Status | Documentation |
 | --- | --- | --- |
-| A16 | Defined | [A16 documentation](A16/) |
-| A32 | In development | [A32 documentation](A32/) |
+| A16 | Defined | [A16 documentation](A16/README.md) |
+| A32 | In development | [A32 documentation](A32/README.md) |
 
 ## Documentation
 
@@ -26,8 +26,8 @@ Read the documents according to what you are trying to do:
 
 | Document | Purpose |
 | --- | --- |
-| [A16 documentation](A16/) | A16 specification chapters, extensions, and supported instructions |
-| [A32 documentation](A32/) | Current status of the A32 specification, extensions, and instruction set |
+| [A16 documentation](A16/README.md) | A16 specification chapters, extensions, and supported instructions |
+| [A32 documentation](A32/README.md) | Current status of the A32 specification, extensions, and instruction set |
 | [Assembly syntax](asm/syntax.md) | Source structure, literals, symbols, expressions, and data declarations shared by all profiles |
 | [A16 assembly reference](asm/A16.md) | A16 registers, operands, ranges, pseudo-instructions, and accepted instruction forms |
 | [A32 assembly reference](asm/A32.md) | Status of the A32 assembly profile |
@@ -45,7 +45,6 @@ asm/                    Assembly-language syntax
 tools/isa/              Shared instruction encoding library
 tools/assembler/        Reference assembler
 tools/disassembler/     Reference disassembler
-tools/examples/         Example programs and generated outputs
 vscode/                 Visual Studio Code language support
 ```
 

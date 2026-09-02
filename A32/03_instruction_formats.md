@@ -55,30 +55,20 @@ For `JMPR`, `CALLR`, and `PUSH`, `r` is a source register. For `POP`, `r` is a d
 
 ## Register-immediate (RI)
 
-Used by `LI` and `CMPI`.
+Used by `LI`, `LIH`, and `CMPI`.
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `r` | `25:21` | Destination or comparison register |
-| `imm21` | `20:0` | Unsigned 21-bit immediate |
-
-For `CMPI`, `r` is a source register and no register is written.
-
-## Upper immediate (UI)
-
-Used by `LIH`.
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination register |
+| `rd` | `25:21` | Destination or comparison register |
 | `reserved` | `20:16` | Reserved bits |
-| `imm16` | `15:0` | Upper-half immediate |
+| `imm16` | `15:0` | Unsigned 16-bit immediate |
+
+For `CMPI`, `rd` is only used as the first comparison operand and not as a destination register.
 
 ## Register-register-immediate (RRI)
 
-Used by `ADDI` and `SUBI`.
+Used by `SLL`, `SRL`, `SRA`, `ADDI`, and `SUBI`.
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -87,18 +77,7 @@ Used by `ADDI` and `SUBI`.
 | `rs` | `20:16` | Source register |
 | `imm16` | `15:0` | Unsigned 16-bit immediate |
 
-## Shift immediate (RSI)
-
-Used by `SLL`, `SRL`, and `SRA`.
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination register |
-| `rs` | `20:16` | Source register |
-| `reserved` | `15:8` | Reserved bits |
-| `imm5` | `7:3` | Shift amount |
-| `func` | `2:0` | Shift operation selector |
+Shift instructions accept values from `0` to `31`. Their `imm16` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
 
 ## Absolute jump
 
@@ -122,14 +101,25 @@ Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
 The target is `PC + 1 + off26`, calculated using 26-bit wrapping arithmetic.
 
-## Memory
+## Load
 
-Used by `LOAD` and `STORE`.
+Used by `LOAD`.
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `rd` or `rs` | `25:21` | Destination or source data register |
+| `rd` | `25:21` | Destination register |
+| `rb` | `20:16` | Base-address register |
+| `off16` | `15:0` | Signed data offset |
+
+## Store
+
+Used by `STORE`.
+
+| Field | Bits | Description |
+| --- | --- | --- |
+| `opcode` | `31:26` | Primary opcode |
+| `rs` | `25:21` | Source data register |
 | `rb` | `20:16` | Base-address register |
 | `off16` | `15:0` | Signed data offset |
 

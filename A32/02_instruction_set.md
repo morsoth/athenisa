@@ -28,10 +28,11 @@ MOV rd, rs                  // rd <- rs
 
 ### LI
 
-`LI` loads a zero-extended 21-bit immediate into the destination register.
+`LI` loads a 16-bit immediate into the lower half of the destination register and clears the upper half to zero.
 
 ```text
-LI rd, imm21                // rd <- zext(imm21)
+LI rd, imm16                // rd[15:0] <- imm16
+                            // rd[31:16] <- 0x0000
 ```
 
 ### LIH
@@ -42,7 +43,7 @@ LI rd, imm21                // rd <- zext(imm21)
 LIH rd, imm16               // rd[31:16] <- imm16
 ```
 
-`LI` followed by `LIH` can construct any 32-bit value. In this sequence, `LI` provides the low 16 bits and `LIH` provides the high 16 bits.
+`LI` followed by `LIH` can construct any 32-bit value. `LI` provides the low 16 bits and `LIH` provides the high 16 bits.
 
 ## Arithmetic and logic instructions
 
@@ -186,14 +187,14 @@ CMP rs1, rs2                // rs1 - rs2
 
 ### CMPI
 
-`CMPI` compares a register with a zero-extended 21-bit immediate. The result is not written to the register file.
+`CMPI` compares a register with a zero-extended 16-bit immediate. The result is not written to the register file.
 
 ```text
-CMPI rs, imm21              // rs - zext(imm21)
+CMPI rs, imm16              // rs - zext(imm16)
 ```
 
 > [!NOTE]
-> `CMPI` uses `zext(imm21)` because comparisons against negative immediate values are expected to be less common. Zero extension provides an immediate range from 0 to 2,097,151. A negative value can still be loaded into a register and compared using `CMP`.
+> `CMPI` uses `zext(imm16)` because comparisons against negative immediate values are expected to be less common. Zero extension provides the full immediate range from 0 to 65,535. A negative value can still be loaded into a register and compared using `CMP`.
 
 | Flag | Value |
 | --- | --- |
