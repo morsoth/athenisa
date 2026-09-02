@@ -86,8 +86,7 @@ Used by `SLL`, `SRL`, and `SRA`.
 | `opcode` | `15:11` | Primary opcode |
 | `rd` | `10:8` | Destination register |
 | `rs` | `7:5` | Source register |
-| `reserved` | `4` | Reserved bits |
-| `imm4` | `3:0` | Shift amount |
+| `imm5` | `4:0` | Shift amount |
 
 ## Absolute jump
 

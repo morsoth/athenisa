@@ -214,11 +214,11 @@ CMPI rd, imm8               // rd - zext(imm8)
 `SLL` performs a logical left shift of the source register by an immediate amount.
 
 ```text
-SLL rd, rs, imm4            // rd <- rs << imm4
+SLL rd, rs, imm5            // rd <- rs << imm5
 ```
 
 > [!NOTE]
-> Shift instructions use only a 4-bit immediate because this is sufficient to encode all meaningful shift amounts in a 16-bit architecture. A 4-bit field allows values from 0 to 15, which covers the full useful shift range for a 16-bit operand.
+> Shift instructions use a 5-bit immediate with a range from 0 to 31. For shift amounts from 16 to 31, `SLL` and `SRL` produce zero, while `SRA` produces either `0x0000` or `0xFFFF` according to the original sign bit.
 
 | Flag | Value |
 | --- | --- |
@@ -232,7 +232,7 @@ SLL rd, rs, imm4            // rd <- rs << imm4
 `SRL` performs a logical right shift of the source register by an immediate amount.
 
 ```text
-SRL rd, rs, imm4            // rd <- zext(rs) >> imm4
+SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
 ```
 
 | Flag | Value |
@@ -247,7 +247,7 @@ SRL rd, rs, imm4            // rd <- zext(rs) >> imm4
 `SRA` performs an arithmetic right shift of the source register by an immediate amount.
 
 ```text
-SRA rd, rs, imm4            // rd <- sext(rs) >> imm4
+SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 ```
 
 | Flag | Value |
