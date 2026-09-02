@@ -13,30 +13,30 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `OR` | `000010` | `001` | RRR |
 | `XOR` | `000010` | `010` | RRR |
 | `NOT` | `000010` | `011` | RR |
-| `LI` | `000011` | - | RI |
-| `LIH` | `000100` | - | RI |
+| `LI` | `000011` | `000` | RI |
+| `LIH` | `000100` | `000` | RI |
 | `SLL` | `000101` | - | RRI |
 | `SRL` | `000110` | - | RRI |
 | `SRA` | `000111` | - | RRI |
-| `JMP` | `001000` | - | Absolute jump |
-| `BRA` | `001001` | - | Relative branch |
-| `BEQ` | `001010` | - | Relative branch |
-| `BNE` | `001011` | - | Relative branch |
-| `BLT` | `001100` | - | Relative branch |
-| `BGE` | `001101` | - | Relative branch |
-| `BLTU` | `001110` | - | Relative branch |
-| `BGEU` | `001111` | - | Relative branch |
-| `CALL` | `010000` | - | Absolute jump |
+| `JMP` | `001000` | - | I |
+| `BRA` | `001001` | - | I |
+| `BEQ` | `001010` | - | I |
+| `BNE` | `001011` | - | I |
+| `BLT` | `001100` | - | I |
+| `BGE` | `001101` | - | I |
+| `BLTU` | `001110` | - | I |
+| `BGEU` | `001111` | - | I |
+| `CALL` | `010000` | - | I |
 | `RET` | `010001` | - | No operand |
 | `JMPR` | `010010` | `000` | R |
 | `CALLR` | `010010` | `001` | R |
 | `PUSH` | `010010` | `010` | R |
 | `POP` | `010010` | `011` | R |
-| `LOAD` | `010011` | - | Load |
-| `STORE` | `010100` | - | Store |
+| `LOAD` | `010011` | - | RRI |
+| `STORE` | `010100` | - | RRI |
 | `ADDI` | `010101` | - | RRI |
 | `SUBI` | `010110` | - | RRI |
-| `CMPI` | `010111` | - | RI |
+| `CMPI` | `010111` | `000` | RI |
 | Reserved | `011xxx` | - | - |
 | Reserved | `1xxxxx` | - | - |
 

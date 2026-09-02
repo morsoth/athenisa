@@ -16,22 +16,22 @@
 | `SLL` | `00101` | - | RRI |
 | `SRL` | `00110` | - | RRI |
 | `SRA` | `00111` | - | RRI |
-| `JMP` | `01000` | - | Absolute jump |
-| `BRA` | `01001` | - | Relative branch |
-| `BEQ` | `01010` | - | Relative branch |
-| `BNE` | `01011` | - | Relative branch |
-| `BLT` | `01100` | - | Relative branch |
-| `BGE` | `01101` | - | Relative branch |
-| `BLTU` | `01110` | - | Relative branch |
-| `BGEU` | `01111` | - | Relative branch |
-| `CALL` | `10000` | - | Absolute jump |
+| `JMP` | `01000` | - | I |
+| `BRA` | `01001` | - | I |
+| `BEQ` | `01010` | - | I |
+| `BNE` | `01011` | - | I |
+| `BLT` | `01100` | - | I |
+| `BGE` | `01101` | - | I |
+| `BLTU` | `01110` | - | I |
+| `BGEU` | `01111` | - | I |
+| `CALL` | `10000` | - | I |
 | `RET` | `10001` | - | No operand |
 | `JMPR` | `10010` | `00` | R |
 | `CALLR` | `10010` | `01` | R |
 | `PUSH` | `10010` | `10` | R |
 | `POP` | `10010` | `11` | R |
-| `LOAD` | `10011` | - | Load |
-| `STORE` | `10100` | - | Store |
+| `LOAD` | `10011` | - | RRI |
+| `STORE` | `10100` | - | RRI |
 | `ADDI` | `10101` | - | RI |
 | `SUBI` | `10110` | - | RI |
 | `CMPI` | `10111` | - | RI |

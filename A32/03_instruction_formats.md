@@ -70,77 +70,46 @@ Used by `LI`, `LIH`, and `CMPI`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination or comparison register |
-| `reserved` | `20:16` | Reserved bits |
-| `imm16` | `15:0` | Unsigned 16-bit immediate |
+| `func` | `25:23` | Secondary operation selector |
+| `r` | `22:18` | Register operand |
+| `reserved` | `17:16` | Reserved bits |
+| `imm` | `15:0` | Immediate field |
 
-For `CMPI`, `rd` is only used as the first comparison operand and not as a destination register.
+For `LI` and `LIH`, `r` is the destination register. For `CMPI`, it is a source register and no register is written.
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, `SRA`, `ADDI`, and `SUBI`.
+Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LOAD`, and `STORE`.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination register |
-| `rs` | `20:16` | Source register |
-| `imm16` | `15:0` | Unsigned 16-bit immediate |
+| `r1` | `25:21` | First register operand |
+| `r2` | `20:16` | Second register operand |
+| `imm` | `15:0` | Immediate field |
 
-Shift instructions accept values from `0` to `31`. Their `imm16` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
+| Instructions | `r1` | `r2` | `imm` |
+| --- | --- | --- | --- |
+| `ADDI`, `SUBI` | Destination | Source | Immediate value |
+| `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
+| `LOAD` | Destination | Base address | Data offset |
+| `STORE` | Source data | Base address | Data offset |
 
-## Absolute jump
+Shift instructions accept values from `0` to `31`. Their `imm` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
 
-Used by `JMP` and `CALL`.
+## Immediate (I)
 
-![Absolute-jump instruction format](imgs/abs_jumps.png)
+Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `addr26` | `25:0` | Absolute instruction address |
-
-The field spans the complete `2^26`-word instruction address space.
-
-## Relative branch
-
-Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
-
-![Relative-branch instruction format](imgs/rel_jumps.png)
+![Immediate instruction format](imgs/i.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `off26` | `25:0` | Signed PC-relative instruction offset |
+| `imm` | `25:0` | Immediate field |
 
-The target is `PC + 1 + off26`, calculated using 26-bit wrapping arithmetic.
-
-## Load
-
-Used by `LOAD`.
-
-![Load instruction format](imgs/load.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination register |
-| `rb` | `20:16` | Base-address register |
-| `off16` | `15:0` | Signed data offset |
-
-## Store
-
-Used by `STORE`.
-
-![Store instruction format](imgs/store.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `rs` | `25:21` | Source data register |
-| `rb` | `20:16` | Base-address register |
-| `off16` | `15:0` | Signed data offset |
+For `JMP` and `CALL`, `imm` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
 
 `opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

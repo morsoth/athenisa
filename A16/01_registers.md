@@ -18,7 +18,7 @@ Every encoded register field is three bits wide.
 `PC` is an 11-bit register containing the address of the current instruction.
 
 > [!NOTE]
-> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an [absolute jump](03_instruction_formats.md#absolute-jump) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
+> `PC` is 11 bits wide because instruction memory contains `2^11 = 2048` words. This allows an absolute jump encoded with the [I format](03_instruction_formats.md#immediate-i) to reach every instruction-memory address using the 11-bit field encoded in the instruction.
 
 Sequential execution advances `PC` by one. `PC` is not directly addressable by the general register fields.
 

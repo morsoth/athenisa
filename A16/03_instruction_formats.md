@@ -69,76 +69,42 @@ Used by `LI`, `LIH`, `ADDI`, `SUBI`, and `CMPI`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination and first operand register |
-| `imm8` | `7:0` | Unsigned 8-bit immediate |
+| `r` | `10:8` | Register operand |
+| `imm` | `7:0` | Immediate field |
 
-
-For `CMPI`, `rd` is only used as the first comparison operand and not as a destination register.
+For `LI` and `LIH`, `r` is the destination register. For `ADDI` and `SUBI`, it is both the source and destination. For `CMPI`, it is a source register and no register is written.
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, and `SRA`.
+Used by `SLL`, `SRL`, `SRA`, `LOAD`, and `STORE`.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination register |
-| `rs` | `7:5` | Source register |
-| `imm5` | `4:0` | Shift amount |
+| `r1` | `10:8` | First register operand |
+| `r2` | `7:5` | Second register operand |
+| `imm` | `4:0` | Immediate field |
 
-## Absolute jump
+| Instructions | `r1` | `r2` | `imm` |
+| --- | --- | --- | --- |
+| `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
+| `LOAD` | Destination | Base address | Data offset |
+| `STORE` | Source data | Base address | Data offset |
 
-Used by `JMP` and `CALL`.
+## Immediate (I)
 
-![Absolute jump instruction format](imgs/abs_jumps.png)
+Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `15:11` | Primary opcode |
-| `addr11` | `10:0` | Absolute instruction address |
-
-The field spans the complete 2048-word instruction address space.
-
-## Relative branch
-
-Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
-
-![Relative branch instruction format](imgs/rel_jumps.png)
+![Immediate instruction format](imgs/i.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `off11` | `10:0` | PC-relative instruction offset |
+| `imm` | `10:0` | Immediate field |
 
-`BRA` always targets `PC + 1 + sext(off11)`. A conditional branch uses the same target when its condition is satisfied.
-
-## Load
-
-Used by `LOAD`.
-
-![Load instruction format](imgs/load.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination register |
-| `rb` | `7:5` | Base-address register |
-| `off5` | `4:0` | Data offset |
-
-## Store
-
-Used by `STORE`.
-
-![Store instruction format](imgs/store.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `15:11` | Primary opcode |
-| `rs` | `10:8` | Source data register |
-| `rb` | `7:5` | Base-address register |
-| `off5` | `4:0` | Data offset |
+For `JMP` and `CALL`, `imm` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
 
 ---
 
