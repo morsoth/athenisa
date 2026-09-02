@@ -24,10 +24,10 @@ Used by `ADD`, `SUB`, `AND`, `OR`, and `XOR`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination register |
-| `rs1` | `7:5` | First source register |
-| `rs2` | `4:2` | Second source register |
-| `func` | `1:0` | Secondary operation selector |
+| `func` | `10:9` | Secondary operation selector |
+| `rd` | `8:6` | Destination register |
+| `rs1` | `5:3` | First source register |
+| `rs2` | `2:0` | Second source register |
 
 ## Register-register (RR)
 
@@ -38,10 +38,10 @@ Used by `MOV`, `CMP`, and `NOT`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `rd` | `10:8` | Destination or first operand register |
-| `rs` | `7:5` | Source or second operand register |
-| `reserved` | `4:2` | Reserved bits |
-| `func` | `1:0` | Secondary operation selector |
+| `func` | `10:9` | Secondary operation selector |
+| `rd` | `8:6` | Destination or first operand register |
+| `rs` | `5:3` | Source or second operand register |
+| `reserved` | `2:0` | Reserved bits |
 
 For `CMP`, `rd` is the first comparison operand and no register is written.
 
@@ -49,12 +49,14 @@ For `CMP`, `rd` is the first comparison operand and no register is written.
 
 Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
 
+![Register instruction format](imgs/r.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `r` | `10:8` | Register operand |
-| `reserved` | `7:2` | Reserved bits |
-| `func` | `1:0` | Secondary operation selector |
+| `func` | `10:9` | Secondary operation selector |
+| `r` | `8:6` | Register operand |
+| `reserved` | `5:0` | Reserved bits |
 
 For `JMPR`, `CALLR`, and `PUSH`, `r` is a source register. For `POP`, `r` is a destination register. The `111` encoding is illegal for `PUSH` and `POP` because both instructions modify `SP` implicitly.
 

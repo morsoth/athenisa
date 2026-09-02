@@ -8,6 +8,8 @@ Fields named `reserved` must be zero in a canonical encoding. The `func` field i
 
 Used by `NOP` and `RET`.
 
+![No-operand instruction format](imgs/no_op.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
@@ -17,26 +19,30 @@ Used by `NOP` and `RET`.
 
 Used by `ADD`, `SUB`, `AND`, `OR`, and `XOR`.
 
+![Register-register-register instruction format](imgs/rrr.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `rd` | `25:21` | Destination register |
-| `rs1` | `20:16` | First source register |
-| `rs2` | `15:11` | Second source register |
-| `reserved` | `10:3` | Reserved bits |
-| `func` | `2:0` | Secondary operation selector |
+| `func` | `25:23` | Secondary operation selector |
+| `rd` | `22:18` | Destination register |
+| `rs1` | `17:13` | First source register |
+| `rs2` | `12:8` | Second source register |
+| `reserved` | `7:0` | Reserved bits |
 
 ## Register-register (RR)
 
 Used by `MOV`, `CMP`, and `NOT`.
 
+![Register-register instruction format](imgs/rr.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `rd` or `rs1` | `25:21` | Destination or first operand register |
-| `rs` or `rs2` | `20:16` | Source or second operand register |
-| `reserved` | `15:3` | Reserved bits |
-| `func` | `2:0` | Secondary operation selector |
+| `func` | `25:23` | Secondary operation selector |
+| `rd` or `rs1` | `22:18` | Destination or first operand register |
+| `rs` or `rs2` | `17:13` | Source or second operand register |
+| `reserved` | `12:0` | Reserved bits |
 
 For `CMP`, both register fields are sources and no register is written.
 
@@ -44,18 +50,22 @@ For `CMP`, both register fields are sources and no register is written.
 
 Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
 
+![Register instruction format](imgs/r.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `r` | `25:21` | Register operand |
-| `reserved` | `20:3` | Reserved bits |
-| `func` | `2:0` | Secondary operation selector |
+| `func` | `25:23` | Secondary operation selector |
+| `r` | `22:18` | Register operand |
+| `reserved` | `17:0` | Reserved bits |
 
 For `JMPR`, `CALLR`, and `PUSH`, `r` is a source register. For `POP`, `r` is a destination register. Encoding `11111` is illegal for `PUSH` and `POP` because both instructions modify `SP` implicitly.
 
 ## Register-immediate (RI)
 
 Used by `LI`, `LIH`, and `CMPI`.
+
+![Register-immediate instruction format](imgs/ri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -70,6 +80,8 @@ For `CMPI`, `rd` is only used as the first comparison operand and not as a desti
 
 Used by `SLL`, `SRL`, `SRA`, `ADDI`, and `SUBI`.
 
+![Register-register-immediate instruction format](imgs/rri.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
@@ -83,6 +95,8 @@ Shift instructions accept values from `0` to `31`. Their `imm16` field therefore
 
 Used by `JMP` and `CALL`.
 
+![Absolute-jump instruction format](imgs/abs_jumps.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
@@ -93,6 +107,8 @@ The field spans the complete `2^26`-word instruction address space.
 ## Relative branch
 
 Used by `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+
+![Relative-branch instruction format](imgs/rel_jumps.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
@@ -105,6 +121,8 @@ The target is `PC + 1 + off26`, calculated using 26-bit wrapping arithmetic.
 
 Used by `LOAD`.
 
+![Load instruction format](imgs/load.png)
+
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
@@ -115,6 +133,8 @@ Used by `LOAD`.
 ## Store
 
 Used by `STORE`.
+
+![Store instruction format](imgs/store.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
