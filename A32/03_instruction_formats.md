@@ -73,7 +73,7 @@ Used by `LI`, `LIH`, and `CMPI`.
 | `func` | `25:23` | Secondary operation selector |
 | `r` | `22:18` | Register operand |
 | `reserved` | `17:16` | Reserved bits |
-| `imm` | `15:0` | Immediate field |
+| `imm16` | `15:0` | Immediate field |
 
 For `LI` and `LIH`, `r` is the destination register. For `CMPI`, it is a source register and no register is written.
 
@@ -88,16 +88,16 @@ Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LOAD`, and `STORE`.
 | `opcode` | `31:26` | Primary opcode |
 | `r1` | `25:21` | First register operand |
 | `r2` | `20:16` | Second register operand |
-| `imm` | `15:0` | Immediate field |
+| `imm16` | `15:0` | Immediate field |
 
-| Instructions | `r1` | `r2` | `imm` |
+| Instructions | `r1` | `r2` | `imm16` |
 | --- | --- | --- | --- |
 | `ADDI`, `SUBI` | Destination | Source | Immediate value |
 | `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
 | `LOAD` | Destination | Base address | Data offset |
 | `STORE` | Source data | Base address | Data offset |
 
-Shift instructions accept values from `0` to `31`. Their `imm` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
+Shift instructions accept values from `0` to `31`. Their `imm16` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
 
 ## Immediate (I)
 
@@ -108,8 +108,8 @@ Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `imm` | `25:0` | Immediate field |
+| `imm26` | `25:0` | Immediate field |
 
-For `JMP` and `CALL`, `imm` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
+For `JMP` and `CALL`, `imm26` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
 
 `opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

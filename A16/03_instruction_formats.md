@@ -70,7 +70,7 @@ Used by `LI`, `LIH`, `ADDI`, `SUBI`, and `CMPI`.
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
 | `r` | `10:8` | Register operand |
-| `imm` | `7:0` | Immediate field |
+| `imm8` | `7:0` | Immediate field |
 
 For `LI` and `LIH`, `r` is the destination register. For `ADDI` and `SUBI`, it is both the source and destination. For `CMPI`, it is a source register and no register is written.
 
@@ -85,9 +85,9 @@ Used by `SLL`, `SRL`, `SRA`, `LOAD`, and `STORE`.
 | `opcode` | `15:11` | Primary opcode |
 | `r1` | `10:8` | First register operand |
 | `r2` | `7:5` | Second register operand |
-| `imm` | `4:0` | Immediate field |
+| `imm5` | `4:0` | Immediate field |
 
-| Instructions | `r1` | `r2` | `imm` |
+| Instructions | `r1` | `r2` | `imm5` |
 | --- | --- | --- | --- |
 | `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
 | `LOAD` | Destination | Base address | Data offset |
@@ -102,9 +102,9 @@ Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `imm` | `10:0` | Immediate field |
+| `imm11` | `10:0` | Immediate field |
 
-For `JMP` and `CALL`, `imm` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
+For `JMP` and `CALL`, `imm11` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
 
 ---
 
