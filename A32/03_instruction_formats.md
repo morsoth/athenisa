@@ -2,53 +2,11 @@
 
 All A32 instructions are 32 bits wide. Bits are numbered from 31, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `31:26`.
 
-Fields named `reserved` must be zero in a canonical encoding. The `func` field is three bits wide and selects one operation within an opcode group.
-
-## No operand
-
-Used by `NOP` and `RET`.
-
-![No-operand instruction format](imgs/no_op.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `reserved` | `25:0` | Reserved bits |
-
-## Register-register-register (RRR)
-
-Used by `ADD`, `SUB`, `AND`, `OR`, and `XOR`.
-
-![Register-register-register instruction format](imgs/rrr.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `func` | `25:23` | Secondary operation selector |
-| `rd` | `22:18` | Destination register |
-| `rs1` | `17:13` | First source register |
-| `rs2` | `12:8` | Second source register |
-| `reserved` | `7:0` | Reserved bits |
-
-## Register-register (RR)
-
-Used by `MOV`, `CMP`, and `NOT`.
-
-![Register-register instruction format](imgs/rr.png)
-
-| Field | Bits | Description |
-| --- | --- | --- |
-| `opcode` | `31:26` | Primary opcode |
-| `func` | `25:23` | Secondary operation selector |
-| `rd` or `rs1` | `22:18` | Destination or first operand register |
-| `rs` or `rs2` | `17:13` | Source or second operand register |
-| `reserved` | `12:0` | Reserved bits |
-
-For `CMP`, both register fields are sources and no register is written.
+A format only defines the position and width of each encoded field. The definition of an instruction specifies how its register and immediate fields are used. Register fields and immediate bits not used by an instruction, along with fields named `reserved`, must be zero in a canonical encoding.
 
 ## Register (R)
 
-Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
+Used by instructions whose operands are all registers.
 
 ![Register instruction format](imgs/r.png)
 
@@ -56,10 +14,12 @@ Used by `JMPR`, `CALLR`, `PUSH`, and `POP`.
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
 | `func` | `25:23` | Secondary operation selector |
-| `r` | `22:18` | Register operand |
-| `reserved` | `17:0` | Reserved bits |
+| `rd` | `22:18` | Register field, normally the destination |
+| `rs1` | `17:13` | First source-register field |
+| `rs2` | `12:8` | Second source-register field |
+| `reserved` | `7:0` | Reserved bits |
 
-For `JMPR`, `CALLR`, and `PUSH`, `r` is a source register. For `POP`, `r` is a destination register. Encoding `11111` is illegal for `PUSH` and `POP` because both instructions modify `SP` implicitly.
+For three-register operations, all register fields are used as named. `MOV` and `NOT` use `rd` and `rs1`. `CMP` uses `rs1` and `rs2`, and does not use `rd`. `JMPR`, `CALLR`, and `PUSH` use `rs1`; `POP` uses `rd`.
 
 ## Register-immediate (RI)
 
@@ -70,38 +30,29 @@ Used by `LI`, `LIH`, and `CMPI`.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `func` | `25:23` | Secondary operation selector |
-| `r` | `22:18` | Register operand |
-| `reserved` | `17:16` | Reserved bits |
-| `imm16` | `15:0` | Immediate field |
+| `rd` | `25:21` | Register field |
+| `imm21` | `20:0` | Immediate field |
 
-For `LI` and `LIH`, `r` is the destination register. For `CMPI`, it is a source register and no register is written.
+`LI` and `LIH` use `rd` as a destination. `CMPI` uses the same field as a source register and does not write a register. Each instruction defines which bits of `imm21` are meaningful and how they affect the operation.
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LDW`, `STW`, `LDB`, and `STB`.
+Used by arithmetic-immediate, logic-immediate, shift, load, and store instructions.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `r1` | `25:21` | First register operand |
-| `r2` | `20:16` | Second register operand |
+| `rd` | `25:21` | Register field, normally the destination |
+| `rs` | `20:16` | Source or base-register field |
 | `imm16` | `15:0` | Immediate field |
 
-| Instructions | `r1` | `r2` | `imm16` |
-| --- | --- | --- | --- |
-| `ADDI`, `SUBI` | Destination | Source | Immediate value |
-| `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
-| `LDW`, `LDB` | Destination | Base address | Byte offset |
-| `STW`, `STB` | Source data | Base address | Byte offset |
-
-Shift instructions accept values from `0` to `31`. Their `imm16` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
+Arithmetic, logic, shift, and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. Each instruction defines whether `imm16` is a numeric operand, shift amount, or memory offset and how it is extended.
 
 ## Immediate (I)
 
-Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+Used by `JMP`, `CALL`, conditional branches, `NOP`, and `RET`.
 
 ![Immediate instruction format](imgs/i.png)
 
@@ -110,6 +61,6 @@ Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | `opcode` | `31:26` | Primary opcode |
 | `imm26` | `25:0` | Immediate field |
 
-For `JMP`, `CALL`, and conditional branches, `imm26` is a signed offset measured in instructions from the instruction that follows the control-flow instruction. The encoded value is shifted left by two when added to `PC`.
+Control-flow instructions interpret `imm26` as a signed offset measured in instructions. `NOP` and `RET` do not use the immediate, so `imm26` must be zero in their canonical encodings.
 
-`opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).
+`opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md). The interpretation of every immediate field is defined in [02_instruction_set.md](02_instruction_set.md).

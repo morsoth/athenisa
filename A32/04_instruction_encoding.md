@@ -1,20 +1,20 @@
 # A32 Instruction Encoding
 
-A32 uses a six-bit primary opcode and a three-bit function field where an opcode groups related operations. Opcode assignments intentionally follow the A16 ordering where practical, with a leading zero added to the corresponding five-bit A16 opcode.
+A32 uses a six-bit primary opcode. The `R` format also provides a three-bit `func` field so one opcode can group related register operations. Opcode assignments intentionally follow the A16 ordering where practical, with a leading zero added to the corresponding five-bit A16 opcode.
 
 | Instruction | `opcode` | `func` | Instruction format |
 | --- | --- | --- | --- |
-| `NOP` | `000000` | - | No operand |
-| `MOV` | `000001` | `000` | RR |
-| `ADD` | `000001` | `001` | RRR |
-| `SUB` | `000001` | `010` | RRR |
-| `CMP` | `000001` | `011` | RR |
-| `AND` | `000010` | `000` | RRR |
-| `OR` | `000010` | `001` | RRR |
-| `XOR` | `000010` | `010` | RRR |
-| `NOT` | `000010` | `011` | RR |
-| `LI` | `000011` | `000` | RI |
-| `LIH` | `000100` | `000` | RI |
+| `NOP` | `000000` | - | I |
+| `MOV` | `000001` | `000` | R |
+| `ADD` | `000001` | `001` | R |
+| `SUB` | `000001` | `010` | R |
+| `CMP` | `000001` | `011` | R |
+| `AND` | `000010` | `000` | R |
+| `OR` | `000010` | `001` | R |
+| `XOR` | `000010` | `010` | R |
+| `NOT` | `000010` | `011` | R |
+| `LI` | `000011` | - | RI |
+| `LIH` | `000100` | - | RI |
 | `SLL` | `000101` | - | RRI |
 | `SRL` | `000110` | - | RRI |
 | `SRA` | `000111` | - | RRI |
@@ -27,7 +27,7 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `BLTU` | `001110` | - | I |
 | `BGEU` | `001111` | - | I |
 | `CALL` | `010000` | - | I |
-| `RET` | `010001` | - | No operand |
+| `RET` | `010001` | - | I |
 | `JMPR` | `010010` | `000` | R |
 | `CALLR` | `010010` | `001` | R |
 | `PUSH` | `010010` | `010` | R |
@@ -36,11 +36,14 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `STW` | `010100` | - | RRI |
 | `ADDI` | `010101` | - | RRI |
 | `SUBI` | `010110` | - | RRI |
-| `CMPI` | `010111` | `000` | RI |
+| `CMPI` | `010111` | - | RI |
 | `LDB` | `011000` | - | RRI |
 | `STB` | `011001` | - | RRI |
-| Reserved | `01101x` | - | - |
-| Reserved | `0111xx` | - | - |
+| `ANDI` | `011010` | - | RRI |
+| `ORI` | `011011` | - | RRI |
+| `XORI` | `011100` | - | RRI |
+| Reserved | `011101` | - | - |
+| Reserved | `01111x` | - | - |
 | Reserved | `1xxxxx` | - | - |
 
 Unused `func` values within an assigned opcode group are reserved. A32 extensions allocate their instructions from the reserved opcode and function space without changing base instruction encodings.

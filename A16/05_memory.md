@@ -55,16 +55,16 @@ The register value must be divisible by two.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches encode a signed `imm11` offset measured in instructions. A16 shifts the offset left by one to convert it to a byte displacement:
+`JMP`, `CALL`, and conditional branches encode a signed `off11` measured in instructions. A16 shifts the offset left by one to convert it to a byte displacement:
 
 ```text
-PC = PC + 2 + (sext(imm11) << 1)
+PC = PC + 2 + (sext(off11) << 1)
 ```
 
 The encoded range is `-1024` to `+1023` instructions, equivalent to byte displacements from `-2048` to `+2046`. The calculation uses 16-bit wrapping arithmetic.
 
 > [!WARNING]
-> An `imm11` value of `-1` targets the control-flow instruction itself because `PC + 2 + (-1 << 1) = PC`. `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
+> An `off11` value of `-1` targets the control-flow instruction itself because `PC + 2 + (-1 << 1) = PC`. `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
 
 ## Stack
 

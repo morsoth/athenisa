@@ -2,7 +2,7 @@
 
 All A16 instructions are 16-bit wide. Bits are numbered from 15, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `15:11`.
 
-Fields named `reserved` must be zero in a canonical encoding.
+Fields named `reserved` or `res.` must be zero in a canonical encoding. The shorter `res.` label is used when a reserved field is three bits wide or less.
 
 ## No operand
 
@@ -41,7 +41,7 @@ Used by `MOV`, `CMP`, and `NOT`.
 | `func` | `10:9` | Secondary operation selector |
 | `rd` | `8:6` | Destination or first operand register |
 | `rs` | `5:3` | Source or second operand register |
-| `reserved` | `2:0` | Reserved bits |
+| `res.` | `2:0` | Reserved bits |
 
 For `CMP`, `rd` is the first comparison operand and no register is written.
 
@@ -76,7 +76,7 @@ For `LI` and `LIH`, `r` is the destination register. For `ADDI` and `SUBI`, it i
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, `SRA`, `LDW`, `STW`, `LDB`, and `STB`.
+Used by `SLL`, `SRL`, and `SRA`.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
@@ -87,24 +87,46 @@ Used by `SLL`, `SRL`, `SRA`, `LDW`, `STW`, `LDB`, and `STB`.
 | `r2` | `7:5` | Second register operand |
 | `imm5` | `4:0` | Immediate field |
 
-| Instructions | `r1` | `r2` | `imm5` |
-| --- | --- | --- | --- |
-| `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
-| `LDW`, `LDB` | Destination | Base address | Byte offset |
-| `STW`, `STB` | Source data | Base address | Byte offset |
+For all three shift instructions, `r1` is the destination, `r2` is the source, and `imm5` is the shift amount.
 
-## Immediate (I)
+## Load format
 
-Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+Used by `LDW` and `LDB`.
 
-![Immediate instruction format](imgs/i.png)
+![Load instruction format](imgs/load.png)
 
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `15:11` | Primary opcode |
-| `imm11` | `10:0` | Immediate field |
+| `rd` | `10:8` | Destination register |
+| `rb` | `7:5` | Base-address register |
+| `imm5` | `4:0` | Signed byte offset |
 
-For `JMP`, `CALL`, and conditional branches, `imm11` is a signed offset measured in instructions from the instruction that follows the control-flow instruction. The encoded value is shifted left by one when added to `PC`.
+## Store format
+
+Used by `STW` and `STB`.
+
+![Store instruction format](imgs/store.png)
+
+| Field | Bits | Description |
+| --- | --- | --- |
+| `opcode` | `15:11` | Primary opcode |
+| `rs` | `10:8` | Source register |
+| `rb` | `7:5` | Base-address register |
+| `imm5` | `4:0` | Signed byte offset |
+
+## Jump format
+
+Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+
+![Jump instruction format](imgs/jump.png)
+
+| Field | Bits | Description |
+| --- | --- | --- |
+| `opcode` | `15:11` | Primary opcode |
+| `off11` | `10:0` | Signed instruction offset |
+
+For `JMP`, `CALL`, and conditional branches, `off11` is measured from the instruction that follows the control-flow instruction. The encoded value is shifted left by one when added to `PC`.
 
 ---
 

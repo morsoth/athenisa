@@ -2,7 +2,7 @@
 
 This chapter defines the architectural behavior of every real A32 instruction. Assembly-only pseudo-instructions will be defined separately in the [A32 assembly reference](../asm/A32.md).
 
-In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. The prefixes `imm`, `addr`, and `off` identify immediate values, absolute addresses, and offsets, while the numeric suffix gives the field width. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
+In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. An `imm` operand is an immediate value, and its numeric suffix gives the number of meaningful bits for that instruction. Each instruction defines how the value is encoded and interpreted. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
 
 By default the `FLAGS` register is unchanged.
 
@@ -10,7 +10,7 @@ By default the `FLAGS` register is unchanged.
 
 ### NOP
 
-`NOP` performs no operation.
+`NOP` performs no operation. Its `imm26` field is zero.
 
 ```text
 NOP                         // does nothing
@@ -28,7 +28,7 @@ MOV rd, rs                  // rd <- rs
 
 ### LI
 
-`LI` loads a 16-bit immediate into the lower half of the destination register and clears the upper half to zero.
+`LI` loads a 16-bit immediate into the lower half of the destination register and clears the upper half to zero. Bits `20:16` of the encoded `imm21` field must be zero.
 
 ```text
 LI rd, imm16                // rd[15:0] <- imm16
@@ -37,7 +37,7 @@ LI rd, imm16                // rd[15:0] <- imm16
 
 ### LIH
 
-`LIH` loads a 16-bit immediate into the upper half of the destination register while leaving the lower half unchanged.
+`LIH` loads a 16-bit immediate into the upper half of the destination register while leaving the lower half unchanged. Bits `20:16` of the encoded `imm21` field must be zero.
 
 ```text
 LIH rd, imm16               // rd[31:16] <- imm16
@@ -125,6 +125,21 @@ AND rd, rs1, rs2            // rd <- rs1 & rs2
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `0` |
 
+### ANDI
+
+`ANDI` performs a bitwise AND between a source register and a zero-extended 16-bit immediate.
+
+```text
+ANDI rd, rs, imm16          // rd <- rs & zext(imm16)
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
 ### OR
 
 `OR` performs a bitwise OR between two source registers.
@@ -140,12 +155,42 @@ OR rd, rs1, rs2             // rd <- rs1 | rs2
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `0` |
 
+### ORI
+
+`ORI` performs a bitwise OR between a source register and a zero-extended 16-bit immediate.
+
+```text
+ORI rd, rs, imm16           // rd <- rs | zext(imm16)
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
 ### XOR
 
 `XOR` performs a bitwise XOR between two source registers.
 
 ```text
 XOR rd, rs1, rs2            // rd <- rs1 ^ rs2
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
+### XORI
+
+`XORI` performs a bitwise XOR between a source register and a zero-extended 16-bit immediate.
+
+```text
+XORI rd, rs, imm16          // rd <- rs ^ zext(imm16)
 ```
 
 | Flag | Value |
@@ -187,14 +232,14 @@ CMP rs1, rs2                // rs1 - rs2
 
 ### CMPI
 
-`CMPI` compares a register with a zero-extended 16-bit immediate. The result is not written to the register file.
+`CMPI` compares a register with a zero-extended 21-bit immediate. The result is not written to the register file.
 
 ```text
-CMPI rs, imm16              // rs - zext(imm16)
+CMPI rs, imm21              // rs - zext(imm21)
 ```
 
 > [!NOTE]
-> `CMPI` uses `zext(imm16)` because comparisons against negative immediate values are expected to be less common. Zero extension provides the full immediate range from 0 to 65,535. A negative value can still be loaded into a register and compared using `CMP`.
+> `CMPI` uses `zext(imm21)` because comparisons against negative immediate values are expected to be less common. Zero extension provides the full immediate range from 0 to 2,097,151. A negative value can still be loaded into a register and compared using `CMP`.
 
 | Flag | Value |
 | --- | --- |
@@ -204,6 +249,8 @@ CMPI rs, imm16              // rs - zext(imm16)
 | `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
 
 ## Shift instructions
+
+The shift amount occupies bits `4:0` of the encoded `imm16` field. Bits `15:5` must be zero, giving every shift instruction an effective `imm5` operand from 0 to 31.
 
 ### SLL
 
@@ -243,8 +290,6 @@ SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
 SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 ```
 
-A five-bit shift amount represents every useful shift from 0 to 31 positions.
-
 | Flag | Value |
 | --- | --- |
 | `Z` | `1` if the result is zero; otherwise `0` |
@@ -259,7 +304,7 @@ A five-bit shift amount represents every useful shift from 0 to 31 positions.
 `JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm26                   // PC <- PC + 4 + (imm26 << 2)
+JMP imm26                   // PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### JMPR
@@ -276,7 +321,7 @@ JMPR rs                     // PC <- rs
 
 ```text
 BEQ imm26                   // if Z = 1
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### BNE
@@ -285,7 +330,7 @@ BEQ imm26                   // if Z = 1
 
 ```text
 BNE imm26                   // if Z = 0
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### BLT
@@ -294,7 +339,7 @@ BNE imm26                   // if Z = 0
 
 ```text
 BLT imm26                   // if (N xor V) = 1
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### BGE
@@ -303,7 +348,7 @@ BLT imm26                   // if (N xor V) = 1
 
 ```text
 BGE imm26                   // if (N xor V) = 0
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### BLTU
@@ -312,7 +357,7 @@ BGE imm26                   // if (N xor V) = 0
 
 ```text
 BLTU imm26                  // if C = 0
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### BGEU
@@ -321,10 +366,10 @@ BLTU imm26                  // if C = 0
 
 ```text
 BGEU imm26                  // if C = 1
-                            // then PC <- PC + 4 + (imm26 << 2)
+                            // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
-The `imm26` field is interpreted as a signed two's-complement offset measured in instructions and is shifted left by two before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
+For these instructions, `imm26` is interpreted as a signed two's-complement offset measured in instructions and is shifted left by two before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
 
 ## Stack instructions
 
@@ -335,7 +380,7 @@ The `imm26` field is interpreted as a signed two's-complement offset measured in
 ```text
 CALL imm26                  // SP <- SP - 4
                             // MEM32[SP] <- PC + 4
-                            // PC <- PC + 4 + (imm26 << 2)
+                            // PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
 ### CALLR
@@ -350,7 +395,7 @@ CALLR rs                    // SP <- SP - 4
 
 ### RET
 
-`RET` restores the program counter from the top stack word and then removes that entry.
+`RET` restores the program counter from the top stack word and then removes that entry. Its `imm26` field is zero.
 
 ```text
 RET                         // PC <- MEM32[SP]

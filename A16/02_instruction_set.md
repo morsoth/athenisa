@@ -264,7 +264,7 @@ SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 `JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm11                   // PC <- PC + 2 + (imm11 << 1)
+JMP off11                   // PC <- PC + 2 + (off11 << 1)
 ```
 
 ### JMPR
@@ -280,8 +280,8 @@ JMPR rs                     // PC <- rs
 `BEQ` branches when the zero flag is set.
 
 ```text
-BEQ imm11                   // if Z = 1
-                            // then PC <- PC + 2 + (imm11 << 1)
+BEQ off11                   // if Z = 1
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 ### BNE
@@ -289,8 +289,8 @@ BEQ imm11                   // if Z = 1
 `BNE` branches when the zero flag is clear.
 
 ```text
-BNE imm11                   // if Z = 0
-                            // then PC <- PC + 2 + (imm11 << 1)
+BNE off11                   // if Z = 0
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 ### BLT
@@ -298,8 +298,8 @@ BNE imm11                   // if Z = 0
 `BLT` branches when the previous comparison indicates signed less than.
 
 ```text
-BLT imm11                   // if (N xor V) = 1
-                            // then PC <- PC + 2 + (imm11 << 1)
+BLT off11                   // if (N xor V) = 1
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 ### BGE
@@ -307,8 +307,8 @@ BLT imm11                   // if (N xor V) = 1
 `BGE` branches when the previous comparison indicates signed greater than or equal.
 
 ```text
-BGE imm11                   // if (N xor V) = 0
-                            // then PC <- PC + 2 + (imm11 << 1)
+BGE off11                   // if (N xor V) = 0
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 ### BLTU
@@ -316,8 +316,8 @@ BGE imm11                   // if (N xor V) = 0
 `BLTU` branches when the previous comparison indicates unsigned less than.
 
 ```text
-BLTU imm11                  // if C = 0
-                            // then PC <- PC + 2 + (imm11 << 1)
+BLTU off11                  // if C = 0
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 ### BGEU
@@ -325,12 +325,12 @@ BLTU imm11                  // if C = 0
 `BGEU` branches when the previous comparison indicates unsigned greater than or equal.
 
 ```text
-BGEU imm11                  // if C = 1
-                            // then PC <- PC + 2 + (imm11 << 1)
+BGEU off11                  // if C = 1
+                            // then PC <- PC + 2 + (off11 << 1)
 ```
 
 > [!NOTE]
-> Control-flow immediates are measured in instructions. A16 shifts `imm11` left by one before adding it to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
+> Control-flow offsets are measured in instructions. A16 shifts `off11` left by one before adding it to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
 
 ## Stack instructions
 
@@ -339,9 +339,9 @@ BGEU imm11                  // if C = 1
 `CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
-CALL imm11                  // SP <- SP - 2
+CALL off11                  // SP <- SP - 2
                             // MEM16[SP] <- PC + 2
-                            // PC <- PC + 2 + (imm11 << 1)
+                            // PC <- PC + 2 + (off11 << 1)
 ```
 
 ### CALLR

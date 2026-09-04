@@ -55,7 +55,7 @@ The register value must be divisible by four.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches encode a signed `imm26` offset measured in instructions. A32 shifts the offset left by two to convert it to a byte displacement:
+`JMP`, `CALL`, and conditional branches interpret `imm26` as a signed offset measured in instructions. A32 shifts the immediate left by two to convert it to a byte displacement:
 
 ```text
 PC = PC + 4 + (sext(imm26) << 2)
