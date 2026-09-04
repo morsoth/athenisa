@@ -30,7 +30,7 @@ The offset is measured in bytes and has a range from `-16` to `+15`. Address ari
 | `LDB` | Read 1 byte | Zero-extend the byte to 16 bits |
 | `STB` | Write 1 byte | Store `rs[7:0]` |
 
-Byte accesses accept any address. `LDW` and `STW` require an address divisible by two; a misaligned word access is illegal.
+Byte accesses accept any address. `LDW` and `STW` require an address divisible by two; any other effective address causes an illegal memory access.
 
 ```athe
 LDW R1, 4[R2]              ; read a word at R2 + 4 bytes
@@ -41,7 +41,7 @@ STB [R5], R0               ; write the low byte of R0 at R5
 
 ## Instruction addressing
 
-`PC` contains the 16-bit byte address of the current instruction. Every instruction occupies two bytes, so sequential execution advances from `PC` to `PC + 2`. A valid instruction address must be divisible by two; fetching from or transferring control to any other address is illegal.
+`PC` contains the 16-bit byte address of the current instruction. Every instruction occupies two bytes, so sequential execution advances from `PC` to `PC + 2`. A valid instruction address must be divisible by two; any other value is an illegal instruction address.
 
 ### Register targets
 
@@ -86,6 +86,8 @@ PC = MEM16[SP]
 SP = SP + 2
 ```
 
+Each `CALL` or `CALLR` creates its own return-address entry and `RET` consumes the most recent one. This stack-based mechanism supports nested and recursive calls without an architectural link register. Argument passing and preservation rules belong to a future ABI and are not defined by A16.
+
 `PUSH` and `POP` use the same convention:
 
 ```text
@@ -98,11 +100,11 @@ SP = SP + 2
 
 Stack entries are untyped. Software must balance values placed above a return address before executing `RET`. A16 does not track a stack base, limit, depth, or empty state, so software is responsible for alignment and for preventing stack underflow and overflow.
 
-## Program layout
+## Program placement
 
-The standard source layout places code at address `0x0000`. Data follows the complete code region at the next two-byte-aligned address. Selecting `.code` and `.data` multiple times changes source interpretation but does not create separate address spaces.
+The A16 architecture does not assign fixed addresses to code, data, or stacks. A platform, linker, or loader chooses their placement within the unified address space while respecting instruction and word alignment.
 
-The complete program, including code, initialized data, and reserved data, must fit in the 64 KiB address space.
+The reference assembler currently places code at address `0x0000` and data after the complete code region at the next two-byte-aligned address. This is a bare-metal tool convention described in the [assembly syntax](../asm/syntax.md#sections), not an architectural memory-map requirement. The complete loaded image must fit in the 64 KiB address space.
 
 ## Byte order and serialized programs
 

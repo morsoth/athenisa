@@ -233,14 +233,13 @@ CMP rs1, rs2                // rs1 - rs2
 
 ### CMPI
 
-`CMPI` compares a register with a zero-extended 8-bit immediate. The arithmetic result is not written to the register file.
+`CMPI` compares a register with a signed 8-bit immediate. The immediate is sign-extended to 16 bits and the arithmetic result is not written to the register file.
 
 ```text
-CMPI rs, imm8               // rs - zext(imm8)
+CMPI rs, imm8               // rs - sext(imm8)
 ```
 
-> [!NOTE]
-> `CMPI` uses `zext(imm8)` because comparisons against negative immediate values are expected to be less common. Zero extension gives the instruction the full unsigned immediate range from 0 to 255. A negative value can still be loaded into a register and compared using `CMP`.
+The valid immediate range is `-128` to `+127`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
 
 | Flag | Value |
 | --- | --- |
@@ -253,14 +252,26 @@ CMPI rs, imm8               // rs - zext(imm8)
 
 ### SLL
 
-`SLL` performs a logical left shift of the source register by an immediate amount.
+`SLL` performs a logical left shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SLL rd, rs, imm5            // rd <- rs << imm5
+SLL rd, rs1, rs2            // rd <- rs1 << rs2[3:0]
 ```
 
-> [!NOTE]
-> Shift instructions use a 5-bit immediate with a range from 0 to 31. For shift amounts from 16 to 31, `SLL` and `SRL` produce zero, while `SRA` produces either `0x0000` or `0xFFFF` according to the original sign bit.
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### SLLI
+
+`SLLI` performs a logical left shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+
+```text
+SLLI rd, rs, shamt4         // rd <- rs << shamt4
+```
 
 | Flag | Value |
 | --- | --- |
@@ -271,10 +282,25 @@ SLL rd, rs, imm5            // rd <- rs << imm5
 
 ### SRL
 
-`SRL` performs a logical right shift of the source register by an immediate amount.
+`SRL` performs a logical right shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
+SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[3:0]
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### SRLI
+
+`SRLI` performs a logical right shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+
+```text
+SRLI rd, rs, shamt4         // rd <- unsigned(rs) >> shamt4
 ```
 
 | Flag | Value |
@@ -286,10 +312,25 @@ SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
 
 ### SRA
 
-`SRA` performs an arithmetic right shift of the source register by an immediate amount.
+`SRA` performs an arithmetic right shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
+SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[3:0]
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### SRAI
+
+`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+
+```text
+SRAI rd, rs, shamt4         // rd <- signed(rs) >> shamt4
 ```
 
 | Flag | Value |
@@ -424,7 +465,7 @@ POP rd                      // rd <- MEM16[SP]
                             // SP <- SP + 2
 ```
 
-The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
+The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. The encodings for `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
 
 Software must initialize `SP` and keep every stack access within its assigned memory region. A16 does not detect an empty stack, stack underflow, or stack overflow.
 
@@ -462,4 +503,4 @@ LDB rd, imm5[rb]            // rd <- zext(MEM8[rb + sext(imm5)])
 STB imm5[rb], rs            // MEM8[rb + sext(imm5)] <- rs[7:0]
 ```
 
-Memory offsets are measured in bytes. Byte accesses accept any address, while `LDW` and `STW` are illegal when their effective address is not a multiple of two.
+Memory offsets are measured in bytes. Byte accesses accept any address, while an `LDW` or `STW` whose effective address is not a multiple of two performs an illegal memory access.

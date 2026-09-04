@@ -28,11 +28,10 @@ MOV rd, rs                  // rd <- rs
 
 ### LI
 
-`LI` loads a 16-bit immediate into the lower half of the destination register and clears the upper half to zero. Bits `20:16` of the encoded `imm21` field must be zero.
+`LI` loads a zero-extended 21-bit immediate into the destination register. Its valid range is `0` to `2,097,151`.
 
 ```text
-LI rd, imm16                // rd[15:0] <- imm16
-                            // rd[31:16] <- 0x0000
+LI rd, imm21                // rd <- zext(imm21)
 ```
 
 ### LIH
@@ -43,7 +42,7 @@ LI rd, imm16                // rd[15:0] <- imm16
 LIH rd, imm16               // rd[31:16] <- imm16
 ```
 
-`LI` followed by `LIH` can construct any 32-bit value. `LI` provides the low 16 bits and `LIH` provides the high 16 bits.
+`LI` can load any unsigned 21-bit value directly. `LI` followed by `LIH` can construct any 32-bit value because `LIH` replaces the high 16 bits while preserving the low 16 bits loaded by `LI`.
 
 ## Arithmetic and logic instructions
 
@@ -232,14 +231,13 @@ CMP rs1, rs2                // rs1 - rs2
 
 ### CMPI
 
-`CMPI` compares a register with a zero-extended 21-bit immediate. The result is not written to the register file.
+`CMPI` compares a register with a signed 21-bit immediate. The immediate is sign-extended to 32 bits and the result is not written to the register file.
 
 ```text
-CMPI rs, imm21              // rs - zext(imm21)
+CMPI rs, imm21              // rs - sext(imm21)
 ```
 
-> [!NOTE]
-> `CMPI` uses `zext(imm21)` because comparisons against negative immediate values are expected to be less common. Zero extension provides the full immediate range from 0 to 2,097,151. A negative value can still be loaded into a register and compared using `CMP`.
+The valid immediate range is `-1,048,576` to `+1,048,575`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
 
 | Flag | Value |
 | --- | --- |
@@ -250,14 +248,27 @@ CMPI rs, imm21              // rs - zext(imm21)
 
 ## Shift instructions
 
-The shift amount occupies bits `4:0` of the encoded `imm16` field. Bits `15:5` must be zero, giving every shift instruction an effective `imm5` operand from 0 to 31.
-
 ### SLL
 
-`SLL` performs a logical left shift of the source register by an immediate amount.
+`SLL` performs a logical left shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SLL rd, rs, imm5            // rd <- rs << imm5
+SLL rd, rs1, rs2            // rd <- rs1 << rs2[4:0]
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
+### SLLI
+
+`SLLI` performs a logical left shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+
+```text
+SLLI rd, rs, shamt5         // rd <- rs << shamt5
 ```
 
 | Flag | Value |
@@ -269,10 +280,25 @@ SLL rd, rs, imm5            // rd <- rs << imm5
 
 ### SRL
 
-`SRL` performs a logical right shift of the source register by an immediate amount.
+`SRL` performs a logical right shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
+SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[4:0]
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
+### SRLI
+
+`SRLI` performs a logical right shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+
+```text
+SRLI rd, rs, shamt5         // rd <- unsigned(rs) >> shamt5
 ```
 
 | Flag | Value |
@@ -284,10 +310,25 @@ SRL rd, rs, imm5            // rd <- zext(rs) >> imm5
 
 ### SRA
 
-`SRA` performs an arithmetic right shift of the source register by an immediate amount.
+`SRA` performs an arithmetic right shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
 
 ```text
-SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
+SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[4:0]
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `0` |
+
+### SRAI
+
+`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+
+```text
+SRAI rd, rs, shamt5         // rd <- signed(rs) >> shamt5
 ```
 
 | Flag | Value |
@@ -420,7 +461,7 @@ POP rd                      // rd <- MEM32[SP]
                             // SP <- SP + 4
 ```
 
-The register operand of `PUSH` or `POP` must be one of `R0` through `R30`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly. Software must initialize `SP` and keep every stack access within its assigned memory region.
+The register operand of `PUSH` or `POP` must be one of `R0` through `R30`. The encodings for `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly. Software must initialize `SP` and keep every stack access within its assigned memory region.
 
 ## Memory instructions
 
@@ -456,4 +497,4 @@ LDB rd, imm16[rb]           // rd <- zext(MEM8[rb + sext(imm16)])
 STB imm16[rb], rs           // MEM8[rb + sext(imm16)] <- rs[7:0]
 ```
 
-Memory offsets are measured in bytes. Byte accesses accept any address, while `LDW` and `STW` are illegal when their effective address is not a multiple of four.
+Memory offsets are measured in bytes. Byte accesses accept any address, while an `LDW` or `STW` whose effective address is not a multiple of four performs an illegal memory access.

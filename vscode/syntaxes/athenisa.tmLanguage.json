@@ -59,11 +59,11 @@
       "patterns": [
         {
           "name": "keyword.control.athe",
-          "match": "(?i:\\b(?:JMP|CALL|RET|BEQ|BNE|BLT|BGT|BLE|BGE)\\b)"
+          "match": "(?i:\\b(?:JMP|JMPR|CALL|CALLR|RET|BEQ|BNE|BLT|BGE|BLTU|BGEU)\\b)"
         },
         {
           "name": "keyword.other.instruction.athe",
-          "match": "(?i:\\b(?:NOP|MOV|ADD|SUB|CMP|AND|OR|XOR|NOT|LI|LIH|SLL|SRL|SRA|LOAD|STORE|ADDI|SUBI|CMPI)\\b)"
+          "match": "(?i:\\b(?:NOP|MOV|ADD|ADDI|SUB|SUBI|CMP|CMPI|AND|ANDI|OR|ORI|XOR|XORI|NOT|LI|LIH|SLL|SLLI|SRL|SRLI|SRA|SRAI|PUSH|POP|LDW|STW|LDB|STB)\\b)"
         }
       ]
     },
@@ -79,7 +79,7 @@
       "patterns": [
         {
           "name": "variable.language.register.athe",
-          "match": "(?i:\\bR[0-7]\\b)"
+          "match": "(?i:\\b(?:R(?:[0-9]|[12][0-9]|30)|SP)\\b)"
         }
       ]
     },

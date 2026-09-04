@@ -30,7 +30,7 @@ An extension only defines the state, instructions, formats, and encodings added 
 | Data movement | `MOV`, `LI`, `LIH` | |
 | Arithmetic and comparison | `ADD`, `ADDI`, `SUB`, `SUBI`, `CMP`, `CMPI` | |
 | Logic | `AND`, `ANDI`, `OR`, `ORI`, `XOR`, `XORI`, `NOT` | |
-| Shifts | `SLL`, `SRL`, `SRA` | |
+| Shifts | `SLL`, `SLLI`, `SRL`, `SRLI`, `SRA`, `SRAI` | |
 | Jumps and branches | `JMP`, `JMPR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
 | Stack and calls | `CALL`, `CALLR`, `RET`, `PUSH`, `POP` | |
 | Memory | `LDW`, `STW`, `LDB`, `STB` | |

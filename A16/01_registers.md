@@ -18,7 +18,7 @@ Every encoded register field is three bits wide.
 `PC` is a 16-bit register containing the byte address of the current instruction.
 
 > [!NOTE]
-> A16 instructions occupy two bytes, so every valid instruction address is a multiple of two. Loading any other value into `PC` is illegal.
+> A16 instructions occupy two bytes, so every valid instruction address is a multiple of two. Loading any other value into `PC` produces an illegal instruction address.
 
 Sequential execution advances `PC` by two. `PC` is not directly addressable by the general register fields.
 
@@ -47,8 +47,8 @@ Flag updates are grouped as follows:
 | --- | --- | --- | --- | --- |
 | `ADD`, `ADDI` | From result | Carry out | From result | Addition overflow |
 | `SUB`, `SUBI`, `CMP`, `CMPI` | From result | No borrow | From result | Subtraction overflow |
-| `AND`, `OR`, `XOR`, `NOT` | From result | `0` | From result | `0` |
-| `SLL`, `SRL`, `SRA` | From result | `0` | From result | `0` |
+| `AND`, `ANDI`, `OR`, `ORI`, `XOR`, `XORI`, `NOT` | From result | `0` | From result | `0` |
+| `SLL`, `SLLI`, `SRL`, `SRLI`, `SRA`, `SRAI` | From result | `0` | From result | `0` |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |
 
 `CMP` and `CMPI` calculate flags exactly like subtraction but do not write the subtraction result to the register file. Conditional branches read `Z`, `C`, `N`, and `V` as required to determine whether their branch condition is satisfied.

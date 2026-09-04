@@ -23,7 +23,7 @@ Blank lines and comments are ignored. A data declaration is the only statement t
 
 ## Sections
 
-AthenISA source represents code and data with the `.code` and `.data` sections.
+AthenISA source represents code and data with the `.code` and `.data` sections. Their placement described here is a convention of the reference assembler for simple bare-metal images, not a fixed memory layout required by the ISA.
 
 | Section | Accepted statements | Placement |
 | --- | --- | --- |
