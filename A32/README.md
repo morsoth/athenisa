@@ -11,7 +11,7 @@ A32 is the 32-bit base architecture of the AthenISA family. This page provides a
 | [02 - Instruction set](02_instruction_set.md) | Programmer-visible behavior of every base instruction |
 | [03 - Instruction formats](03_instruction_formats.md) | Bit fields used by each instruction format |
 | [04 - Instruction encoding](04_instruction_encoding.md) | Opcode and function assignments |
-| [05 - Memory](05_memory.md) | Address spaces, control-flow targets, data addressing, and stack behavior |
+| [05 - Memory](05_memory.md) | Unified address space, memory accesses, control-flow targets, and stack behavior |
 
 ## Extensions
 
@@ -34,6 +34,6 @@ An extension only defines the state, instructions, formats, and encodings added 
 | Shifts | `SLL`, `SRL`, `SRA` | |
 | Jumps and branches | `JMP`, `JMPR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
 | Stack and calls | `CALL`, `CALLR`, `RET`, `PUSH`, `POP` | |
-| Memory | `LOAD`, `STORE` | |
+| Memory | `LDW`, `STW`, `LDB`, `STB` | |
 
 Pseudo-instructions will be listed separately in the [A32 assembly reference](../asm/A32.md).

@@ -15,16 +15,16 @@ Every encoded register field is five bits wide.
 
 ## Program counter
 
-`PC` is a 26-bit register containing the address of the current instruction.
+`PC` is a 32-bit register containing the byte address of the current instruction.
 
 > [!NOTE]
-> `PC` is 26 bits wide because instruction memory contains `2^26` words. Its width matches the `imm26` field used by PC-relative control-flow instructions, so their target calculations use 26-bit wrapping arithmetic.
+> A32 instructions occupy four bytes, so every valid instruction address is a multiple of four. Loading any other value into `PC` is illegal.
 
-Sequential execution advances `PC` by one. `PC` is not directly addressable by the general register fields.
+Sequential execution advances `PC` by four. `PC` is not directly addressable by the general register fields.
 
 ## Stack pointer
 
-`SP` is a 32-bit register used both explicitly through register encoding `11111` and implicitly by `CALL`, `CALLR`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower data-memory addresses.
+`SP` is a 32-bit register used both explicitly through register encoding `11111` and implicitly by `CALL`, `CALLR`, `RET`, `PUSH`, and `POP`. The stack convention grows toward lower memory addresses.
 
 Software is responsible for initializing `SP`, assigning the valid stack region, and preventing stack overflow or underflow. The complete stack convention is defined in [05_memory.md](05_memory.md#stack).
 
@@ -60,8 +60,8 @@ The reset profile is:
 | State | Reset value |
 | --- | --- |
 | `R0` to `R30` | `0x00000000` |
-| `PC` | `0x0000000` |
+| `PC` | `0x00000000` |
 | `SP` | `0x00000000` |
 | `FLAGS` | `0000` |
 
-The reset value of `SP` does not establish a valid stack. Software must initialize it before executing stack instructions. Instruction and data memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.
+The reset value of `SP` does not establish a valid stack. Software must initialize it before executing stack instructions. Memory contents are not cleared by architectural reset. Program loading and memory initialization are platform responsibilities.

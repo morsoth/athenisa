@@ -32,12 +32,15 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `CALLR` | `010010` | `001` | R |
 | `PUSH` | `010010` | `010` | R |
 | `POP` | `010010` | `011` | R |
-| `LOAD` | `010011` | - | RRI |
-| `STORE` | `010100` | - | RRI |
+| `LDW` | `010011` | - | RRI |
+| `STW` | `010100` | - | RRI |
 | `ADDI` | `010101` | - | RRI |
 | `SUBI` | `010110` | - | RRI |
 | `CMPI` | `010111` | `000` | RI |
-| Reserved | `011xxx` | - | - |
+| `LDB` | `011000` | - | RRI |
+| `STB` | `011001` | - | RRI |
+| Reserved | `01101x` | - | - |
+| Reserved | `0111xx` | - | - |
 | Reserved | `1xxxxx` | - | - |
 
 Unused `func` values within an assigned opcode group are reserved. A32 extensions allocate their instructions from the reserved opcode and function space without changing base instruction encodings.

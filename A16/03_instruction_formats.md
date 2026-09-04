@@ -76,7 +76,7 @@ For `LI` and `LIH`, `r` is the destination register. For `ADDI` and `SUBI`, it i
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, `SRA`, `LOAD`, and `STORE`.
+Used by `SLL`, `SRL`, `SRA`, `LDW`, `STW`, `LDB`, and `STB`.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
@@ -90,8 +90,8 @@ Used by `SLL`, `SRL`, `SRA`, `LOAD`, and `STORE`.
 | Instructions | `r1` | `r2` | `imm5` |
 | --- | --- | --- | --- |
 | `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
-| `LOAD` | Destination | Base address | Data offset |
-| `STORE` | Source data | Base address | Data offset |
+| `LDW`, `LDB` | Destination | Base address | Byte offset |
+| `STW`, `STB` | Source data | Base address | Byte offset |
 
 ## Immediate (I)
 
@@ -104,7 +104,7 @@ Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | `opcode` | `15:11` | Primary opcode |
 | `imm11` | `10:0` | Immediate field |
 
-For `JMP`, `CALL`, and conditional branches, `imm11` is a signed offset from the instruction that follows the control-flow instruction.
+For `JMP`, `CALL`, and conditional branches, `imm11` is a signed offset measured in instructions from the instruction that follows the control-flow instruction. The encoded value is shifted left by one when added to `PC`.
 
 ---
 

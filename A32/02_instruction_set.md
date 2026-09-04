@@ -259,7 +259,7 @@ A five-bit shift amount represents every useful shift from 0 to 31 positions.
 `JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm26                   // PC <- PC + 1 + imm26
+JMP imm26                   // PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### JMPR
@@ -276,7 +276,7 @@ JMPR rs                     // PC <- rs
 
 ```text
 BEQ imm26                   // if Z = 1
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### BNE
@@ -285,7 +285,7 @@ BEQ imm26                   // if Z = 1
 
 ```text
 BNE imm26                   // if Z = 0
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### BLT
@@ -294,7 +294,7 @@ BNE imm26                   // if Z = 0
 
 ```text
 BLT imm26                   // if (N xor V) = 1
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### BGE
@@ -303,7 +303,7 @@ BLT imm26                   // if (N xor V) = 1
 
 ```text
 BGE imm26                   // if (N xor V) = 0
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### BLTU
@@ -312,7 +312,7 @@ BGE imm26                   // if (N xor V) = 0
 
 ```text
 BLTU imm26                  // if C = 0
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### BGEU
@@ -321,10 +321,10 @@ BLTU imm26                  // if C = 0
 
 ```text
 BGEU imm26                  // if C = 1
-                            // then PC <- PC + 1 + imm26
+                            // then PC <- PC + 4 + (imm26 << 2)
 ```
 
-The `imm26` field is interpreted as a signed two's-complement offset. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
+The `imm26` field is interpreted as a signed two's-complement offset measured in instructions and is shifted left by two before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
 
 ## Stack instructions
 
@@ -333,9 +333,9 @@ The `imm26` field is interpreted as a signed two's-complement offset. `BGT`, `BL
 `CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
-CALL imm26                  // SP <- SP - 1
-                            // MEM[SP] <- zext(PC + 1)
-                            // PC <- PC + 1 + imm26
+CALL imm26                  // SP <- SP - 4
+                            // MEM32[SP] <- PC + 4
+                            // PC <- PC + 4 + (imm26 << 2)
 ```
 
 ### CALLR
@@ -343,18 +343,18 @@ CALL imm26                  // SP <- SP - 1
 `CALLR` stores the sequential return address on the stack and transfers execution to the instruction address stored in a register. The target is read before `SP` is modified.
 
 ```text
-CALLR rs                    // SP <- SP - 1
-                            // MEM[SP] <- zext(PC + 1)
+CALLR rs                    // SP <- SP - 4
+                            // MEM32[SP] <- PC + 4
                             // PC <- rs
 ```
 
 ### RET
 
-`RET` restores the program counter from the low 26 bits of the top stack word and then removes that entry.
+`RET` restores the program counter from the top stack word and then removes that entry.
 
 ```text
-RET                         // PC <- MEM[SP][25:0]
-                            // SP <- SP + 1
+RET                         // PC <- MEM32[SP]
+                            // SP <- SP + 4
 ```
 
 ### PUSH
@@ -362,8 +362,8 @@ RET                         // PC <- MEM[SP][25:0]
 `PUSH` adds one register value to the stack.
 
 ```text
-PUSH rs                     // SP <- SP - 1
-                            // MEM[SP] <- rs
+PUSH rs                     // SP <- SP - 4
+                            // MEM32[SP] <- rs
 ```
 
 ### POP
@@ -371,26 +371,44 @@ PUSH rs                     // SP <- SP - 1
 `POP` removes the top value from the stack and writes it to a register.
 
 ```text
-POP rd                      // rd <- MEM[SP]
-                            // SP <- SP + 1
+POP rd                      // rd <- MEM32[SP]
+                            // SP <- SP + 4
 ```
 
 The register operand of `PUSH` or `POP` must be one of `R0` through `R30`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly. Software must initialize `SP` and keep every stack access within its assigned memory region.
 
 ## Memory instructions
 
-### LOAD
+### LDW
 
-`LOAD` reads one 32-bit word from data memory into the destination register.
-
-```text
-LOAD rd, imm16[rb]          // rd <- MEM[rb + sext(imm16)]
-```
-
-### STORE
-
-`STORE` writes one 32-bit source-register value to data memory.
+`LDW` reads one 32-bit word from a four-byte-aligned memory address.
 
 ```text
-STORE imm16[rb], rs         // MEM[rb + sext(imm16)] <- rs
+LDW rd, imm16[rb]           // rd <- MEM32[rb + sext(imm16)]
 ```
+
+### STW
+
+`STW` writes one 32-bit source-register value to a four-byte-aligned memory address.
+
+```text
+STW imm16[rb], rs           // MEM32[rb + sext(imm16)] <- rs
+```
+
+### LDB
+
+`LDB` reads one byte from memory and zero-extends it to 32 bits.
+
+```text
+LDB rd, imm16[rb]           // rd <- zext(MEM8[rb + sext(imm16)])
+```
+
+### STB
+
+`STB` writes the low eight bits of a source register to memory.
+
+```text
+STB imm16[rb], rs           // MEM8[rb + sext(imm16)] <- rs[7:0]
+```
+
+Memory offsets are measured in bytes. Byte accesses accept any address, while `LDW` and `STW` are illegal when their effective address is not a multiple of four.

@@ -79,7 +79,7 @@ For `LI` and `LIH`, `r` is the destination register. For `CMPI`, it is a source 
 
 ## Register-register-immediate (RRI)
 
-Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LOAD`, and `STORE`.
+Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LDW`, `STW`, `LDB`, and `STB`.
 
 ![Register-register-immediate instruction format](imgs/rri.png)
 
@@ -94,8 +94,8 @@ Used by `SLL`, `SRL`, `SRA`, `ADDI`, `SUBI`, `LOAD`, and `STORE`.
 | --- | --- | --- | --- |
 | `ADDI`, `SUBI` | Destination | Source | Immediate value |
 | `SLL`, `SRL`, `SRA` | Destination | Source | Shift amount |
-| `LOAD` | Destination | Base address | Data offset |
-| `STORE` | Source data | Base address | Data offset |
+| `LDW`, `LDB` | Destination | Base address | Byte offset |
+| `STW`, `STB` | Source data | Base address | Byte offset |
 
 Shift instructions accept values from `0` to `31`. Their `imm16` field therefore has bits `15:5` cleared and stores the shift amount in bits `4:0`.
 
@@ -110,6 +110,6 @@ Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | `opcode` | `31:26` | Primary opcode |
 | `imm26` | `25:0` | Immediate field |
 
-For `JMP`, `CALL`, and conditional branches, `imm26` is a signed offset from the instruction that follows the control-flow instruction.
+For `JMP`, `CALL`, and conditional branches, `imm26` is a signed offset measured in instructions from the instruction that follows the control-flow instruction. The encoded value is shifted left by two when added to `PC`.
 
 `opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

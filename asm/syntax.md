@@ -17,7 +17,7 @@ An AthenISA source file is made of statements. Each non-empty line contains only
 | Instruction | `ADD R1, R2, R3` | Requests an operation from the selected architecture profile |
 | Label | `loop:` | Gives a name to an instruction address |
 | Constant | `limit: 10` | Gives a name to a numeric value |
-| Data declaration | `data[1] 5` | Reserves and initializes data-memory words |
+| Data declaration | `data[1] 5` | Reserves and initializes memory words |
 
 Blank lines and comments are ignored. A data declaration is the only statement that may continue onto another line.
 
@@ -25,10 +25,10 @@ Blank lines and comments are ignored. A data declaration is the only statement t
 
 AthenISA source represents code and data with the `.code` and `.data` sections.
 
-| Section | Accepted statements | Initial address |
+| Section | Accepted statements | Placement |
 | --- | --- | --- |
-| `.code` | Instructions, labels, and constants | `0` |
-| `.data` | Data declarations | `0` |
+| `.code` | Instructions, labels, and constants | Begins at address `0` |
+| `.data` | Data declarations | Follows the complete code region |
 
 A section directive changes the active section for the statements that follow it. It must appear alone on its line and does not occupy memory:
 
@@ -42,18 +42,20 @@ A section directive changes the active section for the statements that follow it
 
 By default the active section is `.code` when assembly begins. Programs that contain no data therefore do not need to write `.code` explicitly.
 
-Sections may be selected any number of times. Code and data have independent address counters, and each counter resumes from its previous value when its section is selected again:
+Sections may be selected any number of times. Each instruction is appended to the code region and each declaration is appended to the data region, regardless of how often the source alternates between them:
 
 ```athe
 .code
-NOP             ; code address 0
+NOP
 
 .data
-value[1] 5      ; data address 0
+value[1] 5
 
 .code
-RET             ; code address 1
+RET
 ```
+
+Code and data share one address space. The data region begins after all emitted instructions at the next address aligned to the architecture's word size.
 
 Using a statement in the wrong section is an error.
 
@@ -140,7 +142,7 @@ Names such as `1loop`, `bad-name`, and `bad$name` are invalid.
 
 ### Labels
 
-A name followed by `:` with no value defines a label. Its value is the address of the next emitted instruction:
+A name followed by `:` with no value defines a label. Its value is the byte address of the next emitted instruction:
 
 ```athe
 loop:
@@ -198,7 +200,7 @@ Operators at the same precedence are evaluated from left to right. Parentheses m
 
 ## Data declarations
 
-A data declaration reserves and optionally initializes a block of consecutive data words. It may only appear in `.data` and uses the following form:
+A data declaration reserves and optionally initializes a block of consecutive memory words. It may only appear in `.data` and uses the following form:
 
 ```text
 name[size] values
@@ -218,11 +220,11 @@ item[1] 9
 vector[5] 0, 1, 2, 3, 4
 ```
 
-The selected architecture profile defines the width of each data word and the size of data memory.
+The selected architecture profile defines the width of each word and the size of the unified memory space.
 
 ### Size
 
-The size is measured in words, must be greater than zero, and must fit together with preceding declarations in the target data memory. It may be a literal or an expression:
+The size is measured in words, must be greater than zero, and must fit together with the code region and preceding declarations in the target memory. It may be a literal or an expression:
 
 ```athe
 .code
@@ -280,23 +282,23 @@ first[2] 10, 20
 second[1] 30
 ```
 
-In this example, `first` has value `0` and `second` has value `2` because the two words belonging to `first` occupy addresses 0 and 1.
+In this example, `second` equals `first + 2 * word_size` because the two words belonging to `first` occupy the preceding bytes. The exact addresses also depend on the size of the code region.
 
 `name(index)` calculates the address of another word relative to the start of a declaration:
 
 ```text
-name(index) = name + index
+name(index) = name + index * word_size
 ```
 
-The index is an expression evaluated by the assembler and measured in words. This syntax only calculates an address; it does not read data memory:
+The index is an expression evaluated by the assembler and measured in words. This syntax only calculates a byte address; it does not read memory:
 
 ```athe
 .code
-LDI  R5, vector(3)
-LOAD R1, [R5]
+LDI R5, vector(3)
+LDW R1, [R5]
 ```
 
-The index is not restricted to the declared size, which permits calculations such as the address immediately after an array. The resulting address must fit the target data address space. The complete `name(index)` expression must remain contiguous when used as an instruction operand.
+The index is not restricted to the declared size, which permits calculations such as the address immediately after an array. The resulting address must fit the target memory address space. The complete `name(index)` expression must remain contiguous when used as an instruction operand.
 
 ## Symbol references
 

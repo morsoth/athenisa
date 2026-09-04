@@ -264,15 +264,15 @@ SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 `JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm11                   // PC <- PC + 1 + imm11
+JMP imm11                   // PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### JMPR
 
-`JMPR` transfers execution to the instruction address stored in a register. Only the low 11 bits of the register are used.
+`JMPR` transfers execution to the instruction byte address stored in a register.
 
 ```text
-JMPR rs                     // PC <- rs[10:0]
+JMPR rs                     // PC <- rs
 ```
 
 ### BEQ
@@ -281,7 +281,7 @@ JMPR rs                     // PC <- rs[10:0]
 
 ```text
 BEQ imm11                   // if Z = 1
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### BNE
@@ -290,7 +290,7 @@ BEQ imm11                   // if Z = 1
 
 ```text
 BNE imm11                   // if Z = 0
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### BLT
@@ -299,7 +299,7 @@ BNE imm11                   // if Z = 0
 
 ```text
 BLT imm11                   // if (N xor V) = 1
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### BGE
@@ -308,7 +308,7 @@ BLT imm11                   // if (N xor V) = 1
 
 ```text
 BGE imm11                   // if (N xor V) = 0
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### BLTU
@@ -317,7 +317,7 @@ BGE imm11                   // if (N xor V) = 0
 
 ```text
 BLTU imm11                  // if C = 0
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### BGEU
@@ -326,11 +326,11 @@ BLTU imm11                  // if C = 0
 
 ```text
 BGEU imm11                  // if C = 1
-                            // then PC <- PC + 1 + imm11
+                            // then PC <- PC + 2 + (imm11 << 1)
 ```
 
 > [!NOTE]
-> `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
+> Control-flow immediates are measured in instructions. A16 shifts `imm11` left by one before adding it to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
 
 ## Stack instructions
 
@@ -339,19 +339,19 @@ BGEU imm11                  // if C = 1
 `CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
-CALL imm11                  // SP <- SP - 1
-                            // MEM[SP] <- PC + 1
-                            // PC <- PC + 1 + imm11
+CALL imm11                  // SP <- SP - 2
+                            // MEM16[SP] <- PC + 2
+                            // PC <- PC + 2 + (imm11 << 1)
 ```
 
 ### CALLR
 
-`CALLR` stores the sequential return address on the stack and transfers execution to the instruction address stored in a register. The target is read before `SP` is modified, and only its low 11 bits are used.
+`CALLR` stores the sequential return address on the stack and transfers execution to the instruction byte address stored in a register. The target is read before `SP` is modified.
 
 ```text
-CALLR rs                    // target <- rs[10:0]
-                            // SP <- SP - 1
-                            // MEM[SP] <- PC + 1
+CALLR rs                    // target <- rs
+                            // SP <- SP - 2
+                            // MEM16[SP] <- PC + 2
                             // PC <- target
 ```
 
@@ -360,8 +360,8 @@ CALLR rs                    // target <- rs[10:0]
 `RET` restores the program counter from the stack and then removes that entry.
 
 ```text
-RET                         // PC <- MEM[SP]
-                            // SP <- SP + 1
+RET                         // PC <- MEM16[SP]
+                            // SP <- SP + 2
 ```
 
 ### PUSH
@@ -369,8 +369,8 @@ RET                         // PC <- MEM[SP]
 `PUSH` adds one register value to the stack.
 
 ```text
-PUSH rs                     // SP <- SP - 1
-                            // MEM[SP] <- rs
+PUSH rs                     // SP <- SP - 2
+                            // MEM16[SP] <- rs
 ```
 
 ### POP
@@ -378,8 +378,8 @@ PUSH rs                     // SP <- SP - 1
 `POP` removes the top value from the stack and writes it to a register.
 
 ```text
-POP rd                      // rd <- MEM[SP]
-                            // SP <- SP + 1
+POP rd                      // rd <- MEM16[SP]
+                            // SP <- SP + 2
 ```
 
 The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
@@ -388,18 +388,36 @@ Software must initialize `SP` and keep every stack access within its assigned me
 
 ## Memory instructions
 
-### LOAD
+### LDW
 
-`LOAD` reads one 16-bit word from data memory into the destination register.
-
-```text
-LOAD rd, imm5[rb]           // rd <- MEM[rb + sext(imm5)]
-```
-
-### STORE
-
-`STORE` writes one 16-bit source-register value to data memory.
+`LDW` reads one 16-bit word from a two-byte-aligned memory address.
 
 ```text
-STORE imm5[rb], rs          // MEM[rb + sext(imm5)] <- rs
+LDW rd, imm5[rb]            // rd <- MEM16[rb + sext(imm5)]
 ```
+
+### STW
+
+`STW` writes one 16-bit source-register value to a two-byte-aligned memory address.
+
+```text
+STW imm5[rb], rs            // MEM16[rb + sext(imm5)] <- rs
+```
+
+### LDB
+
+`LDB` reads one byte from memory and zero-extends it to 16 bits.
+
+```text
+LDB rd, imm5[rb]            // rd <- zext(MEM8[rb + sext(imm5)])
+```
+
+### STB
+
+`STB` writes the low eight bits of a source register to memory.
+
+```text
+STB imm5[rb], rs            // MEM8[rb + sext(imm5)] <- rs[7:0]
+```
+
+Memory offsets are measured in bytes. Byte accesses accept any address, while `LDW` and `STW` are illegal when their effective address is not a multiple of two.

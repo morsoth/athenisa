@@ -8,12 +8,11 @@ This document introduces the architectural contract of A32. The following chapte
 | --- | --- |
 | Instruction width | 32 bits |
 | Data width | 32 bits |
-| Instruction addresses | 26 bits, word-addressed |
-| Data addresses | 32 bits, word-addressed |
+| Memory addresses | 32 bits, byte-addressed |
 | Register operands | `R0` to `R30` and `SP` |
-| Instruction byte order | Little-endian |
+| Byte order | Little-endian |
 
-A32 uses separate instruction and data address spaces. An instruction address selects one 32-bit instruction word; a data address selects one 32-bit data word. The base architecture has no byte load, byte store, or unaligned access.
+A32 uses one unified 4 GiB address space for instructions and data. Instructions occupy four bytes and must be aligned to a four-byte boundary. The base architecture supports byte and 32-bit word accesses; word accesses must also be four-byte aligned.
 
 ## Implementation independence
 

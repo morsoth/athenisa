@@ -1,109 +1,114 @@
 # A16 Memory and Addressing
 
-A16 uses separate instruction and data address spaces. Both spaces are word-addressed and contain 16-bit words.
+A16 uses one unified, byte-addressable memory space for instructions, data, and the stack.
 
-| Property | Instruction memory | Data memory |
-| --- | --- | --- |
-| Address width | 11 bits | 16 bits |
-| Address range | `0x000` to `0x7FF` | `0x0000` to `0xFFFF` |
-| Number of words | 2048 | 65,536 |
-| Word width | 16 bits | 16 bits |
-| Byte capacity | 4 KiB | 128 KiB |
-| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `CALLR`, `RET`, `PUSH`, `POP` |
+| Property | Definition |
+| --- | --- |
+| Address width | 16 bits |
+| Address range | `0x0000` to `0xFFFF` |
+| Capacity | 64 KiB |
+| Instruction size | 2 bytes |
+| Data word size | 2 bytes |
+| Byte order | Little-endian |
 
-Both memory spaces are word-addressed: each address refers to one complete 16-bit word. For example, address `0x0000` selects the first word and address `0x0001` selects the second word; addresses do not identify individual bytes.
+Every address identifies one byte. Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A16 base specification.
 
-The instruction space is read-only from the perspective of A16 instructions. Loading a program into it is a platform responsibility performed before normal execution or through an external programming interface.
+## Memory accesses
 
-## Data memory addressing
-
-`LOAD` and `STORE` calculate a data-memory address by adding the signed `imm5` field to the base register `rb`:
+`LDW`, `STW`, `LDB`, and `STB` calculate an effective address by adding the signed `imm5` field to the base register `rb`:
 
 ```text
-d_addr = rb + sext(imm5)
+address = rb + sext(imm5)
 ```
 
-The offset is measured in 16-bit words and has a range of `-16` to `+15`.
+The offset is measured in bytes and has a range from `-16` to `+15`. Address arithmetic wraps to 16 bits.
 
-The calculation uses 16-bit address arithmetic. If the result exceeds the data-memory address range, it wraps around; for example, `0x0000 - 1` produces address `0xFFFF`.
+| Instruction | Access | Result |
+| --- | --- | --- |
+| `LDW` | Read 2 bytes | Load one 16-bit word |
+| `STW` | Write 2 bytes | Store all 16 bits of `rs` |
+| `LDB` | Read 1 byte | Zero-extend the byte to 16 bits |
+| `STB` | Write 1 byte | Store `rs[7:0]` |
 
-Assembly represents these operands as follows:
+Byte accesses accept any address. `LDW` and `STW` require an address divisible by two; a misaligned word access is illegal.
 
 ```athe
-LOAD  R1, 4[R2]             ; load from address R2 + 4
-STORE -1[R6], R3            ; store at address R6 - 1
+LDW R1, 4[R2]              ; read a word at R2 + 4 bytes
+LDB R3, 1[R2]              ; read one byte at R2 + 1 byte
+STW -2[R6], R4             ; write a word at R6 - 2 bytes
+STB [R5], R0               ; write the low byte of R0 at R5
 ```
 
-The source-language shorthand for a zero offset is defined in the [A16 assembly reference](../asm/A16.md#memory-operands).
+## Instruction addressing
 
-## Instruction memory addressing
-
-The program counter (`PC`) contains the 11-bit word address of the current instruction. Sequential execution advances to `PC + 1`, wrapping from `0x7FF` to `0x000`.
+`PC` contains the 16-bit byte address of the current instruction. Every instruction occupies two bytes, so sequential execution advances from `PC` to `PC + 2`. A valid instruction address must be divisible by two; fetching from or transferring control to any other address is illegal.
 
 ### Register targets
 
-`JMPR` and `CALLR` take their target from the low 11 bits of a source register:
+`JMPR` and `CALLR` load `PC` from a source register:
 
 ```text
-PC = rs[10:0]
+PC = rs
 ```
 
-The upper five bits of the source register do not affect the target address.
+The register value must be divisible by two.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches contain a signed 11-bit offset from the instruction after the control-flow instruction:
+`JMP`, `CALL`, and conditional branches encode a signed `imm11` offset measured in instructions. A16 shifts the offset left by one to convert it to a byte displacement:
 
 ```text
-PC = PC + 1 + imm11
+PC = PC + 2 + (sext(imm11) << 1)
 ```
 
-In these instructions, the `imm11` field has a signed range of `-1024` to `+1023` instructions. A positive value transfers execution forward and a negative value transfers execution backward.
+The encoded range is `-1024` to `+1023` instructions, equivalent to byte displacements from `-2048` to `+2046`. The calculation uses 16-bit wrapping arithmetic.
 
 > [!WARNING]
-> An `imm11` value of `-1` targets the control-flow instruction itself (`PC + 1 - 1 = PC`). `JMP -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this value also repeats while its condition remains satisfied.
-
-The calculation uses 11-bit address arithmetic and therefore wraps at the instruction-memory boundary. For example, advancing beyond `0x7FF` continues from `0x000`.
+> An `imm11` value of `-1` targets the control-flow instruction itself because `PC + 2 + (-1 << 1) = PC`. `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
 
 ## Stack
 
-The stack resides in data memory and grows toward lower addresses. `SP` identifies the most recently stored stack word, which may contain a return address or a value saved by software. Register encoding `111` allows software to read and write `SP` directly.
+The stack shares the unified memory space and grows toward lower addresses. `SP` identifies the first byte of the most recently stored 16-bit stack word and must remain divisible by two. Register encoding `111` allows software to read and write `SP` directly.
 
 Software chooses the initial value and valid memory region of each stack. After reset, `SP` contains `0x0000`, but this value does not indicate an empty or initialized stack.
 
-`CALL` and `CALLR` decrement `SP` before storing their return address:
+`CALL` and `CALLR` decrement `SP` by two before storing the return address:
 
 ```text
-SP       = SP - 1
-DMEM[SP] = zext(PC + 1)
+SP        = SP - 2
+MEM16[SP] = PC + 2
 ```
 
-`RET` reads the current top entry and then increments `SP`:
+`RET` reads the current top entry and then increments `SP` by two:
 
 ```text
-PC = DMEM[SP]
-SP = SP + 1
+PC = MEM16[SP]
+SP = SP + 2
 ```
 
-`PUSH` and `POP` use the same stack convention:
+`PUSH` and `POP` use the same convention:
 
 ```text
-SP       = SP - 1           // PUSH
-DMEM[SP] = rs
+SP        = SP - 2          // PUSH
+MEM16[SP] = rs
 
-rd = DMEM[SP]               // POP
-SP = SP + 1
+rd = MEM16[SP]              // POP
+SP = SP + 2
 ```
 
-Stack entries are untyped. Software must balance any `PUSH` operations performed after a `CALL` with corresponding `POP` operations before executing `RET`.
+Stack entries are untyped. Software must balance values placed above a return address before executing `RET`. A16 does not track a stack base, limit, depth, or empty state, so software is responsible for alignment and for preventing stack underflow and overflow.
 
-A16 does not track a stack base, limit, depth, or empty state. Software is responsible for preventing stack underflow and overflow. Stack-pointer arithmetic uses 16-bit wrapping arithmetic, so an invalid `SP` may cause `CALL`, `CALLR`, `RET`, `PUSH`, or `POP` to access any data-memory address.
+## Program layout
+
+The standard source layout places code at address `0x0000`. Data follows the complete code region at the next two-byte-aligned address. Selecting `.code` and `.data` multiple times changes source interpretation but does not create separate address spaces.
+
+The complete program, including code, initialized data, and reserved data, must fit in the 64 KiB address space.
 
 ## Byte order and serialized programs
 
-A16 uses little-endian byte order. Base-architecture memory accesses transfer complete 16-bit words, so byte order is not observable through `LOAD` or `STORE`.
+A16 uses little-endian byte order. For a 16-bit word beginning at address `A`, address `A` contains bits `7:0` and address `A + 1` contains bits `15:8`. `LDB` can observe each byte independently, and `STB` changes only the selected byte.
 
-When the assembler generates a raw `.bin` file, it serializes each 16-bit instruction in little-endian order: the low byte is written first, followed by the high byte. Text `.hex` files represent complete 16-bit words and therefore have no byte-order ambiguity. The exact output formats are documented in the [assembler guide](../tools/assembler/README.md#output-files).
+When the assembler generates a raw binary image, it serializes each 16-bit instruction or data word from its least significant byte to its most significant byte. Text hexadecimal representations contain complete words and therefore have no byte-order ambiguity.
 
 ## Timing and physical memory
 

@@ -1,101 +1,114 @@
 # A32 Memory and Addressing
 
-A32 uses separate instruction and data address spaces. Both spaces are word-addressed and contain 32-bit words.
+A32 uses one unified, byte-addressable memory space for instructions, data, and the stack.
 
-| Property | Instruction memory | Data memory |
-| --- | --- | --- |
-| Address width | 26 bits | 32 bits |
-| Address range | `0x0000000` to `0x3FFFFFF` | `0x00000000` to `0xFFFFFFFF` |
-| Number of words | `2^26` | `2^32` |
-| Word width | 32 bits | 32 bits |
-| Byte capacity | 256 MiB | 16 GiB |
-| ISA access | Instruction fetch | `LOAD`, `STORE`, `CALL`, `CALLR`, `RET`, `PUSH`, `POP` |
+| Property | Definition |
+| --- | --- |
+| Address width | 32 bits |
+| Address range | `0x00000000` to `0xFFFFFFFF` |
+| Capacity | 4 GiB |
+| Instruction size | 4 bytes |
+| Data word size | 4 bytes |
+| Byte order | Little-endian |
 
-Each address selects one complete 32-bit word. Address `0` selects the first word and address `1` selects the following word; neither address identifies an individual byte.
+Every address identifies one byte. Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A32 base specification. An implementation may provide less physical memory than the architectural address space, but the platform must define which address ranges are available.
 
-The instruction space is read-only from the perspective of A32 instructions. Loading a program into it is a platform responsibility performed before normal execution or through an external programming interface. An implementation may provide less physical memory than the architectural address space, but the platform must define which address ranges are available.
+## Memory accesses
 
-## Data memory addressing
-
-`LOAD` and `STORE` add the signed `imm16` field to the base register `rb`:
+`LDW`, `STW`, `LDB`, and `STB` calculate an effective address by adding the signed `imm16` field to the base register `rb`:
 
 ```text
-d_addr = rb + sext(imm16)
+address = rb + sext(imm16)
 ```
 
-The offset is measured in 32-bit words and has a range from `-32,768` to `+32,767`. The calculation uses 32-bit wrapping arithmetic.
+The offset is measured in bytes and has a range from `-32,768` to `+32,767`. Address arithmetic wraps to 32 bits.
 
-Assembly represents these operands as follows:
+| Instruction | Access | Result |
+| --- | --- | --- |
+| `LDW` | Read 4 bytes | Load one 32-bit word |
+| `STW` | Write 4 bytes | Store all 32 bits of `rs` |
+| `LDB` | Read 1 byte | Zero-extend the byte to 32 bits |
+| `STB` | Write 1 byte | Store `rs[7:0]` |
+
+Byte accesses accept any address. `LDW` and `STW` require an address divisible by four; a misaligned word access is illegal.
 
 ```athe
-LOAD  R1, 4[R2]             ; load from address R2 + 4
-STORE -1[R30], R3           ; store at address R30 - 1
+LDW R1, 8[R2]              ; read a word at R2 + 8 bytes
+LDB R3, 1[R2]              ; read one byte at R2 + 1 byte
+STW -4[R30], R4            ; write a word at R30 - 4 bytes
+STB [R5], R0               ; write the low byte of R0 at R5
 ```
 
-## Instruction memory addressing
+## Instruction addressing
 
-The program counter contains the 26-bit word address of the current instruction. Sequential execution advances to `PC + 1`, wrapping from `0x3FFFFFF` to `0x0000000`.
+`PC` contains the 32-bit byte address of the current instruction. Every instruction occupies four bytes, so sequential execution advances from `PC` to `PC + 4`. A valid instruction address must be divisible by four; fetching from or transferring control to any other address is illegal.
 
 ### Register targets
 
-`JMPR` and `CALLR` take their target from the low 26 bits of a source register:
+`JMPR` and `CALLR` load `PC` from a source register:
 
 ```text
-PC = rs[25:0]
+PC = rs
 ```
 
-The upper six bits of the source register do not affect the target address.
+The register value must be divisible by four.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches add a signed 26-bit offset to the address of the following instruction:
+`JMP`, `CALL`, and conditional branches encode a signed `imm26` offset measured in instructions. A32 shifts the offset left by two to convert it to a byte displacement:
 
 ```text
-PC = PC + 1 + imm26
+PC = PC + 4 + (sext(imm26) << 2)
 ```
 
-In these instructions, the `imm26` field has a signed range from `-33,554,432` to `+33,554,431` instructions. The calculation uses 26-bit wrapping arithmetic.
+The encoded range is `-33,554,432` to `+33,554,431` instructions, equivalent to byte displacements from `-134,217,728` to `+134,217,724`. The calculation uses 32-bit wrapping arithmetic.
 
 > [!WARNING]
-> An `imm26` value of `-1` targets the control-flow instruction itself (`PC + 1 - 1 = PC`). `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
+> An `imm26` value of `-1` targets the control-flow instruction itself because `PC + 4 + (-1 << 2) = PC`. `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
 
 ## Stack
 
-The stack resides in data memory and grows toward lower addresses. `SP` identifies the most recently stored stack word, which may contain a return address or a value saved by software. Register encoding `11111` allows software to read and write `SP` directly.
+The stack shares the unified memory space and grows toward lower addresses. `SP` identifies the first byte of the most recently stored 32-bit stack word and must remain divisible by four. Register encoding `11111` allows software to read and write `SP` directly.
 
 Software chooses the initial value and valid memory region of each stack. After reset, `SP` contains `0x00000000`, but this value does not indicate an empty or initialized stack.
 
-`CALL` and `CALLR` decrement `SP` before storing the zero-extended return address:
+`CALL` and `CALLR` decrement `SP` by four before storing the return address:
 
 ```text
-SP       = SP - 1
-DMEM[SP] = zext(PC + 1)
+SP        = SP - 4
+MEM32[SP] = PC + 4
 ```
 
-`RET` reads the current top entry and then increments `SP`:
+`RET` reads the current top entry and then increments `SP` by four:
 
 ```text
-PC = DMEM[SP][25:0]
-SP = SP + 1
+PC = MEM32[SP]
+SP = SP + 4
 ```
 
 `PUSH` and `POP` use the same convention:
 
 ```text
-SP       = SP - 1           // PUSH
-DMEM[SP] = rs
+SP        = SP - 4          // PUSH
+MEM32[SP] = rs
 
-rd = DMEM[SP]               // POP
-SP = SP + 1
+rd = MEM32[SP]              // POP
+SP = SP + 4
 ```
 
-Stack entries are untyped. Software must balance values placed above a return address before executing `RET`. A32 does not track a stack base, limit, depth, or empty state, so software is responsible for preventing stack underflow and overflow.
+Stack entries are untyped. Software must balance values placed above a return address before executing `RET`. A32 does not track a stack base, limit, depth, or empty state, so software is responsible for alignment and for preventing stack underflow and overflow.
+
+## Program layout
+
+The standard source layout places code at address `0x00000000`. Data follows the complete code region at the next four-byte-aligned address. Selecting `.code` and `.data` multiple times changes source interpretation but does not create separate address spaces.
+
+The complete program must fit in the available platform memory and every referenced address must belong to an implemented region.
 
 ## Byte order and serialized programs
 
-A32 uses little-endian byte order. Base-architecture memory accesses transfer complete 32-bit words, so byte order is not observable through `LOAD` or `STORE`.
+A32 uses little-endian byte order. For a 32-bit word beginning at address `A`, addresses `A`, `A + 1`, `A + 2`, and `A + 3` contain bits `7:0`, `15:8`, `23:16`, and `31:24`, respectively. `LDB` can observe each byte independently, and `STB` changes only the selected byte.
 
-When an assembler generates a raw binary image, each 32-bit instruction is serialized from its least significant byte to its most significant byte. Text representations containing complete instruction words have no byte-order ambiguity.
+When the assembler generates a raw binary image, it serializes each 32-bit instruction or data word from its least significant byte to its most significant byte. Text hexadecimal representations contain complete words and therefore have no byte-order ambiguity.
 
 ## Timing and physical memory
 

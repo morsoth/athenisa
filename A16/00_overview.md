@@ -8,12 +8,11 @@ This document introduces the architectural contract of A16. The following chapte
 | --- | --- |
 | Instruction width | 16 bits |
 | Data width | 16 bits |
-| Instruction addresses | 11 bits, word-addressed |
-| Data addresses | 16 bits, word-addressed |
+| Memory addresses | 16 bits, byte-addressed |
 | Register operands | `R0` to `R6` and `SP` |
-| Instruction byte order | Little-endian |
+| Byte order | Little-endian |
 
-A16 uses separate instruction and data address spaces. An instruction address selects one 16-bit instruction word; a data address selects one 16-bit data word. The base architecture has no byte load, byte store, or unaligned access.
+A16 uses one unified 64 KiB address space for instructions and data. Instructions occupy two bytes and must be aligned to a two-byte boundary. The base architecture supports byte and 16-bit word accesses; word accesses must also be two-byte aligned.
 
 ## Implementation independence
 
