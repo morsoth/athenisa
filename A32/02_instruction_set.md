@@ -10,7 +10,7 @@ By default the `FLAGS` register is unchanged.
 
 ### NOP
 
-`NOP` performs no operation. Its `imm26` field is zero.
+`NOP` performs no operation. Its reserved bits are zero.
 
 ```text
 NOP                         // does nothing
@@ -395,7 +395,7 @@ CALLR rs                    // SP <- SP - 4
 
 ### RET
 
-`RET` restores the program counter from the top stack word and then removes that entry. Its `imm26` field is zero.
+`RET` restores the program counter from the top stack word and then removes that entry. Its reserved bits are zero.
 
 ```text
 RET                         // PC <- MEM32[SP]

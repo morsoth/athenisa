@@ -2,7 +2,7 @@
 
 This chapter defines the architectural behavior of every real A16 instruction. Assembly-only pseudo-instructions are defined separately in the [A16 assembly reference](../asm/A16.md#pseudo-instructions).
 
-In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. `imm` identifies an encoded immediate field, while its numeric suffix gives the field width. Each instruction defines whether that field represents a value, an address, or an offset. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
+In the instruction notation, `rd` denotes a destination register, `rs`, `rs1`, and `rs2` denote source registers, and `rb` denotes a base-address register. An `imm` operand is an immediate value, and its numeric suffix gives the number of meaningful bits for that instruction. Each instruction defines how the value is encoded and interpreted. Detailed bit layouts are defined in [03_instruction_formats.md](03_instruction_formats.md).
 
 By default the `FLAGS` register is unchanged.
 
@@ -10,7 +10,7 @@ By default the `FLAGS` register is unchanged.
 
 ### NOP
 
-`NOP` performs no operation.
+`NOP` performs no operation. Its reserved bits are zero.
 
 ```text
 NOP                         // does nothing
@@ -119,8 +119,20 @@ SUBI rd, imm8               // rd <- rd - zext(imm8)
 AND rd, rs1, rs2            // rd <- rs1 & rs2
 ```
 
-> [!NOTE]
-> Logical operations (`AND`, `OR`, `XOR`, `NOT`) do not have immediate versions because the 8-bit immediate available in [`RI` instructions](./03_instruction_formats.md#register-immediate-ri) is not especially useful in a 16-bit architecture, particularly for full-width bit masks.
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### ANDI
+
+`ANDI` performs a bitwise AND between the destination register and a zero-extended 8-bit immediate.
+
+```text
+ANDI rd, imm8               // rd <- rd & zext(imm8)
+```
 
 | Flag | Value |
 | --- | --- |
@@ -144,12 +156,42 @@ OR rd, rs1, rs2             // rd <- rs1 | rs2
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `0` |
 
+### ORI
+
+`ORI` performs a bitwise OR between the destination register and a zero-extended 8-bit immediate.
+
+```text
+ORI rd, imm8                // rd <- rd | zext(imm8)
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
 ### XOR
 
 `XOR` performs a bitwise XOR between two source registers.
 
 ```text
 XOR rd, rs1, rs2            // rd <- rs1 ^ rs2
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `0` |
+
+### XORI
+
+`XORI` performs a bitwise XOR between the destination register and a zero-extended 8-bit immediate.
+
+```text
+XORI rd, imm8               // rd <- rd ^ zext(imm8)
 ```
 
 | Flag | Value |
@@ -179,7 +221,7 @@ NOT rd, rs                  // rd <- ~rs
 `CMP` performs a register subtraction only to update the flags. The arithmetic result is not written to the register file.
 
 ```text
-CMP rd, rs                  // rd - rs
+CMP rs1, rs2                // rs1 - rs2
 ```
 
 | Flag | Value |
@@ -194,7 +236,7 @@ CMP rd, rs                  // rd - rs
 `CMPI` compares a register with a zero-extended 8-bit immediate. The arithmetic result is not written to the register file.
 
 ```text
-CMPI rd, imm8               // rd - zext(imm8)
+CMPI rs, imm8               // rs - zext(imm8)
 ```
 
 > [!NOTE]
@@ -264,7 +306,7 @@ SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 `JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP off11                   // PC <- PC + 2 + (off11 << 1)
+JMP imm11                   // PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### JMPR
@@ -280,8 +322,8 @@ JMPR rs                     // PC <- rs
 `BEQ` branches when the zero flag is set.
 
 ```text
-BEQ off11                   // if Z = 1
-                            // then PC <- PC + 2 + (off11 << 1)
+BEQ imm11                   // if Z = 1
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### BNE
@@ -289,8 +331,8 @@ BEQ off11                   // if Z = 1
 `BNE` branches when the zero flag is clear.
 
 ```text
-BNE off11                   // if Z = 0
-                            // then PC <- PC + 2 + (off11 << 1)
+BNE imm11                   // if Z = 0
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### BLT
@@ -298,8 +340,8 @@ BNE off11                   // if Z = 0
 `BLT` branches when the previous comparison indicates signed less than.
 
 ```text
-BLT off11                   // if (N xor V) = 1
-                            // then PC <- PC + 2 + (off11 << 1)
+BLT imm11                   // if (N xor V) = 1
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### BGE
@@ -307,8 +349,8 @@ BLT off11                   // if (N xor V) = 1
 `BGE` branches when the previous comparison indicates signed greater than or equal.
 
 ```text
-BGE off11                   // if (N xor V) = 0
-                            // then PC <- PC + 2 + (off11 << 1)
+BGE imm11                   // if (N xor V) = 0
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### BLTU
@@ -316,8 +358,8 @@ BGE off11                   // if (N xor V) = 0
 `BLTU` branches when the previous comparison indicates unsigned less than.
 
 ```text
-BLTU off11                  // if C = 0
-                            // then PC <- PC + 2 + (off11 << 1)
+BLTU imm11                  // if C = 0
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### BGEU
@@ -325,12 +367,12 @@ BLTU off11                  // if C = 0
 `BGEU` branches when the previous comparison indicates unsigned greater than or equal.
 
 ```text
-BGEU off11                  // if C = 1
-                            // then PC <- PC + 2 + (off11 << 1)
+BGEU imm11                  // if C = 1
+                            // then PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 > [!NOTE]
-> Control-flow offsets are measured in instructions. A16 shifts `off11` left by one before adding it to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
+> For control-flow instructions, `imm11` is interpreted as a signed offset measured in instructions and shifted left by one before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
 
 ## Stack instructions
 
@@ -339,9 +381,9 @@ BGEU off11                  // if C = 1
 `CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
-CALL off11                  // SP <- SP - 2
+CALL imm11                  // SP <- SP - 2
                             // MEM16[SP] <- PC + 2
-                            // PC <- PC + 2 + (off11 << 1)
+                            // PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
 ### CALLR
@@ -357,7 +399,7 @@ CALLR rs                    // target <- rs
 
 ### RET
 
-`RET` restores the program counter from the stack and then removes that entry.
+`RET` restores the program counter from the stack and then removes that entry. Its reserved bits are zero.
 
 ```text
 RET                         // PC <- MEM16[SP]

@@ -4,6 +4,17 @@ All A32 instructions are 32 bits wide. Bits are numbered from 31, the most signi
 
 A format only defines the position and width of each encoded field. The definition of an instruction specifies how its register and immediate fields are used. Register fields and immediate bits not used by an instruction, along with fields named `reserved`, must be zero in a canonical encoding.
 
+## No operand (N)
+
+Used by `NOP` and `RET`.
+
+![No-operand instruction format](imgs/n.png)
+
+| Field | Bits | Description |
+| --- | --- | --- |
+| `opcode` | `31:26` | Primary opcode |
+| `reserved` | `25:0` | Reserved bits |
+
 ## Register (R)
 
 Used by instructions whose operands are all registers.
@@ -13,11 +24,11 @@ Used by instructions whose operands are all registers.
 | Field | Bits | Description |
 | --- | --- | --- |
 | `opcode` | `31:26` | Primary opcode |
-| `func` | `25:23` | Secondary operation selector |
-| `rd` | `22:18` | Register field, normally the destination |
-| `rs1` | `17:13` | First source-register field |
-| `rs2` | `12:8` | Second source-register field |
-| `reserved` | `7:0` | Reserved bits |
+| `rd` | `25:21` | Register field, normally the destination |
+| `rs1` | `20:16` | First source-register field |
+| `rs2` | `15:11` | Second source-register field |
+| `reserved` | `10:3` | Reserved bits |
+| `func` | `2:0` | Secondary operation selector |
 
 For three-register operations, all register fields are used as named. `MOV` and `NOT` use `rd` and `rs1`. `CMP` uses `rs1` and `rs2`, and does not use `rd`. `JMPR`, `CALLR`, and `PUSH` use `rs1`; `POP` uses `rd`.
 
@@ -52,7 +63,7 @@ Arithmetic, logic, shift, and load instructions use `rd` as the destination and 
 
 ## Immediate (I)
 
-Used by `JMP`, `CALL`, conditional branches, `NOP`, and `RET`.
+Used by `JMP`, `CALL`, and conditional branches.
 
 ![Immediate instruction format](imgs/i.png)
 
@@ -61,6 +72,6 @@ Used by `JMP`, `CALL`, conditional branches, `NOP`, and `RET`.
 | `opcode` | `31:26` | Primary opcode |
 | `imm26` | `25:0` | Immediate field |
 
-Control-flow instructions interpret `imm26` as a signed offset measured in instructions. `NOP` and `RET` do not use the immediate, so `imm26` must be zero in their canonical encodings.
+Control-flow instructions interpret `imm26` as a signed offset measured in instructions.
 
 `opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md). The interpretation of every immediate field is defined in [02_instruction_set.md](02_instruction_set.md).

@@ -1,10 +1,10 @@
 # A32 Instruction Encoding
 
-A32 uses a six-bit primary opcode. The `R` format also provides a three-bit `func` field so one opcode can group related register operations. Opcode assignments intentionally follow the A16 ordering where practical, with a leading zero added to the corresponding five-bit A16 opcode.
+A32 uses a six-bit primary opcode. The `R` format also provides a three-bit `func` field in bits `2:0` so one opcode can group related register operations. Opcode assignments intentionally follow the A16 ordering where practical, with a leading zero added to the corresponding five-bit A16 opcode.
 
 | Instruction | `opcode` | `func` | Instruction format |
 | --- | --- | --- | --- |
-| `NOP` | `000000` | - | I |
+| `NOP` | `000000` | - | N |
 | `MOV` | `000001` | `000` | R |
 | `ADD` | `000001` | `001` | R |
 | `SUB` | `000001` | `010` | R |
@@ -27,7 +27,7 @@ A32 uses a six-bit primary opcode. The `R` format also provides a three-bit `fun
 | `BLTU` | `001110` | - | I |
 | `BGEU` | `001111` | - | I |
 | `CALL` | `010000` | - | I |
-| `RET` | `010001` | - | I |
+| `RET` | `010001` | - | N |
 | `JMPR` | `010010` | `000` | R |
 | `CALLR` | `010010` | `001` | R |
 | `PUSH` | `010010` | `010` | R |
