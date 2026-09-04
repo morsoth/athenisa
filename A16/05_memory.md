@@ -40,16 +40,6 @@ The source-language shorthand for a zero offset is defined in the [A16 assembly 
 
 The program counter (`PC`) contains the 11-bit word address of the current instruction. Sequential execution advances to `PC + 1`, wrapping from `0x7FF` to `0x000`.
 
-### Absolute targets
-
-`JMP` and `CALL` contain an `imm11` field that directly replaces the program counter:
-
-```text
-PC = imm11
-```
-
-Because `imm11` is 11 bits wide, these instructions can target any word in instruction memory.
-
 ### Register targets
 
 `JMPR` and `CALLR` take their target from the low 11 bits of a source register:
@@ -60,18 +50,18 @@ PC = rs[10:0]
 
 The upper five bits of the source register do not affect the target address.
 
-### Relative branch targets
+### Relative targets
 
-Relative branches contain a signed 11-bit offset from the instruction after the branch:
+`JMP`, `CALL`, and conditional branches contain a signed 11-bit offset from the instruction after the control-flow instruction:
 
 ```text
 PC = PC + 1 + imm11
 ```
 
-When used by a relative branch, the `imm11` field has a signed range of `-1024` to `+1023` instructions. A positive value branches forward and a negative value branches backward.
+In these instructions, the `imm11` field has a signed range of `-1024` to `+1023` instructions. A positive value transfers execution forward and a negative value transfers execution backward.
 
 > [!WARNING]
-> An `imm11` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this value also repeats while its condition remains satisfied.
+> An `imm11` value of `-1` targets the control-flow instruction itself (`PC + 1 - 1 = PC`). `JMP -1` therefore repeats indefinitely. Conditional branches do not modify the flags, so a conditional branch taken with this value also repeats while its condition remains satisfied.
 
 The calculation uses 11-bit address arithmetic and therefore wraps at the instruction-memory boundary. For example, advancing beyond `0x7FF` continues from `0x000`.
 

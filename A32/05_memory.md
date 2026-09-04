@@ -36,16 +36,6 @@ STORE -1[R30], R3           ; store at address R30 - 1
 
 The program counter contains the 26-bit word address of the current instruction. Sequential execution advances to `PC + 1`, wrapping from `0x3FFFFFF` to `0x0000000`.
 
-### Absolute targets
-
-`JMP` and `CALL` replace the program counter with their `imm26` field:
-
-```text
-PC = imm26
-```
-
-The field can target any word in instruction memory.
-
 ### Register targets
 
 `JMPR` and `CALLR` take their target from the low 26 bits of a source register:
@@ -56,18 +46,18 @@ PC = rs[25:0]
 
 The upper six bits of the source register do not affect the target address.
 
-### Relative branch targets
+### Relative targets
 
-Relative branches add a signed 26-bit offset to the address of the following instruction:
+`JMP`, `CALL`, and conditional branches add a signed 26-bit offset to the address of the following instruction:
 
 ```text
 PC = PC + 1 + imm26
 ```
 
-When used by a relative branch, the `imm26` field has a signed range from `-33,554,432` to `+33,554,431` instructions. The calculation uses 26-bit wrapping arithmetic.
+In these instructions, the `imm26` field has a signed range from `-33,554,432` to `+33,554,431` instructions. The calculation uses 26-bit wrapping arithmetic.
 
 > [!WARNING]
-> An `imm26` value of `-1` targets the branch instruction itself (`PC + 1 - 1 = PC`). `BRA -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
+> An `imm26` value of `-1` targets the control-flow instruction itself (`PC + 1 - 1 = PC`). `JMP -1` therefore repeats indefinitely. A taken conditional branch with the same value also repeats while its condition remains satisfied.
 
 ## Stack
 

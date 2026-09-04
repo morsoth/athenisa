@@ -101,7 +101,7 @@ Shift instructions accept values from `0` to `31`. Their `imm16` field therefore
 
 ## Immediate (I)
 
-Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
 ![Immediate instruction format](imgs/i.png)
 
@@ -110,6 +110,6 @@ Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | `opcode` | `31:26` | Primary opcode |
 | `imm26` | `25:0` | Immediate field |
 
-For `JMP` and `CALL`, `imm26` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
+For `JMP`, `CALL`, and conditional branches, `imm26` is a signed offset from the instruction that follows the control-flow instruction.
 
 `opcode` and `func` assignments are listed in [04_instruction_encoding.md](04_instruction_encoding.md).

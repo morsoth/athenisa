@@ -19,7 +19,7 @@ A32 uses a six-bit primary opcode and a three-bit function field where an opcode
 | `SRL` | `000110` | - | RRI |
 | `SRA` | `000111` | - | RRI |
 | `JMP` | `001000` | - | I |
-| `BRA` | `001001` | - | I |
+| Reserved | `001001` | - | - |
 | `BEQ` | `001010` | - | I |
 | `BNE` | `001011` | - | I |
 | `BLT` | `001100` | - | I |

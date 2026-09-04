@@ -95,7 +95,7 @@ Used by `SLL`, `SRL`, `SRA`, `LOAD`, and `STORE`.
 
 ## Immediate (I)
 
-Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+Used by `JMP`, `CALL`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
 ![Immediate instruction format](imgs/i.png)
 
@@ -104,7 +104,7 @@ Used by `JMP`, `CALL`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 | `opcode` | `15:11` | Primary opcode |
 | `imm11` | `10:0` | Immediate field |
 
-For `JMP` and `CALL`, `imm11` is an unsigned absolute instruction address. For relative branches, it is a signed offset from the instruction that follows the branch.
+For `JMP`, `CALL`, and conditional branches, `imm11` is a signed offset from the instruction that follows the control-flow instruction.
 
 ---
 

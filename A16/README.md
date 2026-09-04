@@ -31,7 +31,7 @@ An extension only defines the state, instructions, formats, and encodings added 
 | Arithmetic and comparison | `ADD`, `ADDI`, `SUB`, `SUBI`, `CMP`, `CMPI` | |
 | Logic | `AND`, `OR`, `XOR`, `NOT` | |
 | Shifts | `SLL`, `SRL`, `SRA` | |
-| Jumps and branches | `JMP`, `JMPR`, `BRA`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
+| Jumps and branches | `JMP`, `JMPR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
 | Stack and calls | `CALL`, `CALLR`, `RET`, `PUSH`, `POP` | |
 | Memory | `LOAD`, `STORE` | |
 | Multiplication and division | `MUL`, `DIV` | `M` |

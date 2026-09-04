@@ -261,10 +261,10 @@ SRA rd, rs, imm5            // rd <- sext(rs) >> imm5
 
 ### JMP
 
-`JMP` transfers execution to an absolute 11-bit instruction address.
+`JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm11                   // PC <- imm11
+JMP imm11                   // PC <- PC + 1 + imm11
 ```
 
 ### JMPR
@@ -275,21 +275,13 @@ JMP imm11                   // PC <- imm11
 JMPR rs                     // PC <- rs[10:0]
 ```
 
-### BRA
-
-`BRA` always branches by a signed offset relative to the instruction that follows it.
-
-```text
-BRA imm11                   // PC <- PC + 1 + sext(imm11)
-```
-
 ### BEQ
 
 `BEQ` branches when the zero flag is set.
 
 ```text
 BEQ imm11                   // if Z = 1
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 ### BNE
@@ -298,7 +290,7 @@ BEQ imm11                   // if Z = 1
 
 ```text
 BNE imm11                   // if Z = 0
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 ### BLT
@@ -307,7 +299,7 @@ BNE imm11                   // if Z = 0
 
 ```text
 BLT imm11                   // if (N xor V) = 1
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 ### BGE
@@ -316,7 +308,7 @@ BLT imm11                   // if (N xor V) = 1
 
 ```text
 BGE imm11                   // if (N xor V) = 0
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 ### BLTU
@@ -325,7 +317,7 @@ BGE imm11                   // if (N xor V) = 0
 
 ```text
 BLTU imm11                  // if C = 0
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 ### BGEU
@@ -334,7 +326,7 @@ BLTU imm11                  // if C = 0
 
 ```text
 BGEU imm11                  // if C = 1
-                            // then PC <- PC + 1 + sext(imm11)
+                            // then PC <- PC + 1 + imm11
 ```
 
 > [!NOTE]
@@ -344,12 +336,12 @@ BGEU imm11                  // if C = 1
 
 ### CALL
 
-`CALL` stores the sequential return address on the stack and transfers execution to an absolute 11-bit instruction address.
+`CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
 CALL imm11                  // SP <- SP - 1
                             // MEM[SP] <- PC + 1
-                            // PC <- imm11
+                            // PC <- PC + 1 + imm11
 ```
 
 ### CALLR

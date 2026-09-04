@@ -256,10 +256,10 @@ A five-bit shift amount represents every useful shift from 0 to 31 positions.
 
 ### JMP
 
-`JMP` transfers execution to an absolute 26-bit instruction address.
+`JMP` always branches by a signed offset relative to the instruction that follows it.
 
 ```text
-JMP imm26                   // PC <- imm26
+JMP imm26                   // PC <- PC + 1 + imm26
 ```
 
 ### JMPR
@@ -268,14 +268,6 @@ JMP imm26                   // PC <- imm26
 
 ```text
 JMPR rs                     // PC <- rs
-```
-
-### BRA
-
-`BRA` always branches by a signed offset relative to the instruction that follows it.
-
-```text
-BRA imm26                   // PC <- PC + 1 + imm26
 ```
 
 ### BEQ
@@ -338,12 +330,12 @@ The `imm26` field is interpreted as a signed two's-complement offset. `BGT`, `BL
 
 ### CALL
 
-`CALL` stores the sequential return address on the stack and transfers execution to an absolute 26-bit instruction address.
+`CALL` stores the sequential return address on the stack and transfers execution by a signed offset relative to the instruction that follows it.
 
 ```text
 CALL imm26                  // SP <- SP - 1
                             // MEM[SP] <- zext(PC + 1)
-                            // PC <- imm26
+                            // PC <- PC + 1 + imm26
 ```
 
 ### CALLR
