@@ -1,6 +1,6 @@
 # AthenISA
 
-AthenISA is a family of compact, fixed-width Instruction Set Architectures (ISA) designed for small multicycle implementations, FPGA use, and educational CPU development. The A16 base architecture is implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor.
+AthenISA is a family of compact, fixed-width Instruction Set Architectures (ISA) designed for small multicycle implementations, FPGA use, and educational CPU development. It aims to follow a RISC philosophy by favoring simple operations, regular encodings, and straightforward hardware implementations. The A16 base architecture is implemented by the [Tydeus-16](https://github.com/morsoth/tydeus16-core) processor.
 
 This repository is the source of truth for the programmer-visible architecture, assembly language, and reference tools.
 
@@ -15,10 +15,10 @@ This repository is the source of truth for the programmer-visible architecture, 
 
 ## Architectures
 
-| Architecture | Status | Documentation |
+| Architecture | Word width | Extensions |
 | --- | --- | --- |
-| A16 | Defined | [A16 documentation](A16/README.md) |
-| A32 | In development | [A32 documentation](A32/README.md) |
+| [A16](A16/README.md) | 16 bits | `M`, `B` |
+| [A32](A32/README.md) | 32 bits | `M`, `F`, `V`, `B`, `P` |
 
 ## Documentation
 
@@ -26,11 +26,9 @@ Read the documents according to what you are trying to do:
 
 | Document | Purpose |
 | --- | --- |
-| [A16 documentation](A16/README.md) | A16 specification chapters, extensions, and supported instructions |
-| [A32 documentation](A32/README.md) | Current status of the A32 specification, extensions, and instruction set |
+| [A16 documentation](A16/README.md) | A16 specification, extensions, and supported instructions |
+| [A32 documentation](A32/README.md) | A32 specification, extensions, and supported instructions |
 | [Assembly syntax](asm/syntax.md) | Source structure, literals, symbols, expressions, and data declarations shared by all profiles |
-| [A16 assembly reference](asm/A16.md) | A16 registers, operands, ranges, pseudo-instructions, and accepted instruction forms |
-| [A32 assembly reference](asm/A32.md) | Status of the A32 assembly profile |
 | [Tool installation](tools/README.md) | Installing, running, and releasing the AthenISA command-line tools |
 | [Assembler guide](tools/assembler/README.md) | Assembler command line, outputs, diagnostics, and processing flow |
 | [Disassembler guide](tools/disassembler/README.md) | Disassembler command line, input formats, output, and limitations |

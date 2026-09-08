@@ -33,7 +33,7 @@ For three-register operations, including `SLL`, `SRL`, and `SRA`, all register f
 
 ## Register-immediate (RI)
 
-Used by `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI`, `ANDI`, `ORI`, and `XORI`.
+Used by `LI`, `LIH`, `ADDI`, `CMPI`, `ANDI`, `ORI`, and `XORI`.
 
 ![Register-immediate instruction format](imgs/ri.png)
 
@@ -43,7 +43,7 @@ Used by `LI`, `LIH`, `ADDI`, `SUBI`, `CMPI`, `ANDI`, `ORI`, and `XORI`.
 | `rd` | `10:8` | Register field |
 | `imm8` | `7:0` | Immediate field |
 
-`LI` and `LIH` use `rd` as a destination. `ADDI`, `SUBI`, `ANDI`, `ORI`, and `XORI` use it as both source and destination. `CMPI` uses the same field as a source register, interprets `imm8` as signed, and does not write a register. Each other instruction defines how `imm8` affects the operation.
+`LI` and `LIH` use `rd` as a destination. `ADDI`, `ANDI`, `ORI`, and `XORI` use it as both source and destination. `CMPI` uses the same field as a source register, interprets `imm8` as signed, and does not write a register. Each other instruction defines how `imm8` affects the operation.
 
 ## Register-register-immediate (RRI)
 

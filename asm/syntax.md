@@ -146,7 +146,7 @@ A name followed by `:` with no value defines a label. Its value is the byte addr
 
 ```athe
 loop:
-    SUBI R1, 1
+    ADDI R1, -1
     CMPI R1, 0
     BNE loop
 ```
@@ -156,7 +156,7 @@ Labels do not emit an instruction and may only be defined in `.code`. Their addr
 A label must have its own line. The following form is not accepted:
 
 ```athe
-loop: SUBI R1, 1
+loop: ADDI R1, -1
 ```
 
 ### Constants

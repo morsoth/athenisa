@@ -46,7 +46,7 @@ Flag updates are grouped as follows:
 | Instructions | `Z` | `C` | `N` | `V` |
 | --- | --- | --- | --- | --- |
 | `ADD`, `ADDI` | From result | Carry out | From result | Addition overflow |
-| `SUB`, `SUBI`, `CMP`, `CMPI` | From result | No borrow | From result | Subtraction overflow |
+| `SUB`, `CMP`, `CMPI` | From result | No borrow | From result | Subtraction overflow |
 | `AND`, `ANDI`, `OR`, `ORI`, `XOR`, `XORI`, `NOT` | From result | `0` | From result | `0` |
 | `SLL`, `SLLI`, `SRL`, `SRLI`, `SRA`, `SRAI` | From result | `0` | From result | `0` |
 | All other instructions | Unchanged | Unchanged | Unchanged | Unchanged |

@@ -40,10 +40,10 @@ A32 uses a six-bit primary opcode. The `R` format also provides a two-bit `func`
 | `LDB` | `010110` | - | RRI |
 | `STB` | `010111` | - | RRI |
 | `ADDI` | `011000` | - | RRI |
-| `SUBI` | `011001` | - | RRI |
-| `CMPI` | `011010` | - | RI |
-| `ANDI` | `011011` | - | RRI |
-| `ORI` | `011100` | - | RRI |
-| `XORI` | `011101` | - | RRI |
+| `CMPI` | `011001` | - | RI |
+| `ANDI` | `011010` | - | RRI |
+| `ORI` | `011011` | - | RRI |
+| `XORI` | `011100` | - | RRI |
+| Reserved | `011101` | - | - |
 | Reserved | `01111x` | - | - |
 | Reserved | `1xxxxx` | - | - |

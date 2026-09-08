@@ -40,9 +40,9 @@ A16 uses a five-bit primary opcode. The `R` format also provides a two-bit `func
 | `LDB` | `10110` | - | RRI |
 | `STB` | `10111` | - | RRI |
 | `ADDI` | `11000` | - | RI |
-| `SUBI` | `11001` | - | RI |
-| `CMPI` | `11010` | - | RI |
-| `ANDI` | `11011` | - | RI |
-| `ORI` | `11100` | - | RI |
-| `XORI` | `11101` | - | RI |
+| `CMPI` | `11001` | - | RI |
+| `ANDI` | `11010` | - | RI |
+| `ORI` | `11011` | - | RI |
+| `XORI` | `11100` | - | RI |
+| Reserved | `11101` | - | - |
 | Reserved | `1111x` | - | - |

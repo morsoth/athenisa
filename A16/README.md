@@ -6,18 +6,18 @@ A16 is the 16-bit base architecture of the AthenISA family. This page provides a
 
 | Chapter | Contents |
 | --- | --- |
-| [00 - Overview](00_overview.md) | Architectural profile, scope, and implementation boundaries |
-| [01 - Registers](01_registers.md) | Register encodings, `PC`, `SP`, flags, and reset state |
-| [02 - Instruction set](02_instruction_set.md) | Programmer-visible behavior of every base instruction |
-| [03 - Instruction formats](03_instruction_formats.md) | Bit fields used by each instruction format |
-| [04 - Instruction encoding](04_instruction_encoding.md) | Opcode and function assignments |
-| [05 - Memory](05_memory.md) | Unified address space, memory accesses, control-flow targets, and stack behavior |
+| [0. Overview](00_overview.md) | Architectural profile, scope, and implementation boundaries |
+| [1. Registers](01_registers.md) | Register encodings, `PC`, `SP`, flags, and reset state |
+| [2. Instruction set](02_instruction_set.md) | Programmer-visible behavior of every base instruction |
+| [3. Instruction formats](03_instruction_formats.md) | Bit fields used by each instruction format |
+| [4. Instruction encoding](04_instruction_encoding.md) | Opcode and function assignments |
+| [5. Memory](05_memory.md) | Unified address space, memory accesses, control-flow targets, and stack behavior |
 
 ## Extensions
 
 | Extension | Name | Instructions |
 | --- | --- | --- |
-| [`M`](extensions/M/00_overview.md) | Integer multiplication and division | `MUL`, `DIV` |
+| [`M`](extensions/M/00_overview.md) | Integer multiplication and division | - |
 | [`F`](extensions/F/00_overview.md) | Floating-point | - |
 
 An extension only defines the state, instructions, formats, and encodings added to the A16 base architecture. Extension documents are stored under [`extensions/`](extensions/).
@@ -26,14 +26,13 @@ An extension only defines the state, instructions, formats, and encodings added 
 
 | Category | Instructions | Extension |
 | --- | --- | --- |
-| No operation | `NOP` | |
-| Data movement | `MOV`, `LI`, `LIH` | |
-| Arithmetic and comparison | `ADD`, `ADDI`, `SUB`, `SUBI`, `CMP`, `CMPI` | |
-| Logic | `AND`, `ANDI`, `OR`, `ORI`, `XOR`, `XORI`, `NOT` | |
-| Shifts | `SLL`, `SLLI`, `SRL`, `SRLI`, `SRA`, `SRAI` | |
-| Jumps and branches | `JMP`, `JMPR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU` | |
-| Stack and calls | `CALL`, `CALLR`, `RET`, `PUSH`, `POP` | |
-| Memory | `LDW`, `STW`, `LDB`, `STB` | |
-| Multiplication and division | `MUL`, `DIV` | `M` |
+| No operation | [`NOP`](02_instruction_set.md#nop) | |
+| Data movement | [`MOV`](02_instruction_set.md#mov), [`LI`](02_instruction_set.md#li), [`LIH`](02_instruction_set.md#lih) | |
+| Arithmetic and comparison | [`ADD`](02_instruction_set.md#add), [`ADDI`](02_instruction_set.md#addi), [`SUB`](02_instruction_set.md#sub), [`CMP`](02_instruction_set.md#cmp), [`CMPI`](02_instruction_set.md#cmpi) | |
+| Logic | [`AND`](02_instruction_set.md#and), [`ANDI`](02_instruction_set.md#andi), [`OR`](02_instruction_set.md#or), [`ORI`](02_instruction_set.md#ori), [`XOR`](02_instruction_set.md#xor), [`XORI`](02_instruction_set.md#xori), [`NOT`](02_instruction_set.md#not) | |
+| Shifts | [`SLL`](02_instruction_set.md#sll), [`SLLI`](02_instruction_set.md#slli), [`SRL`](02_instruction_set.md#srl), [`SRLI`](02_instruction_set.md#srli), [`SRA`](02_instruction_set.md#sra), [`SRAI`](02_instruction_set.md#srai) | |
+| Jumps and branches | [`JMP`](02_instruction_set.md#jmp), [`JMPR`](02_instruction_set.md#jmpr), [`BEQ`](02_instruction_set.md#beq), [`BNE`](02_instruction_set.md#bne), [`BLT`](02_instruction_set.md#blt), [`BGE`](02_instruction_set.md#bge), [`BLTU`](02_instruction_set.md#bltu), [`BGEU`](02_instruction_set.md#bgeu) | |
+| Stack and calls | [`CALL`](02_instruction_set.md#call), [`CALLR`](02_instruction_set.md#callr), [`RET`](02_instruction_set.md#ret), [`PUSH`](02_instruction_set.md#push), [`POP`](02_instruction_set.md#pop) | |
+| Memory | [`LDW`](02_instruction_set.md#ldw), [`STW`](02_instruction_set.md#stw), [`LDB`](02_instruction_set.md#ldb), [`STB`](02_instruction_set.md#stb) | |
 
 Pseudo-instructions are assembly conveniences and are listed separately in the [A16 assembly reference](../asm/A16.md#pseudo-instructions).

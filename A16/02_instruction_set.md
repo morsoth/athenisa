@@ -65,14 +65,13 @@ ADD rd, rs1, rs2            // rd <- rs1 + rs2
 
 ### ADDI
 
-`ADDI` adds a zero-extended 8-bit immediate to the destination register.
+`ADDI` adds a sign-extended 8-bit immediate to the destination register.
 
 ```text
-ADDI rd, imm8               // rd <- rd + zext(imm8)
+ADDI rd, imm8               // rd <- rd + sext(imm8)
 ```
 
-> [!NOTE]
-> `ADDI` uses `zext(imm8)` rather than `sext(imm8)` because adding a negative value would be equivalent to using `SUBI` with its positive magnitude, while zero extension allows `ADDI` to use the full unsigned immediate range from 0 to 255.
+The valid immediate range is `-128` to `+127`. A negative immediate performs subtraction without requiring a separate immediate-subtraction instruction.
 
 | Flag | Value |
 | --- | --- |
@@ -87,21 +86,6 @@ ADDI rd, imm8               // rd <- rd + zext(imm8)
 
 ```text
 SUB rd, rs1, rs2            // rd <- rs1 - rs2
-```
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the result is zero; otherwise `0` |
-| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
-| `N` | `1` if result bit 15 is set; otherwise `0` |
-| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
-
-### SUBI
-
-`SUBI` subtracts a zero-extended 8-bit immediate from the destination register.
-
-```text
-SUBI rd, imm8               // rd <- rd - zext(imm8)
 ```
 
 | Flag | Value |
