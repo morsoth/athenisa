@@ -46,7 +46,7 @@ LIH rd, imm8                // rd[15:8] <- imm8
 > [!NOTE]
 > To successfully load a 16-bit immediate into a register it is mandatory to use `LI` first and then `LIH`.
 
-## Arithmetic and logic instructions
+## Arithmetic instructions
 
 ### ADD
 
@@ -94,6 +94,40 @@ The valid immediate range is `-128` to `+127`. A negative immediate performs sub
 | `C` | `1` if the addition produces a carry out of bit 15; otherwise `0` |
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `1` if the addition produces signed overflow; otherwise `0` |
+
+### CMP
+
+`CMP` performs a register subtraction only to update the flags. The arithmetic result is not written to the register file.
+
+```text
+CMP rs1, rs2                // rs1 - rs2
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### CMPI
+
+`CMPI` compares a register with a signed 8-bit immediate. The immediate is sign-extended to 16 bits and the arithmetic result is not written to the register file.
+
+```text
+CMPI rs, imm8               // rs - sext(imm8)
+```
+
+The valid immediate range is `-128` to `+127`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+## Logic instructions
 
 ### AND
 
@@ -199,38 +233,6 @@ NOT rd, rs                  // rd <- ~rs
 | `C` | `0` |
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `0` |
-
-### CMP
-
-`CMP` performs a register subtraction only to update the flags. The arithmetic result is not written to the register file.
-
-```text
-CMP rs1, rs2                // rs1 - rs2
-```
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the comparison result is zero; otherwise `0` |
-| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
-| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
-| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
-
-### CMPI
-
-`CMPI` compares a register with a signed 8-bit immediate. The immediate is sign-extended to 16 bits and the arithmetic result is not written to the register file.
-
-```text
-CMPI rs, imm8               // rs - sext(imm8)
-```
-
-The valid immediate range is `-128` to `+127`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the comparison result is zero; otherwise `0` |
-| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
-| `N` | `1` if comparison result bit 15 is set; otherwise `0` |
-| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
 
 ## Shift instructions
 

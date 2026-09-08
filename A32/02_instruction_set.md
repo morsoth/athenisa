@@ -44,7 +44,7 @@ LIH rd, imm16               // rd[31:16] <- imm16
 
 `LI` can load any unsigned 21-bit value directly. `LI` followed by `LIH` can construct any 32-bit value because `LIH` replaces the high 16 bits while preserving the low 16 bits loaded by `LI`.
 
-## Arithmetic and logic instructions
+## Arithmetic instructions
 
 ### ADD
 
@@ -92,6 +92,40 @@ The valid immediate range is `-32,768` to `+32,767`. A negative immediate perfor
 | `C` | `1` if the addition produces a carry out of bit 31; otherwise `0` |
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `1` if the addition produces signed overflow; otherwise `0` |
+
+### CMP
+
+`CMP` subtracts the second operand from the first only to update the flags. The result is not written to the register file.
+
+```text
+CMP rs1, rs2                // rs1 - rs2
+```
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 31 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### CMPI
+
+`CMPI` compares a register with a signed 21-bit immediate. The immediate is sign-extended to 32 bits and the result is not written to the register file.
+
+```text
+CMPI rs, imm21              // rs - sext(imm21)
+```
+
+The valid immediate range is `-1,048,576` to `+1,048,575`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the comparison result is zero; otherwise `0` |
+| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
+| `N` | `1` if comparison result bit 31 is set; otherwise `0` |
+| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+## Logic instructions
 
 ### AND
 
@@ -197,38 +231,6 @@ NOT rd, rs                  // rd <- ~rs
 | `C` | `0` |
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `0` |
-
-### CMP
-
-`CMP` subtracts the second operand from the first only to update the flags. The result is not written to the register file.
-
-```text
-CMP rs1, rs2                // rs1 - rs2
-```
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the comparison result is zero; otherwise `0` |
-| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
-| `N` | `1` if comparison result bit 31 is set; otherwise `0` |
-| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
-
-### CMPI
-
-`CMPI` compares a register with a signed 21-bit immediate. The immediate is sign-extended to 32 bits and the result is not written to the register file.
-
-```text
-CMPI rs, imm21              // rs - sext(imm21)
-```
-
-The valid immediate range is `-1,048,576` to `+1,048,575`. `CMPI` generates flags exactly like `CMP`. Signed branches (`BLT` and `BGE`) and unsigned branches (`BLTU` and `BGEU`) interpret those flags differently; a separate unsigned-immediate comparison instruction is therefore not required.
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the comparison result is zero; otherwise `0` |
-| `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
-| `N` | `1` if comparison result bit 31 is set; otherwise `0` |
-| `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
 
 ## Shift instructions
 
