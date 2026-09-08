@@ -10,7 +10,7 @@ By default the `FLAGS` register is unchanged.
 
 ### NOP
 
-`NOP` performs no operation. Its reserved bits are zero.
+`NOP` performs no operation.
 
 ```text
 NOP                         // does nothing
@@ -251,7 +251,7 @@ SLL rd, rs1, rs2            // rd <- rs1 << rs2[3:0]
 
 ### SLLI
 
-`SLLI` performs a logical left shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+`SLLI` performs a logical left shift using an immediate shift amount from 0 to 15.
 
 ```text
 SLLI rd, rs, shamt4         // rd <- rs << shamt4
@@ -281,7 +281,7 @@ SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[3:0]
 
 ### SRLI
 
-`SRLI` performs a logical right shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+`SRLI` performs a logical right shift using an immediate shift amount from 0 to 15.
 
 ```text
 SRLI rd, rs, shamt4         // rd <- unsigned(rs) >> shamt4
@@ -311,7 +311,7 @@ SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[3:0]
 
 ### SRAI
 
-`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 15. `shamt4` occupies bits `3:0` of the encoded `imm5` field, and bit `4` must be zero.
+`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 15.
 
 ```text
 SRAI rd, rs, shamt4         // rd <- signed(rs) >> shamt4
@@ -424,7 +424,7 @@ CALLR rs                    // target <- rs
 
 ### RET
 
-`RET` restores the program counter from the stack and then removes that entry. Its reserved bits are zero.
+`RET` restores the program counter from the stack and then removes that entry.
 
 ```text
 RET                         // PC <- MEM16[SP]

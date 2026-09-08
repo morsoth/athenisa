@@ -10,7 +10,7 @@ By default the `FLAGS` register is unchanged.
 
 ### NOP
 
-`NOP` performs no operation. Its reserved bits are zero.
+`NOP` performs no operation.
 
 ```text
 NOP                         // does nothing
@@ -36,7 +36,7 @@ LI rd, imm21                // rd <- zext(imm21)
 
 ### LIH
 
-`LIH` loads a 16-bit immediate into the upper half of the destination register while leaving the lower half unchanged. Bits `20:16` of the encoded `imm21` field must be zero.
+`LIH` loads a 16-bit immediate into the upper half of the destination register while leaving the lower half unchanged.
 
 ```text
 LIH rd, imm16               // rd[31:16] <- imm16
@@ -249,7 +249,7 @@ SLL rd, rs1, rs2            // rd <- rs1 << rs2[4:0]
 
 ### SLLI
 
-`SLLI` performs a logical left shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+`SLLI` performs a logical left shift using an immediate shift amount from 0 to 31.
 
 ```text
 SLLI rd, rs, shamt5         // rd <- rs << shamt5
@@ -279,7 +279,7 @@ SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[4:0]
 
 ### SRLI
 
-`SRLI` performs a logical right shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+`SRLI` performs a logical right shift using an immediate shift amount from 0 to 31.
 
 ```text
 SRLI rd, rs, shamt5         // rd <- unsigned(rs) >> shamt5
@@ -309,7 +309,7 @@ SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[4:0]
 
 ### SRAI
 
-`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 31. `shamt5` occupies bits `4:0` of the encoded `imm16` field, and bits `15:5` must be zero.
+`SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 31.
 
 ```text
 SRAI rd, rs, shamt5         // rd <- signed(rs) >> shamt5
@@ -420,7 +420,7 @@ CALLR rs                    // SP <- SP - 4
 
 ### RET
 
-`RET` restores the program counter from the top stack word and then removes that entry. Its reserved bits are zero.
+`RET` restores the program counter from the top stack word and then removes that entry.
 
 ```text
 RET                         // PC <- MEM32[SP]

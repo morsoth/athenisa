@@ -2,7 +2,7 @@
 
 All A16 instructions are 16 bits wide. Bits are numbered from 15, the most significant bit, to 0, the least significant bit. The primary `opcode` always occupies bits `15:11`.
 
-A format only defines the position and width of each encoded field. The definition of an instruction specifies how its register and immediate fields are used. Register fields and immediate bits not used by an instruction, along with fields named `reserved`, must be zero in a valid encoding. If any such bit is one, the complete word is an illegal instruction encoding and must not execute as the base instruction. A future exception mechanism may report this condition, but exception handling is outside the current base specification.
+A format only defines the position and width of each encoded field. The definition of an instruction specifies how its register and immediate fields are used. Fields named `reserved` and any register or immediate bits not used by the selected instruction must be zero. An extension may assign a meaning to bits reserved by the base architecture.
 
 ## No operand (N)
 
@@ -58,7 +58,7 @@ Used by immediate shift, load, and store instructions.
 | `rs` | `7:5` | Source or base-register field |
 | `imm5` | `4:0` | Immediate field |
 
-Immediate shift and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `shamt4` in bits `3:0`; bit `4` is unused and must be zero. Memory instructions interpret the complete `imm5` field as a signed byte offset.
+Immediate shift and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `shamt4` in bits `3:0`; bit `4` is unused. Memory instructions interpret the complete `imm5` field as a signed byte offset.
 
 ## Immediate (I)
 
