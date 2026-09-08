@@ -236,12 +236,15 @@ NOT rd, rs                  // rd <- ~rs
 
 ## Shift instructions
 
+> [!NOTE]
+> For register shifts, any shift amount of 16 or greater is equivalent to shifting by 16.
+
 ### SLL
 
-`SLL` performs a logical left shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SLL` performs a logical left shift using the second source register as the shift amount.
 
 ```text
-SLL rd, rs1, rs2            // rd <- rs1 << rs2[3:0]
+SLL rd, rs1, rs2            // rd <- rs1 << rs2
 ```
 
 | Flag | Value |
@@ -256,7 +259,7 @@ SLL rd, rs1, rs2            // rd <- rs1 << rs2[3:0]
 `SLLI` performs a logical left shift using an immediate shift amount from 0 to 15.
 
 ```text
-SLLI rd, rs, shamt4         // rd <- rs << shamt4
+SLLI rd, rs, imm4           // rd <- rs << imm4
 ```
 
 | Flag | Value |
@@ -268,10 +271,10 @@ SLLI rd, rs, shamt4         // rd <- rs << shamt4
 
 ### SRL
 
-`SRL` performs a logical right shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SRL` performs a logical right shift using the second source register as the shift amount.
 
 ```text
-SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[3:0]
+SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2
 ```
 
 | Flag | Value |
@@ -286,7 +289,7 @@ SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[3:0]
 `SRLI` performs a logical right shift using an immediate shift amount from 0 to 15.
 
 ```text
-SRLI rd, rs, shamt4         // rd <- unsigned(rs) >> shamt4
+SRLI rd, rs, imm4           // rd <- unsigned(rs) >> imm4
 ```
 
 | Flag | Value |
@@ -298,10 +301,10 @@ SRLI rd, rs, shamt4         // rd <- unsigned(rs) >> shamt4
 
 ### SRA
 
-`SRA` performs an arithmetic right shift using the low four bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SRA` performs an arithmetic right shift using the second source register as the shift amount.
 
 ```text
-SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[3:0]
+SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2
 ```
 
 | Flag | Value |
@@ -316,7 +319,7 @@ SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[3:0]
 `SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 15.
 
 ```text
-SRAI rd, rs, shamt4         // rd <- signed(rs) >> shamt4
+SRAI rd, rs, imm4           // rd <- signed(rs) >> imm4
 ```
 
 | Flag | Value |
@@ -336,6 +339,9 @@ SRAI rd, rs, shamt4         // rd <- signed(rs) >> shamt4
 JMP imm11                   // PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
+> [!NOTE]
+> In every relative control-flow instruction, `imm11` measures the offset in instructions rather than bytes. Because each A16 instruction occupies two bytes, the offset is shifted left by one before being added to the byte-addressed `PC`.
+
 ### JMPR
 
 `JMPR` transfers execution to the instruction byte address stored in a register.
@@ -343,6 +349,9 @@ JMP imm11                   // PC <- PC + 2 + (sext(imm11) << 1)
 ```text
 JMPR rs                     // PC <- rs
 ```
+
+> [!WARNING]
+> Absolute targets used by `JMPR` and `CALLR` must be multiples of two so they point to valid A16 instruction boundaries.
 
 ### BEQ
 
@@ -399,7 +408,7 @@ BGEU imm11                  // if C = 1
 ```
 
 > [!NOTE]
-> For control-flow instructions, `imm11` is interpreted as a signed offset measured in instructions and shifted left by one before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
+> `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`. For example, `CMP R2, R1` followed by `BLT` tests whether `R1 > R2`, while the same comparison followed by `BGE` tests whether `R1 <= R2`. `BLTU` and `BGEU` provide the equivalent unsigned cases.
 
 ## Stack instructions
 
@@ -409,7 +418,7 @@ BGEU imm11                  // if C = 1
 
 ```text
 CALL imm11                  // SP <- SP - 2
-                            // MEM16[SP] <- PC + 2
+                            // MEM[SP] <- PC + 2
                             // PC <- PC + 2 + (sext(imm11) << 1)
 ```
 
@@ -418,10 +427,9 @@ CALL imm11                  // SP <- SP - 2
 `CALLR` stores the sequential return address on the stack and transfers execution to the instruction byte address stored in a register. The target is read before `SP` is modified.
 
 ```text
-CALLR rs                    // target <- rs
-                            // SP <- SP - 2
-                            // MEM16[SP] <- PC + 2
-                            // PC <- target
+CALLR rs                    // SP <- SP - 2
+                            // MEM[SP] <- PC + 2
+                            // PC <- rs
 ```
 
 ### RET
@@ -429,7 +437,7 @@ CALLR rs                    // target <- rs
 `RET` restores the program counter from the stack and then removes that entry.
 
 ```text
-RET                         // PC <- MEM16[SP]
+RET                         // PC <- MEM[SP]
                             // SP <- SP + 2
 ```
 
@@ -439,7 +447,7 @@ RET                         // PC <- MEM16[SP]
 
 ```text
 PUSH rs                     // SP <- SP - 2
-                            // MEM16[SP] <- rs
+                            // MEM[SP] <- rs
 ```
 
 ### POP
@@ -447,13 +455,13 @@ PUSH rs                     // SP <- SP - 2
 `POP` removes the top value from the stack and writes it to a register.
 
 ```text
-POP rd                      // rd <- MEM16[SP]
+POP rd                      // rd <- MEM[SP]
                             // SP <- SP + 2
 ```
 
 The register operand of `PUSH` or `POP` must be one of `R0` through `R6`. The encodings for `PUSH SP` and `POP SP` are illegal because these instructions already modify `SP` implicitly.
 
-Software must initialize `SP` and keep every stack access within its assigned memory region. A16 does not detect an empty stack, stack underflow, or stack overflow.
+Software must initialize `SP` and keep every stack access within its assigned memory region. AthenISA does not detect an empty stack, stack underflow, or stack overflow.
 
 ## Memory instructions
 
@@ -462,7 +470,7 @@ Software must initialize `SP` and keep every stack access within its assigned me
 `LDW` reads one 16-bit word from a two-byte-aligned memory address.
 
 ```text
-LDW rd, imm5[rb]            // rd <- MEM16[rb + sext(imm5)]
+LDW rd, imm5[rb]            // rd <- MEM[rb + sext(imm5)]
 ```
 
 ### STW
@@ -470,7 +478,7 @@ LDW rd, imm5[rb]            // rd <- MEM16[rb + sext(imm5)]
 `STW` writes one 16-bit source-register value to a two-byte-aligned memory address.
 
 ```text
-STW imm5[rb], rs            // MEM16[rb + sext(imm5)] <- rs
+STW imm5[rb], rs            // MEM[rb + sext(imm5)] <- rs
 ```
 
 ### LDB
@@ -478,7 +486,7 @@ STW imm5[rb], rs            // MEM16[rb + sext(imm5)] <- rs
 `LDB` reads one byte from memory and zero-extends it to 16 bits.
 
 ```text
-LDB rd, imm5[rb]            // rd <- zext(MEM8[rb + sext(imm5)])
+LDB rd, imm5[rb]            // rd <- zext(MEM[rb + sext(imm5)])
 ```
 
 ### STB
@@ -486,7 +494,7 @@ LDB rd, imm5[rb]            // rd <- zext(MEM8[rb + sext(imm5)])
 `STB` writes the low eight bits of a source register to memory.
 
 ```text
-STB imm5[rb], rs            // MEM8[rb + sext(imm5)] <- rs[7:0]
+STB imm5[rb], rs            // MEM[rb + sext(imm5)] <- rs[7:0]
 ```
 
 Memory offsets are measured in bytes. Byte accesses accept any address, while an `LDW` or `STW` whose effective address is not a multiple of two performs an illegal memory access.

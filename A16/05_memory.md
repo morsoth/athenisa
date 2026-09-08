@@ -76,13 +76,13 @@ Software chooses the initial value and valid memory region of each stack. After 
 
 ```text
 SP        = SP - 2
-MEM16[SP] = PC + 2
+MEM[SP] = PC + 2
 ```
 
 `RET` reads the current top entry and then increments `SP` by two:
 
 ```text
-PC = MEM16[SP]
+PC = MEM[SP]
 SP = SP + 2
 ```
 
@@ -92,9 +92,9 @@ Each `CALL` or `CALLR` creates its own return-address entry and `RET` consumes t
 
 ```text
 SP        = SP - 2          // PUSH
-MEM16[SP] = rs
+MEM[SP] = rs
 
-rd = MEM16[SP]              // POP
+rd = MEM[SP]                // POP
 SP = SP + 2
 ```
 

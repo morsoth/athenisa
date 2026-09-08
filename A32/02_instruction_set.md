@@ -234,12 +234,15 @@ NOT rd, rs                  // rd <- ~rs
 
 ## Shift instructions
 
+> [!NOTE]
+> For register shifts, any shift amount of 32 or greater is equivalent to shifting by 32. An implementation may therefore clamp the shift amount to 32.
+
 ### SLL
 
-`SLL` performs a logical left shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SLL` performs a logical left shift using the second source register as the shift amount.
 
 ```text
-SLL rd, rs1, rs2            // rd <- rs1 << rs2[4:0]
+SLL rd, rs1, rs2            // rd <- rs1 << rs2
 ```
 
 | Flag | Value |
@@ -254,7 +257,7 @@ SLL rd, rs1, rs2            // rd <- rs1 << rs2[4:0]
 `SLLI` performs a logical left shift using an immediate shift amount from 0 to 31.
 
 ```text
-SLLI rd, rs, shamt5         // rd <- rs << shamt5
+SLLI rd, rs, imm5           // rd <- rs << imm5
 ```
 
 | Flag | Value |
@@ -266,10 +269,10 @@ SLLI rd, rs, shamt5         // rd <- rs << shamt5
 
 ### SRL
 
-`SRL` performs a logical right shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SRL` performs a logical right shift using the second source register as the shift amount.
 
 ```text
-SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[4:0]
+SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2
 ```
 
 | Flag | Value |
@@ -284,7 +287,7 @@ SRL rd, rs1, rs2            // rd <- unsigned(rs1) >> rs2[4:0]
 `SRLI` performs a logical right shift using an immediate shift amount from 0 to 31.
 
 ```text
-SRLI rd, rs, shamt5         // rd <- unsigned(rs) >> shamt5
+SRLI rd, rs, imm5           // rd <- unsigned(rs) >> imm5
 ```
 
 | Flag | Value |
@@ -296,10 +299,10 @@ SRLI rd, rs, shamt5         // rd <- unsigned(rs) >> shamt5
 
 ### SRA
 
-`SRA` performs an arithmetic right shift using the low five bits of the second source register as the shift amount. The remaining bits of `rs2` do not affect the operation.
+`SRA` performs an arithmetic right shift using the second source register as the shift amount.
 
 ```text
-SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[4:0]
+SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2
 ```
 
 | Flag | Value |
@@ -314,7 +317,7 @@ SRA rd, rs1, rs2            // rd <- signed(rs1) >> rs2[4:0]
 `SRAI` performs an arithmetic right shift using an immediate shift amount from 0 to 31.
 
 ```text
-SRAI rd, rs, shamt5         // rd <- signed(rs) >> shamt5
+SRAI rd, rs, imm5           // rd <- signed(rs) >> imm5
 ```
 
 | Flag | Value |
@@ -334,6 +337,9 @@ SRAI rd, rs, shamt5         // rd <- signed(rs) >> shamt5
 JMP imm26                   // PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
+> [!NOTE]
+> In every relative control-flow instruction, `imm26` measures the offset in instructions rather than bytes. Because each A32 instruction occupies four bytes, the offset is shifted left by two before being added to the byte-addressed `PC`.
+
 ### JMPR
 
 `JMPR` transfers execution to the instruction address stored in a register.
@@ -341,6 +347,9 @@ JMP imm26                   // PC <- PC + 4 + (sext(imm26) << 2)
 ```text
 JMPR rs                     // PC <- rs
 ```
+
+> [!WARNING]
+> Absolute targets used by `JMPR` and `CALLR` must be multiples of four so they point to valid A32 instruction boundaries.
 
 ### BEQ
 
@@ -396,7 +405,8 @@ BGEU imm26                  // if C = 1
                             // then PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
-For these instructions, `imm26` is interpreted as a signed two's-complement offset measured in instructions and is shifted left by two before being added to the byte-addressed `PC`. `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
+> [!NOTE]
+> `BGT`, `BLE`, `BGTU`, and `BLEU` are not provided because their conditions can be expressed by reversing the operands of `CMP`.
 
 ## Stack instructions
 
@@ -406,7 +416,7 @@ For these instructions, `imm26` is interpreted as a signed two's-complement offs
 
 ```text
 CALL imm26                  // SP <- SP - 4
-                            // MEM32[SP] <- PC + 4
+                            // MEM[SP] <- PC + 4
                             // PC <- PC + 4 + (sext(imm26) << 2)
 ```
 
@@ -416,7 +426,7 @@ CALL imm26                  // SP <- SP - 4
 
 ```text
 CALLR rs                    // SP <- SP - 4
-                            // MEM32[SP] <- PC + 4
+                            // MEM[SP] <- PC + 4
                             // PC <- rs
 ```
 
@@ -425,7 +435,7 @@ CALLR rs                    // SP <- SP - 4
 `RET` restores the program counter from the top stack word and then removes that entry.
 
 ```text
-RET                         // PC <- MEM32[SP]
+RET                         // PC <- MEM[SP]
                             // SP <- SP + 4
 ```
 
@@ -435,7 +445,7 @@ RET                         // PC <- MEM32[SP]
 
 ```text
 PUSH rs                     // SP <- SP - 4
-                            // MEM32[SP] <- rs
+                            // MEM[SP] <- rs
 ```
 
 ### POP
@@ -443,7 +453,7 @@ PUSH rs                     // SP <- SP - 4
 `POP` removes the top value from the stack and writes it to a register.
 
 ```text
-POP rd                      // rd <- MEM32[SP]
+POP rd                      // rd <- MEM[SP]
                             // SP <- SP + 4
 ```
 
@@ -456,7 +466,7 @@ The register operand of `PUSH` or `POP` must be one of `R0` through `R30`. The e
 `LDW` reads one 32-bit word from a four-byte-aligned memory address.
 
 ```text
-LDW rd, imm16[rb]           // rd <- MEM32[rb + sext(imm16)]
+LDW rd, imm16[rb]           // rd <- MEM[rb + sext(imm16)]
 ```
 
 ### STW
@@ -464,7 +474,7 @@ LDW rd, imm16[rb]           // rd <- MEM32[rb + sext(imm16)]
 `STW` writes one 32-bit source-register value to a four-byte-aligned memory address.
 
 ```text
-STW imm16[rb], rs           // MEM32[rb + sext(imm16)] <- rs
+STW imm16[rb], rs           // MEM[rb + sext(imm16)] <- rs
 ```
 
 ### LDB
@@ -472,7 +482,7 @@ STW imm16[rb], rs           // MEM32[rb + sext(imm16)] <- rs
 `LDB` reads one byte from memory and zero-extends it to 32 bits.
 
 ```text
-LDB rd, imm16[rb]           // rd <- zext(MEM8[rb + sext(imm16)])
+LDB rd, imm16[rb]           // rd <- zext(MEM[rb + sext(imm16)])
 ```
 
 ### STB
@@ -480,7 +490,7 @@ LDB rd, imm16[rb]           // rd <- zext(MEM8[rb + sext(imm16)])
 `STB` writes the low eight bits of a source register to memory.
 
 ```text
-STB imm16[rb], rs           // MEM8[rb + sext(imm16)] <- rs[7:0]
+STB imm16[rb], rs           // MEM[rb + sext(imm16)] <- rs[7:0]
 ```
 
 Memory offsets are measured in bytes. Byte accesses accept any address, while an `LDW` or `STW` whose effective address is not a multiple of four performs an illegal memory access.

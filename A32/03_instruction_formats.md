@@ -59,7 +59,7 @@ Used by arithmetic-immediate, logic-immediate, immediate shift, load, and store 
 | `rs` | `20:16` | Source or base-register field |
 | `imm16` | `15:0` | Immediate field |
 
-Arithmetic, logic, immediate shift, and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `shamt5` in bits `4:0`; bits `15:5` are unused. Other instructions define whether `imm16` is a numeric operand or memory offset and how it is extended.
+Arithmetic, logic, immediate shift, and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `imm5` in bits `4:0`; bits `15:5` are unused. Other instructions define whether `imm16` is a numeric operand or memory offset and how it is extended.
 
 ## Immediate (I)
 

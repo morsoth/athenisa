@@ -58,7 +58,7 @@ Used by immediate shift, load, and store instructions.
 | `rs` | `7:5` | Source or base-register field |
 | `imm5` | `4:0` | Immediate field |
 
-Immediate shift and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `shamt4` in bits `3:0`; bit `4` is unused. Memory instructions interpret the complete `imm5` field as a signed byte offset.
+Immediate shift and load instructions use `rd` as the destination and `rs` as a source or base register. Store instructions use `rd` as the value source and `rs` as the base register. `SLLI`, `SRLI`, and `SRAI` store `imm4` in bits `3:0`; bit `4` is unused. Memory instructions interpret the complete `imm5` field as a signed byte offset.
 
 ## Immediate (I)
 
