@@ -61,23 +61,6 @@ ADD rd, rs1, rs2            // rd <- rs1 + rs2
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
-### ADDI
-
-`ADDI` adds a sign-extended 16-bit immediate to a source register and writes the result to a separate destination register.
-
-```text
-ADDI rd, rs, imm16          // rd <- rs + sext(imm16)
-```
-
-The valid immediate range is `-32,768` to `+32,767`. A negative immediate performs subtraction without requiring a separate immediate-subtraction instruction.
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the result is zero; otherwise `0` |
-| `C` | `1` if the addition produces a carry out of bit 31; otherwise `0` |
-| `N` | `1` if result bit 31 is set; otherwise `0` |
-| `V` | `1` if the addition produces signed overflow; otherwise `0` |
-
 ### SUB
 
 `SUB` subtracts the second source register from the first and writes the low 32 bits of the result to the destination register.
@@ -92,6 +75,23 @@ SUB rd, rs1, rs2            // rd <- rs1 - rs2
 | `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
 | `N` | `1` if result bit 31 is set; otherwise `0` |
 | `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### ADDI
+
+`ADDI` adds a sign-extended 16-bit immediate to a source register and writes the result to a separate destination register.
+
+```text
+ADDI rd, rs, imm16          // rd <- rs + sext(imm16)
+```
+
+The valid immediate range is `-32,768` to `+32,767`. A negative immediate performs subtraction .
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the addition produces a carry out of bit 31; otherwise `0` |
+| `N` | `1` if result bit 31 is set; otherwise `0` |
+| `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
 ### AND
 

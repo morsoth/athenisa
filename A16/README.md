@@ -28,7 +28,7 @@ An extension only defines the state, instructions, formats, and encodings added 
 | --- | --- | --- |
 | No operation | [`NOP`](02_instruction_set.md#nop) | |
 | Data movement | [`MOV`](02_instruction_set.md#mov), [`LI`](02_instruction_set.md#li), [`LIH`](02_instruction_set.md#lih) | |
-| Arithmetic and comparison | [`ADD`](02_instruction_set.md#add), [`ADDI`](02_instruction_set.md#addi), [`SUB`](02_instruction_set.md#sub), [`CMP`](02_instruction_set.md#cmp), [`CMPI`](02_instruction_set.md#cmpi) | |
+| Arithmetic and comparison | [`ADD`](02_instruction_set.md#add), [`SUB`](02_instruction_set.md#sub), [`ADDI`](02_instruction_set.md#addi), [`CMP`](02_instruction_set.md#cmp), [`CMPI`](02_instruction_set.md#cmpi) | |
 | Logic | [`AND`](02_instruction_set.md#and), [`ANDI`](02_instruction_set.md#andi), [`OR`](02_instruction_set.md#or), [`ORI`](02_instruction_set.md#ori), [`XOR`](02_instruction_set.md#xor), [`XORI`](02_instruction_set.md#xori), [`NOT`](02_instruction_set.md#not) | |
 | Shifts | [`SLL`](02_instruction_set.md#sll), [`SLLI`](02_instruction_set.md#slli), [`SRL`](02_instruction_set.md#srl), [`SRLI`](02_instruction_set.md#srli), [`SRA`](02_instruction_set.md#sra), [`SRAI`](02_instruction_set.md#srai) | |
 | Jumps and branches | [`JMP`](02_instruction_set.md#jmp), [`JMPR`](02_instruction_set.md#jmpr), [`BEQ`](02_instruction_set.md#beq), [`BNE`](02_instruction_set.md#bne), [`BLT`](02_instruction_set.md#blt), [`BGE`](02_instruction_set.md#bge), [`BLTU`](02_instruction_set.md#bltu), [`BGEU`](02_instruction_set.md#bgeu) | |

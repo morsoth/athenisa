@@ -63,23 +63,6 @@ ADD rd, rs1, rs2            // rd <- rs1 + rs2
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
-### ADDI
-
-`ADDI` adds a sign-extended 8-bit immediate to the destination register.
-
-```text
-ADDI rd, imm8               // rd <- rd + sext(imm8)
-```
-
-The valid immediate range is `-128` to `+127`. A negative immediate performs subtraction without requiring a separate immediate-subtraction instruction.
-
-| Flag | Value |
-| --- | --- |
-| `Z` | `1` if the result is zero; otherwise `0` |
-| `C` | `1` if the addition produces a carry out of bit 15; otherwise `0` |
-| `N` | `1` if result bit 15 is set; otherwise `0` |
-| `V` | `1` if the addition produces signed overflow; otherwise `0` |
-
 ### SUB
 
 `SUB` subtracts the second source register from the first and writes the result to the destination register.
@@ -94,6 +77,23 @@ SUB rd, rs1, rs2            // rd <- rs1 - rs2
 | `C` | `1` if the subtraction requires no unsigned borrow; otherwise `0` |
 | `N` | `1` if result bit 15 is set; otherwise `0` |
 | `V` | `1` if the subtraction produces signed overflow; otherwise `0` |
+
+### ADDI
+
+`ADDI` adds a sign-extended 8-bit immediate to the destination register.
+
+```text
+ADDI rd, imm8               // rd <- rd + sext(imm8)
+```
+
+The valid immediate range is `-128` to `+127`. A negative immediate performs subtraction.
+
+| Flag | Value |
+| --- | --- |
+| `Z` | `1` if the result is zero; otherwise `0` |
+| `C` | `1` if the addition produces a carry out of bit 15; otherwise `0` |
+| `N` | `1` if result bit 15 is set; otherwise `0` |
+| `V` | `1` if the addition produces signed overflow; otherwise `0` |
 
 ### AND
 
