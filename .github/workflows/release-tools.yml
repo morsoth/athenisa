@@ -1,0 +1,112 @@
+name: Release AthenISA
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+            artifact: linux-package
+            archive: tools/dist/*.tar.gz
+          - os: windows-latest
+            platform: windows-x86_64
+            artifact: windows-package
+            archive: tools/dist/*.zip
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select stable Rust
+        run: rustup update stable --no-self-update
+
+      - name: Build tools
+        working-directory: tools
+        run: cargo build --locked --release -p athenisa-asm -p athenisa-dis
+
+      - name: Verify tag and executable version
+        working-directory: tools
+        shell: pwsh
+        run: |
+          $expected = $env:GITHUB_REF_NAME -replace '^v', ''
+          $executable = if ("${{ runner.os }}" -eq "Windows") {
+              "target/release/athenisa-asm.exe"
+          } else {
+              "target/release/athenisa-asm"
+          }
+          $executable = (Resolve-Path $executable).Path
+          $actual = (& $executable --version).Split()[-1]
+          if ($actual -ne $expected) {
+              throw "Tag version $expected does not match executable version $actual"
+          }
+
+      - name: Package Linux tools
+        if: runner.os == 'Linux'
+        working-directory: tools
+        shell: bash
+        run: |
+          package="athenisa-tools-${GITHUB_REF_NAME}-linux-x86_64"
+          mkdir -p "dist/${package}"
+          cp target/release/athenisa-asm "dist/${package}/"
+          cp target/release/athenisa-dis "dist/${package}/"
+          cp README.md "dist/${package}/"
+          cp ../LICENSE "dist/${package}/"
+          tar -C dist -czf "dist/${package}.tar.gz" "${package}"
+
+      - name: Package Windows tools
+        if: runner.os == 'Windows'
+        working-directory: tools
+        shell: pwsh
+        run: |
+          $package = "athenisa-tools-$env:GITHUB_REF_NAME-windows-x86_64"
+          New-Item -ItemType Directory -Path "dist/$package" -Force
+          Copy-Item "target/release/athenisa-asm.exe" "dist/$package/"
+          Copy-Item "target/release/athenisa-dis.exe" "dist/$package/"
+          Copy-Item "README.md" "dist/$package/"
+          Copy-Item "../LICENSE" "dist/$package/"
+          Compress-Archive -Path "dist/$package" -DestinationPath "dist/$package.zip"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.archive }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v5
+        with:
+          pattern: "*-package"
+          path: dist
+          merge-multiple: true
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* \
+              --title "${GITHUB_REF_NAME}" \
+              --generate-notes \
+              --verify-tag
+          fi
