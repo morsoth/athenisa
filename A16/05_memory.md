@@ -11,17 +11,19 @@ A16 uses one unified, byte-addressable memory space for instructions, data, and 
 | Data word size | 2 bytes |
 | Byte order | Little-endian |
 
-Every address identifies one byte. Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A16 base specification.
+Every architectural address identifies one byte. This includes addresses held in `PC`, `SP`, and general-purpose registers, as well as labels and other address symbols. Memory-access immediates are also measured in bytes. Relative control-flow immediates are the exception: they count fixed-width instructions and are converted to byte displacements before being added to `PC`.
+
+Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A16 base specification.
 
 ## Memory accesses
 
-`LDW`, `STW`, `LDB`, and `STB` calculate an effective address by adding the signed `imm5` field to the base register `rb`:
+`LDW`, `STW`, `LDB`, and `STB` calculate an effective byte address by adding the signed byte offset in `imm5` to the base register `rb`:
 
 ```text
 address = rb + sext(imm5)
 ```
 
-The offset is measured in bytes and has a range from `-16` to `+15`. Address arithmetic wraps to 16 bits.
+`imm5` has a range from `-16` to `+15`. Address arithmetic wraps to 16 bits.
 
 | Instruction | Access | Result |
 | --- | --- | --- |
@@ -55,7 +57,7 @@ The register value must be divisible by two.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches interpret `imm11` as a signed offset measured in instructions. A16 shifts the immediate left by one to convert it to a byte displacement:
+`JMP`, `CALL`, and conditional branches use the signed `imm11` field to select a target relative to the following instruction. Because `imm11` counts instructions, A16 shifts it left by one to obtain a byte displacement:
 
 ```text
 PC = PC + 2 + (sext(imm11) << 1)

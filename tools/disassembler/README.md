@@ -55,11 +55,11 @@ athenisa-dis --version
 
 ### Raw binary: `.bin`
 
-The file contains headerless 16-bit instruction words stored as little-endian byte pairs. An odd byte count is rejected because the final instruction would be incomplete.
+The file contains headerless instruction words serialized with the width and byte order of the selected architecture. A file that ends with an incomplete word is rejected.
 
 ### Hexadecimal image: `.hex`
 
-Each non-empty line contains one hexadecimal instruction word of at most four digits. Addresses, headers, comments, and multiple words on one line are not accepted.
+Each non-empty line contains one complete hexadecimal instruction word using the width of the selected architecture. Addresses, headers, comments, and multiple words on one line are not accepted.
 
 Both formats are compatible with the corresponding outputs of `athenisa-asm`.
 
@@ -67,12 +67,12 @@ Both formats are compatible with the corresponding outputs of `athenisa-asm`.
 
 The output contains only real AthenISA instructions. Symbol names, constants, comments, source formatting, labels, and pseudo-instructions cannot be recovered from machine code.
 
-`JMP` and `CALL` operands are written as absolute addresses. Conditional branch operands are written as signed relative offsets. Reassembling valid canonical output produces the original instruction words.
+Operands are written in the canonical form defined by the selected architecture. Reassembling valid canonical output for the same architecture produces the original instruction words.
 
 ## Disassembly flow
 
 1. Select the input format from the file extension and read its instruction words.
-2. Reject images larger than the 2048-word AthenISA instruction address space.
+2. Reject images larger than the instruction address space of the selected architecture.
 3. Decode every word and validate its opcode and reserved fields.
 4. Format each real instruction using canonical AthenISA assembly syntax.
 5. Write the result to the selected file or standard output.

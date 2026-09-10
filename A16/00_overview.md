@@ -8,7 +8,8 @@ This document introduces the architectural contract of A16. The following chapte
 | --- | --- |
 | Instruction width | 16 bits |
 | Data width | 16 bits |
-| Memory addresses | 16 bits, byte-addressed |
+| Address width | 16 bits |
+| Addressing unit | Byte |
 | Register operands | `R0` to `R6` and `SP` |
 | Byte order | Little-endian |
 

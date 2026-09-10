@@ -11,17 +11,19 @@ A32 uses one unified, byte-addressable memory space for instructions, data, and 
 | Data word size | 4 bytes |
 | Byte order | Little-endian |
 
-Every address identifies one byte. Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A32 base specification. An implementation may provide less physical memory than the architectural address space, but the platform must define which address ranges are available.
+Every architectural address identifies one byte. This includes addresses held in `PC`, `SP`, and general-purpose registers, as well as labels and other address symbols. Memory-access immediates are also measured in bytes. Relative control-flow immediates are the exception: they count fixed-width instructions and are converted to byte displacements before being added to `PC`.
+
+Instructions and data share the same addresses, so the base architecture does not prevent a store from modifying memory that contains instructions. A platform may add access permissions, but they are outside the A32 base specification. An implementation may provide less physical memory than the architectural address space, but the platform must define which address ranges are available.
 
 ## Memory accesses
 
-`LDW`, `STW`, `LDB`, and `STB` calculate an effective address by adding the signed `imm16` field to the base register `rb`:
+`LDW`, `STW`, `LDB`, and `STB` calculate an effective byte address by adding the signed byte offset in `imm16` to the base register `rb`:
 
 ```text
 address = rb + sext(imm16)
 ```
 
-The offset is measured in bytes and has a range from `-32,768` to `+32,767`. Address arithmetic wraps to 32 bits.
+`imm16` has a range from `-32,768` to `+32,767`. Address arithmetic wraps to 32 bits.
 
 | Instruction | Access | Result |
 | --- | --- | --- |
@@ -55,7 +57,7 @@ The register value must be divisible by four.
 
 ### Relative targets
 
-`JMP`, `CALL`, and conditional branches interpret `imm26` as a signed offset measured in instructions. A32 shifts the immediate left by two to convert it to a byte displacement:
+`JMP`, `CALL`, and conditional branches use the signed `imm26` field to select a target relative to the following instruction. Because `imm26` counts instructions, A32 shifts it left by two to obtain a byte displacement:
 
 ```text
 PC = PC + 4 + (sext(imm26) << 2)

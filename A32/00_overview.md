@@ -8,7 +8,8 @@ This document introduces the architectural contract of A32. The following chapte
 | --- | --- |
 | Instruction width | 32 bits |
 | Data width | 32 bits |
-| Memory addresses | 32 bits, byte-addressed |
+| Address width | 32 bits |
+| Addressing unit | Byte |
 | Register operands | `R0` to `R30` and `SP` |
 | Byte order | Little-endian |
 
